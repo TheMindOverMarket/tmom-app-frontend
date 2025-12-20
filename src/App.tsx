@@ -2,10 +2,10 @@ import { PriceChart } from './components/PriceChart';
 
 function App() {
   return (
-    <div>
+    <main>
       <h1>Mind Over Market – Demo</h1>
       <PriceChart />
-    </div>
+    </main>
   );
 }
 
