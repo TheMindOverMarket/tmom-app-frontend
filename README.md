@@ -1,6 +1,6 @@
-# Mind Over Market - Application Frontend
+# TheMindOverMarket - Application Frontend
 
-This repository houses the authenticated dashboard and trading interface for Mind Over Market.
+This repository houses the authenticated dashboard and trading interface for TheMindOverMarket.
 
 ## Architecture
 

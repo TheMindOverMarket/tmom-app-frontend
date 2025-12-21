@@ -3,7 +3,7 @@ import { PriceChart } from './components/PriceChart';
 function App() {
   return (
     <main>
-      <h1>Mind Over Market – Demo</h1>
+      <h1>TheMindOverMarket – Demo</h1>
       <PriceChart />
     </main>
   );
