@@ -12,12 +12,17 @@ export function useDerivedSignals(candles: Candle[], currentCandle: Candle | nul
   const historyEMA = useMemo(() => {
     // TODO(MARKETDATA_CANONICAL): EMA-9 is computed client-side for POC.
     // This heavy calculation runs once on history load.
+    // EMA assumes monotonically increasing candle times
     return calculateEMA(candles, EMA_PERIOD);
   }, [candles]);
 
   // 2. Calculate Live EMA
   // Derived strictly from the last known EMA point + current live candle.
+  // Derived strictly from the last known EMA point + current live candle.
   // Note: This approach assumes 'currentCandle' is the immediate successor to 'candles'.
+  // live EMA depends on ordering
+  // overlap handling is conservative
+  // acceptable for POC, not production-grade market data
   // If there is a massive gap or 'candles' is empty, this logic naturally yields generic results (null).
   
   let liveEMA: EMAValue | null = null;

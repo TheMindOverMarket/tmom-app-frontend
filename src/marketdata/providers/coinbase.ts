@@ -12,6 +12,11 @@ export const CoinbaseProvider: MarketDataProvider = {
     const product = symbol; // e.g., 'BTC-USD'
     const granularity = interval; // 60 for 1m
 
+    // ticker messages are not true OHLC candles
+    // timestamps are approximate / derived from local clock
+    // provider emits tick-derived snapshots / aggregated approximations
+    // true aggregation is out of scope for this POC provider and belongs elsewhere
+
     try {
       const response = await fetch(
         `/api/coinbase/products/${product}/candles?granularity=${granularity}`
@@ -91,7 +96,17 @@ export const CoinbaseProvider: MarketDataProvider = {
         const message = JSON.parse(event.data);
         if (message.type === 'ticker' && message.price) {
           const price = parseFloat(message.price);
-          const timestamp = new Date(message.time).getTime() / 1000;
+          
+          if (!Number.isFinite(price)) {
+            return;
+          }
+
+          const rawTime = new Date(message.time).getTime();
+          if (!Number.isFinite(rawTime) || rawTime < 0) {
+             return; 
+          }
+
+          const timestamp = rawTime / 1000;
           
           // Bucket timestamp to the nearest minute (start of the minute)
           const candleTimestamp = Math.floor(timestamp / 60) * 60;

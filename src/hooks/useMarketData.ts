@@ -11,6 +11,8 @@ export function useMarketData(symbol: string = 'BTC-USD', interval: number = 60)
   
   // Guard to ensure single listener setup
   const isSubscribedRef = useRef(false);
+  // Monotonic-time guard for live updates
+  const lastAcceptedTimeRef = useRef<number>(0);
 
   useEffect(() => {
     // Reset state on symbol change
@@ -25,6 +27,12 @@ export function useMarketData(symbol: string = 'BTC-USD', interval: number = 60)
       const history = await CoinbaseProvider.getHistory(symbol, interval);
       setCandles(history);
 
+      if (history.length > 0) {
+        // Initialize guard with last history candle time
+        // validation: timestamps are treated as numeric seconds/timestamps
+        lastAcceptedTimeRef.current = Number(history[history.length - 1].time);
+      }
+
       // Pre-seed the live candle ref if possible to avoid gaps
       // TODO(MARKETDATA_CANONICAL): Better gap handling (merging history end with live start)
       if (history.length > 0) {
@@ -35,6 +43,11 @@ export function useMarketData(symbol: string = 'BTC-USD', interval: number = 60)
       if (isSubscribedRef.current) return; // Prevent double subscription
       
       unsubscribe = CoinbaseProvider.subscribeLive(symbol, interval, (updatedCandle) => {
+        // Add a short comment explaining this prevents time regression and protects downstream indicators
+        if (Number(updatedCandle.time) < lastAcceptedTimeRef.current) {
+          return;
+        }
+        lastAcceptedTimeRef.current = Number(updatedCandle.time);
         setCurrentCandle(updatedCandle);
       });
       isSubscribedRef.current = true;
