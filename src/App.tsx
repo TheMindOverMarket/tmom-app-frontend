@@ -1,8 +1,8 @@
 import { PriceChart } from './components/PriceChart';
-import { BehaviorTimelinePanel } from './components/terminal/BehaviorTimelinePanel';
+// import { BehaviorTimelinePanel } from './components/terminal/BehaviorTimelinePanel';
 
 function App() {
-  const symbol = "BTC-USD";
+  // const symbol = "BTC-USD";
 
   return (
     <main style={{ 

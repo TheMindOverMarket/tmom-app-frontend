@@ -87,15 +87,17 @@ const TimelineRow: FC<{ item: BehaviorTimelineItem }> = ({ item }) => {
 };
 
 export const BehaviorTimelinePanel: FC<BehaviorTimelinePanelProps> = ({ symbol }) => {
-  const { timeline, adherenceScore } = useBehaviorTimeline(symbol);
+  const { timeline } = useBehaviorTimeline(symbol);
 
   // Newest events first
   const displayTimeline = [...timeline].reverse();
 
+  /*
   // Score color
   let scoreColor = '#EF4444'; // Red
   if (adherenceScore >= 80) scoreColor = '#10B981'; // Green
   else if (adherenceScore >= 50) scoreColor = '#F59E0B'; // Yellow
+  */
 
   const containerStyle: React.CSSProperties = {
     display: 'flex',
@@ -123,17 +125,21 @@ export const BehaviorTimelinePanel: FC<BehaviorTimelinePanelProps> = ({ symbol }
     color: '#374151',
   };
 
+  /*
   const scoreLabelStyle: React.CSSProperties = {
     fontSize: '14px',
     fontWeight: 500,
     color: '#6B7280',
   };
+  */
 
+  /*
   const scoreValueStyle: React.CSSProperties = {
     fontWeight: 700,
     color: scoreColor,
     marginLeft: '8px',
   };
+  */
 
   const listStyle: React.CSSProperties = {
     flex: 1,
