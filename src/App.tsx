@@ -2,13 +2,18 @@ import { useState, useCallback } from 'react';
 import { PriceChart } from './components/PriceChart';
 import { RuleEventInspector } from './components/RuleEventInspector';
 import { useRuleEngineEvents } from './hooks/useRuleEngineEvents';
+import { ingestRule } from './domain/ruleEngine/api';
 
 function App() {
   // Centralized Data Source
   const { events, isMockMode, toggleMockMode } = useRuleEngineEvents();
   
-// Interaction State
+  // Interaction State
   const [focusedView, setFocusedView] = useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);
+  
+  // Rule Ingestion State
+  const [ruleInput, setRuleInput] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleMarkerClick = useCallback((timestamp: number, type?: 'adherence' | 'deviation') => {
     setFocusedView({
@@ -20,6 +25,22 @@ function App() {
   const clearFocus = useCallback(() => {
     setFocusedView(null);
   }, []);
+
+  const handleRuleSubmit = async () => {
+    if (!ruleInput.trim()) return;
+    
+    setIsSubmitting(true);
+    try {
+        await ingestRule(ruleInput);
+        setRuleInput(''); // Clear on success
+        alert('Rule submitted successfully!'); // Simple feedback
+    } catch (error) {
+        console.error(error);
+        alert('Failed to submit rule. Check console.');
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
 
   return (
     <main style={{ 
@@ -63,6 +84,46 @@ function App() {
           {isMockMode ? 'Simulating Events' : 'Enable Mock Stream'}
         </button>
       </header>
+
+      {/* Rule Ingestion Section */}
+      <div style={{ display: 'flex', gap: '8px' }}>
+          <input 
+            type="text" 
+            placeholder="Describe your rule in natural language (e.g. 'Alert if price drops 5% in 1 hour')..."
+            value={ruleInput}
+            onChange={(e) => setRuleInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleRuleSubmit()}
+            style={{ 
+                flex: 1, 
+                padding: '8px 12px', 
+                borderRadius: '6px', 
+                border: '1px solid #D1D5DB', 
+                fontSize: '14px',
+                outline: 'none',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                color: '#111827'
+            }} 
+          />
+          <button
+            onClick={handleRuleSubmit}
+            disabled={isSubmitting || !ruleInput.trim()}
+            style={{
+                padding: '8px 16px',
+                backgroundColor: '#2563EB',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: (isSubmitting || !ruleInput.trim()) ? 'not-allowed' : 'pointer',
+                opacity: (isSubmitting || !ruleInput.trim()) ? 0.7 : 1,
+                transition: 'background-color 0.2s',
+                whiteSpace: 'nowrap'
+            }}
+          >
+            {isSubmitting ? 'Ingesting...' : 'Ingest Rule'}
+          </button>
+      </div>
       
       {/* Chart Section */}
       <div style={{ 
