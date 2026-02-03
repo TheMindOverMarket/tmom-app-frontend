@@ -2,16 +2,19 @@ import { useEffect, useRef, useState } from 'react';
 import { createChart, CandlestickSeries, LineSeries, type IChartApi, type ISeriesApi, type Time } from 'lightweight-charts';
 import { useMarketData } from '../hooks/useMarketData';
 import { useDerivedSignals } from '../hooks/useDerivedSignals';
-import { useRuleEngineEvents } from '../hooks/useRuleEngineEvents';
 import { RuleEngineEvent } from '../domain/ruleEngine/types';
 
-export function PriceChart() {
+interface PriceChartProps {
+  events: RuleEngineEvent[];
+  onMarkerClick: (timestamp: number) => void;
+}
+
+export function PriceChart({ events, onMarkerClick }: PriceChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
   const emaSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
   const markersContainerRef = useRef<HTMLDivElement>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
 
   // Use Canonical Market Data Hook
   const { candles, currentCandle } = useMarketData('BTC-USD', 60);
@@ -19,13 +22,20 @@ export function PriceChart() {
   // Use Derived Signals (EMA-9)
   const { ema9, currentEMA9 } = useDerivedSignals(candles, currentCandle);
 
-  // Use Rule Engine Events
-  const { events } = useRuleEngineEvents();
-  const latestEventsRef = useRef<RuleEngineEvent[]>(events);
-  
+  // User Toggle for Deduplication (State must be before dataRef)
+  const [deduplicateEvents, setDeduplicateEvents] = useState(true);
+
+  // Data Refs to prevent Effect churn on high-frequency updates
+  const dataRef = useRef({ 
+    candles, 
+    currentCandle, 
+    events, 
+    deduplicateEvents 
+  });
+
   useEffect(() => {
-    latestEventsRef.current = events;
-  }, [events]);
+    dataRef.current = { candles, currentCandle, events, deduplicateEvents };
+  }, [candles, currentCandle, events, deduplicateEvents]);
 
   // Initialize Chart
   useEffect(() => {
@@ -69,13 +79,7 @@ export function PriceChart() {
     });
     emaSeriesRef.current = emaSeries;
     
-    // Markers: We now use HTML primitives, so no createSeriesMarkers logic needed.
-
     chart.timeScale().fitContent();
-
-    // Tooltip / Crosshair Logic
-    // Tooltip / Crosshair Logic: REMOVED (Markers handle their own tooltips now)
-    // We only keep basic chart cleanup
 
     const handleResize = () => {
       if (chartContainerRef.current && chartRef.current) {
@@ -109,8 +113,6 @@ export function PriceChart() {
   useEffect(() => {
     if (emaSeriesRef.current && ema9.length > 0) {
       emaSeriesRef.current.setData(ema9);
-      // We don't refit content here to strictly follow the candles, 
-      // but usually they match.
     }
   }, [ema9]);
 
@@ -120,15 +122,10 @@ export function PriceChart() {
       seriesRef.current.update(currentCandle);
     }
     
-    // Live EMA update (using the same 'update' pattern for efficiency if possible, 
-    // but lightweight-charts LineSeries needs 'update' with a new time or same time)
     if (emaSeriesRef.current && currentEMA9) {
       emaSeriesRef.current.update(currentEMA9);
     }
   }, [currentCandle, currentEMA9]);
-
-  // User Toggle for Deduplication
-  const [deduplicateEvents, setDeduplicateEvents] = useState(true);
 
   // Marker Overlay Logic
   const updateMarkersOverlay = () => {
@@ -136,6 +133,9 @@ export function PriceChart() {
        return;
     }
 
+    // Read from REF to avoid stale closures and dependency churn
+    const { candles: refCandles, currentCandle: refCurrentCandle, events: refEvents, deduplicateEvents: refDeduplicate } = dataRef.current;
+    
     const chart = chartRef.current;
     const series = seriesRef.current;
     const timeScale = chart.timeScale();
@@ -146,7 +146,7 @@ export function PriceChart() {
     // 1. Group events by Snapped Timestamp (1m buckets)
     const groupedEvents = new Map<number, RuleEngineEvent[]>();
     
-    events.forEach(event => {
+    refEvents.forEach(event => {
        const snappedTime = Math.floor(event.timestamp / 60) * 60;
        if (!groupedEvents.has(snappedTime)) {
           groupedEvents.set(snappedTime, []);
@@ -156,7 +156,7 @@ export function PriceChart() {
 
     // 2. Process each Group
     groupedEvents.forEach((groupEvents, snappedTime) => {
-       // Sort by time within the group for the tooltip
+       // Sort by time within the group
        groupEvents.sort((a, b) => a.msTimestamp - b.msTimestamp);
 
        const time = snappedTime as Time;
@@ -166,13 +166,13 @@ export function PriceChart() {
        if (x === null || x < 0 || x > container.clientWidth) return;
 
        // Find Candle Y-Coordinates
-       let candle = candles.find(c => Number(c.time) === snappedTime);
-       if (!candle && currentCandle && Number(currentCandle.time) === snappedTime) {
-          candle = currentCandle;
+       let candle = refCandles.find(c => Number(c.time) === snappedTime);
+       if (!candle && refCurrentCandle && Number(refCurrentCandle.time) === snappedTime) {
+          candle = refCurrentCandle;
        }
 
        // Helper to create and append marker
-       const createMarker = (y: number, isDeviation: boolean, eventsForTooltip: RuleEngineEvent[]) => {
+       const createMarker = (y: number, isDeviation: boolean) => {
           const el = document.createElement('div');
           Object.assign(el.style, {
              position: 'absolute',
@@ -187,59 +187,30 @@ export function PriceChart() {
              alignItems: 'center',
              justifyContent: 'center',
              width: '20px',
-             height: '20px'
+             height: '20px',
+             transition: 'transform 0.1s ease-in-out'
           });
 
           el.innerHTML = isDeviation 
              ? '<span style="color: #EF4444; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));">▼</span>' 
              : '<span style="color: #10B981; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));">▲</span>';
 
-          // Tooltip showing ALL events in this bundle (sorted)
-          el.onmouseenter = () => {
-             if (tooltipRef.current) {
-                tooltipRef.current.style.display = 'block';
-                tooltipRef.current.style.left = `${x + 10}px`;
-                tooltipRef.current.style.top = `${y}px`;
-                
-                // Build list of events
-                const content = eventsForTooltip.map((evt, i) => {
-                   const date = new Date(evt.msTimestamp);
-                   const timeStr = date.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                   const msStr = String(date.getMilliseconds()).padStart(3, '0');
-                   const isLast = i === eventsForTooltip.length - 1;
-
-                   return `
-                     <div style="margin-bottom: ${isLast ? '0' : '8px'}; padding-bottom: ${isLast ? '0' : '8px'}; border-bottom: ${isLast ? 'none' : '1px solid #f3f4f6'};">
-                       <div style="font-weight: bold; margin-bottom: 2px; color: ${evt.deviation ? '#EF4444' : '#10B981'}; display: flex; align-items: center; gap: 4px;">
-                         <span>${evt.deviation ? '⚠' : '✓'}</span>
-                         <span>${evt.deviation ? 'DEVIATION' : 'ADHERENCE'}</span>
-                       </div>
-                       <div style="font-size: 11px; margin-bottom: 1px;">
-                         <span style="color: #9CA3AF">Rule:</span> 
-                         <span style="font-family: monospace;">${typeof evt.rule === 'string' ? evt.rule : JSON.stringify(evt.rawRule || evt.rule)}</span>
-                       </div>
-                        <div style="font-size: 11px; margin-bottom: 1px;"><span style="color: #9CA3AF">Price:</span> ${evt.price.toFixed(2)}</div>
-                       <div style="font-size: 11px; margin-bottom: 1px;"><span style="color: #9CA3AF">Action:</span> ${evt.action}</div>
-                       <div style="font-size: 10px; color: #9CA3AF; margin-top: 2px; font-family: monospace;">
-                         ${timeStr}.${msStr}
-                       </div>
-                     </div>
-                   `;
-                }).join('');
-
-                tooltipRef.current.innerHTML = content;
-             }
+          // Click Interaction -> Call Parent
+          el.onclick = (e) => {
+             e.stopPropagation();
+             // Pass the snapped time (candle timestamp) to filter the inspector
+             onMarkerClick(snappedTime);
           };
 
-          el.onmouseleave = () => {
-             if (tooltipRef.current) tooltipRef.current.style.display = 'none';
-          };
+          // Simple hover effect for feedback
+          el.onmouseenter = () => { el.style.transform = `translate(-50%, ${isDeviation ? '-100% - 8px' : '8px'}) scale(1.2)`; };
+          el.onmouseleave = () => { el.style.transform = `translate(-50%, ${isDeviation ? '-100% - 8px' : '8px'}) scale(1.0)`; };
 
           container.appendChild(el);
        };
 
        // 3. Render Logic
-       if (deduplicateEvents) {
+       if (refDeduplicate) {
           // --- MODE: DEDUPLICATED ---
           // One Red (if exists), One Green (if exists)
           const deviations = groupEvents.filter(e => e.deviation);
@@ -247,12 +218,12 @@ export function PriceChart() {
           
           if (deviations.length > 0) {
              const y = candle ? series.priceToCoordinate(candle.high) : series.priceToCoordinate(deviations[0].price);
-             if (y !== null) createMarker(y, true, groupEvents); // Show ALL events in tooltip regardless of marker color
+             if (y !== null) createMarker(y, true); 
           }
           
           if (adherences.length > 0) {
              const y = candle ? series.priceToCoordinate(candle.low) : series.priceToCoordinate(adherences[0].price);
-             if (y !== null) createMarker(y, false, groupEvents); // Show ALL events in tooltip
+             if (y !== null) createMarker(y, false); 
           }
 
        } else {
@@ -267,25 +238,21 @@ export function PriceChart() {
              }
              
              if (y !== null) {
-                // For debug mode, we can show just this event or all?
-                // User asked to "see every time that get streamed".
-                // Let's bind just THIS event to the tooltip for specific inspection, 
-                // OR show group. Standard is "hovering this marker shows this marker's data".
-                createMarker(y, evt.deviation, [evt]); 
+                createMarker(y, evt.deviation); 
              }
           });
        }
     });
   };
 
-  // Subscribe to chart updates to move overlay
+  // Subscribe to chart updates (Scrolling/Zooming)
+  // This effect is now STABLE and does not re-run on data changes.
   useEffect(() => {
     if (!chartRef.current || !seriesRef.current) return;
     
     const timeScale = chartRef.current.timeScale();
     
     const handleUpdate = () => {
-       // Using requestAnimationFrame to debounce and sync with repaint
        requestAnimationFrame(updateMarkersOverlay);
     };
 
@@ -296,12 +263,13 @@ export function PriceChart() {
        timeScale.unsubscribeVisibleTimeRangeChange(handleUpdate);
        timeScale.unsubscribeVisibleLogicalRangeChange(handleUpdate);
     };
-  }, [deduplicateEvents, events, candles, currentCandle]); // Add dependencies to closure
+    // No dependencies on data, only on chart instance availability
+  }, []); 
 
-  // Trigger update when events/data change
+  // Trigger update when events/data change (The "Render Loop")
   useEffect(() => {
     updateMarkersOverlay();
-  }, [events, candles, deduplicateEvents]); // Re-run when toggle changes
+  }, [events, candles, deduplicateEvents, currentCandle]);
 
   return (
     <div className="relative w-full h-[500px]">
@@ -323,30 +291,6 @@ export function PriceChart() {
              : 'Showing all raw events (stacked)'}
          </span>
       </div>
-
-      {/* Tooltip for Markers */}
-      <div 
-        ref={tooltipRef}
-        style={{
-          display: 'none',
-          position: 'absolute',
-          zIndex: 100,
-          pointerEvents: 'auto', // Allow scrolling/interaction
-          backgroundColor: 'rgba(255, 255, 255, 0.98)',
-          backdropFilter: 'blur(4px)',
-          border: '1px solid #e5e7eb',
-          borderRadius: '6px',
-          padding: '8px 12px',
-          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-          color: '#374151',
-          fontSize: '12px',
-          fontFamily: 'sans-serif',
-          minWidth: '220px',
-          maxWidth: '320px',
-          maxHeight: '400px', // Increased height
-          overflowY: 'auto'
-        }}
-      />
 
       <div className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur px-3 py-1 rounded shadow text-xs font-mono text-gray-600">
         BTC-USD • 1m • Coinbase • EMA-9
