@@ -15,7 +15,7 @@ export default defineConfig({
       // TODO(MARKETDATA_CANONICAL): Remove this leftover Binance proxy if not used, or keep for potential future use.
       // '/api/binance': { ... } 
       
-      // Proxy for TMOM Backend (Rule Engine) to bypass CORS
+      // TODO Proxy for TMOM Backend (Rule Engine) to bypass CORS (move cors * to backend)
       '/api/backend': {
         target: 'https://tmom-app-backend.onrender.com',
         changeOrigin: true,
