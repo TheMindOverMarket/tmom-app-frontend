@@ -33,7 +33,7 @@ function App() {
     }}>
       <header style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111827', margin: 0 }}>
-          Mind Over Market <span style={{ fontWeight: 'normal', color: '#6B7280' }}>| Demo Scaffolding</span>
+          TheMindOverMarket <span style={{ fontWeight: 'normal', color: '#6B7280' }}>| Demo Scaffolding</span>
         </h1>
         
         <button
