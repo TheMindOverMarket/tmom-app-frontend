@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { createChart, CandlestickSeries, LineSeries, createSeriesMarkers, type IChartApi, type ISeriesApi, type SeriesMarker, type Time } from 'lightweight-charts';
+import { useEffect, useRef, useState } from 'react';
+import { createChart, CandlestickSeries, LineSeries, type IChartApi, type ISeriesApi, type Time } from 'lightweight-charts';
 import { useMarketData } from '../hooks/useMarketData';
 import { useDerivedSignals } from '../hooks/useDerivedSignals';
 import { useRuleEngineEvents } from '../hooks/useRuleEngineEvents';
@@ -10,7 +10,7 @@ export function PriceChart() {
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
   const emaSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
-  const markersRef = useRef<any>(null); // To store the result of createSeriesMarkers
+  const markersContainerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   // Use Canonical Market Data Hook
@@ -69,53 +69,13 @@ export function PriceChart() {
     });
     emaSeriesRef.current = emaSeries;
     
-    // Series Markers Primitive (Required in v5.1.0+)
-    const markersPlugin = createSeriesMarkers(series);
-    markersRef.current = markersPlugin;
+    // Markers: We now use HTML primitives, so no createSeriesMarkers logic needed.
 
     chart.timeScale().fitContent();
 
     // Tooltip / Crosshair Logic
-    chart.subscribeCrosshairMove((param) => {
-      if (
-        !tooltipRef.current ||
-        !param.point ||
-        !param.time ||
-        param.point.x < 0 ||
-        param.point.x > (chartContainerRef.current?.clientWidth || 0) ||
-        param.point.y < 0 ||
-        param.point.y > 500
-      ) {
-        if (tooltipRef.current) tooltipRef.current.style.display = 'none';
-        return;
-      }
-
-      // Check if we are hovering over a marker
-      // Note: lightweight-charts doesn't give marker hit-testing directly in param.
-      // We check for events at this timestamp using a ref to avoid stale closures.
-      const hoveredEvents = latestEventsRef.current.filter(e => e.timestamp === (param.time as number));
-      
-      if (hoveredEvents.length > 0) {
-        const event = hoveredEvents[0]; // Just show the first one for now
-        tooltipRef.current.style.display = 'block';
-        tooltipRef.current.style.left = `${param.point.x + 15}px`;
-        tooltipRef.current.style.top = `${param.point.y + 15}px`;
-        
-        const ruleName = typeof event.rule === 'string' ? event.rule : JSON.stringify(event.rule);
-        
-        tooltipRef.current.innerHTML = `
-          <div style="font-weight: bold; margin-bottom: 4px; color: ${event.deviation ? '#EF4444' : '#10B981'}">
-            ${event.deviation ? '⚠ DEVIATION' : '✓ ADHERENCE'}
-          </div>
-          <div style="font-size: 11px; margin-bottom: 2px;">Rule: ${ruleName}</div>
-          <div style="font-size: 11px; margin-bottom: 2px;">Price: ${event.price.toFixed(2)}</div>
-          <div style="font-size: 11px; margin-bottom: 2px;">Action: ${event.action}</div>
-          <div style="font-size: 10px; color: #9CA3AF;">${new Date(event.originalTimestamp).toLocaleTimeString()}</div>
-        `;
-      } else {
-        tooltipRef.current.style.display = 'none';
-      }
-    });
+    // Tooltip / Crosshair Logic: REMOVED (Markers handle their own tooltips now)
+    // We only keep basic chart cleanup
 
     const handleResize = () => {
       if (chartContainerRef.current && chartRef.current) {
@@ -167,27 +127,203 @@ export function PriceChart() {
     }
   }, [currentCandle, currentEMA9]);
 
-  // Update Data: Rule Engine Markers
-  useEffect(() => {
-    if (seriesRef.current && events.length > 0) {
-      const markers: SeriesMarker<Time>[] = events.map((event) => ({
-        time: event.timestamp as Time,
-        position: event.deviation ? 'aboveBar' : 'belowBar',
-        color: event.deviation ? '#EF4444' : '#10B981',
-        shape: event.deviation ? 'arrowDown' : 'arrowUp',
-        text: typeof event.rule === 'string' ? event.rule : 'Rule',
-      }));
-      
-      if (markersRef.current) {
-        markersRef.current.setMarkers(markers);
-      }
+  // User Toggle for Deduplication
+  const [deduplicateEvents, setDeduplicateEvents] = useState(true);
+
+  // Marker Overlay Logic
+  const updateMarkersOverlay = () => {
+    if (!chartRef.current || !seriesRef.current || !markersContainerRef.current) {
+       return;
     }
-  }, [events]);
+
+    const chart = chartRef.current;
+    const series = seriesRef.current;
+    const timeScale = chart.timeScale();
+    const container = markersContainerRef.current;
+    
+    container.innerHTML = '';
+
+    // 1. Group events by Snapped Timestamp (1m buckets)
+    const groupedEvents = new Map<number, RuleEngineEvent[]>();
+    
+    events.forEach(event => {
+       const snappedTime = Math.floor(event.timestamp / 60) * 60;
+       if (!groupedEvents.has(snappedTime)) {
+          groupedEvents.set(snappedTime, []);
+       }
+       groupedEvents.get(snappedTime)?.push(event);
+    });
+
+    // 2. Process each Group
+    groupedEvents.forEach((groupEvents, snappedTime) => {
+       // Sort by time within the group for the tooltip
+       groupEvents.sort((a, b) => a.msTimestamp - b.msTimestamp);
+
+       const time = snappedTime as Time;
+       const x = timeScale.timeToCoordinate(time);
+
+       // Skip off-screen
+       if (x === null || x < 0 || x > container.clientWidth) return;
+
+       // Find Candle Y-Coordinates
+       let candle = candles.find(c => Number(c.time) === snappedTime);
+       if (!candle && currentCandle && Number(currentCandle.time) === snappedTime) {
+          candle = currentCandle;
+       }
+
+       // Helper to create and append marker
+       const createMarker = (y: number, isDeviation: boolean, eventsForTooltip: RuleEngineEvent[]) => {
+          const el = document.createElement('div');
+          Object.assign(el.style, {
+             position: 'absolute',
+             left: `${x}px`,
+             top: `${y}px`,
+             transform: `translate(-50%, ${isDeviation ? '-100% - 8px' : '8px'})`,
+             cursor: 'pointer',
+             zIndex: '50',
+             pointerEvents: 'auto',
+             fontSize: '20px',
+             display: 'flex',
+             alignItems: 'center',
+             justifyContent: 'center',
+             width: '20px',
+             height: '20px'
+          });
+
+          el.innerHTML = isDeviation 
+             ? '<span style="color: #EF4444; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));">▼</span>' 
+             : '<span style="color: #10B981; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));">▲</span>';
+
+          // Tooltip showing ALL events in this bundle (sorted)
+          el.onmouseenter = () => {
+             if (tooltipRef.current) {
+                tooltipRef.current.style.display = 'block';
+                tooltipRef.current.style.left = `${x + 10}px`;
+                tooltipRef.current.style.top = `${y}px`;
+                
+                // Build list of events
+                const content = eventsForTooltip.map((evt, i) => {
+                   const date = new Date(evt.msTimestamp);
+                   const timeStr = date.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                   const msStr = String(date.getMilliseconds()).padStart(3, '0');
+                   const isLast = i === eventsForTooltip.length - 1;
+
+                   return `
+                     <div style="margin-bottom: ${isLast ? '0' : '8px'}; padding-bottom: ${isLast ? '0' : '8px'}; border-bottom: ${isLast ? 'none' : '1px solid #f3f4f6'};">
+                       <div style="font-weight: bold; margin-bottom: 2px; color: ${evt.deviation ? '#EF4444' : '#10B981'}; display: flex; align-items: center; gap: 4px;">
+                         <span>${evt.deviation ? '⚠' : '✓'}</span>
+                         <span>${evt.deviation ? 'DEVIATION' : 'ADHERENCE'}</span>
+                       </div>
+                       <div style="font-size: 11px; margin-bottom: 1px;">
+                         <span style="color: #9CA3AF">Rule:</span> 
+                         <span style="font-family: monospace;">${typeof evt.rule === 'string' ? evt.rule : JSON.stringify(evt.rawRule || evt.rule)}</span>
+                       </div>
+                        <div style="font-size: 11px; margin-bottom: 1px;"><span style="color: #9CA3AF">Price:</span> ${evt.price.toFixed(2)}</div>
+                       <div style="font-size: 11px; margin-bottom: 1px;"><span style="color: #9CA3AF">Action:</span> ${evt.action}</div>
+                       <div style="font-size: 10px; color: #9CA3AF; margin-top: 2px; font-family: monospace;">
+                         ${timeStr}.${msStr}
+                       </div>
+                     </div>
+                   `;
+                }).join('');
+
+                tooltipRef.current.innerHTML = content;
+             }
+          };
+
+          el.onmouseleave = () => {
+             if (tooltipRef.current) tooltipRef.current.style.display = 'none';
+          };
+
+          container.appendChild(el);
+       };
+
+       // 3. Render Logic
+       if (deduplicateEvents) {
+          // --- MODE: DEDUPLICATED ---
+          // One Red (if exists), One Green (if exists)
+          const deviations = groupEvents.filter(e => e.deviation);
+          const adherences = groupEvents.filter(e => !e.deviation);
+          
+          if (deviations.length > 0) {
+             const y = candle ? series.priceToCoordinate(candle.high) : series.priceToCoordinate(deviations[0].price);
+             if (y !== null) createMarker(y, true, groupEvents); // Show ALL events in tooltip regardless of marker color
+          }
+          
+          if (adherences.length > 0) {
+             const y = candle ? series.priceToCoordinate(candle.low) : series.priceToCoordinate(adherences[0].price);
+             if (y !== null) createMarker(y, false, groupEvents); // Show ALL events in tooltip
+          }
+
+       } else {
+          // --- MODE: RAW (DEBUG) ---
+          // Render every single event stacked
+          groupEvents.forEach(evt => {
+             let y = null;
+             if (candle) {
+                y = series.priceToCoordinate(evt.deviation ? candle.high : candle.low);
+             } else {
+                y = series.priceToCoordinate(evt.price);
+             }
+             
+             if (y !== null) {
+                // For debug mode, we can show just this event or all?
+                // User asked to "see every time that get streamed".
+                // Let's bind just THIS event to the tooltip for specific inspection, 
+                // OR show group. Standard is "hovering this marker shows this marker's data".
+                createMarker(y, evt.deviation, [evt]); 
+             }
+          });
+       }
+    });
+  };
+
+  // Subscribe to chart updates to move overlay
+  useEffect(() => {
+    if (!chartRef.current || !seriesRef.current) return;
+    
+    const timeScale = chartRef.current.timeScale();
+    
+    const handleUpdate = () => {
+       // Using requestAnimationFrame to debounce and sync with repaint
+       requestAnimationFrame(updateMarkersOverlay);
+    };
+
+    timeScale.subscribeVisibleTimeRangeChange(handleUpdate);
+    timeScale.subscribeVisibleLogicalRangeChange(handleUpdate);
+    
+    return () => {
+       timeScale.unsubscribeVisibleTimeRangeChange(handleUpdate);
+       timeScale.unsubscribeVisibleLogicalRangeChange(handleUpdate);
+    };
+  }, [deduplicateEvents, events, candles, currentCandle]); // Add dependencies to closure
+
+  // Trigger update when events/data change
+  useEffect(() => {
+    updateMarkersOverlay();
+  }, [events, candles, deduplicateEvents]); // Re-run when toggle changes
 
   return (
     <div className="relative w-full h-[500px]">
       <div ref={chartContainerRef} className="absolute inset-0" />
+      {/* HTML Marker Overlay Layer */}
+      <div ref={markersContainerRef} className="absolute inset-0 pointer-events-none" style={{ overflow: 'hidden' }}></div>
       
+      {/* Controls Overlay */}
+      <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-1">
+         <button 
+           onClick={() => setDeduplicateEvents(!deduplicateEvents)}
+           className="bg-white/90 backdrop-blur border border-gray-200 shadow-sm px-3 py-1.5 rounded text-xs font-semibold hover:bg-gray-50 transition-colors text-gray-700"
+         >
+           {deduplicateEvents ? 'Mode: Grouped' : 'Mode: Debug Stream'}
+         </button>
+         <span className="text-[10px] text-gray-500 bg-white/50 backdrop-blur px-1 rounded">
+           {deduplicateEvents 
+             ? 'Showing 1 marker per minute (clean)' 
+             : 'Showing all raw events (stacked)'}
+         </span>
+      </div>
+
       {/* Tooltip for Markers */}
       <div 
         ref={tooltipRef}
@@ -195,17 +331,20 @@ export function PriceChart() {
           display: 'none',
           position: 'absolute',
           zIndex: 100,
-          pointerEvents: 'none',
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          pointerEvents: 'auto', // Allow scrolling/interaction
+          backgroundColor: 'rgba(255, 255, 255, 0.98)',
           backdropFilter: 'blur(4px)',
           border: '1px solid #e5e7eb',
           borderRadius: '6px',
           padding: '8px 12px',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
           color: '#374151',
           fontSize: '12px',
           fontFamily: 'sans-serif',
-          minWidth: '160px'
+          minWidth: '220px',
+          maxWidth: '320px',
+          maxHeight: '400px', // Increased height
+          overflowY: 'auto'
         }}
       />
 

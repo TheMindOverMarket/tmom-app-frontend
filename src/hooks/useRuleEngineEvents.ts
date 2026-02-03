@@ -26,14 +26,18 @@ export function useRuleEngineEvents() {
         const rawData: RuleEngineRawMessage = JSON.parse(messageEvent.data);
         
         // Transform for chart compatibility
-        // Convert ISO-8601 to Unix seconds
-        const unixSeconds = Math.floor(new Date(rawData.timestamp).getTime() / 1000);
+        // Convert ISO-8601 to Unix seconds and ms
+        const date = new Date(rawData.timestamp);
+        const unixSeconds = Math.floor(date.getTime() / 1000);
+        const msTimestamp = date.getTime();
         
         const newEvent: RuleEngineEvent = {
           ...rawData,
           id: crypto.randomUUID(),
           timestamp: unixSeconds,
+          msTimestamp: msTimestamp,
           originalTimestamp: rawData.timestamp,
+          rawRule: rawData.rule,
         };
 
         setEvents((prev) => [...prev, newEvent]);
