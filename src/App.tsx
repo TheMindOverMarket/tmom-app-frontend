@@ -31,9 +31,12 @@ function App() {
         <PriceChart />
       </div>
       
+      {/* Hidden for now as it contains mock data */}
+      {/* 
       <div style={{ height: '350px' }}>
          <BehaviorTimelinePanel symbol={symbol} />
       </div>
+      */}
     </main>
   );
 }

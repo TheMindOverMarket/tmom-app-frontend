@@ -153,10 +153,13 @@ export const BehaviorTimelinePanel: FC<BehaviorTimelinePanelProps> = ({ symbol }
     <div style={containerStyle}>
       <div style={headerStyle}>
         <span style={titleStyle}>Behavioral Feed • {symbol}</span>
+        {/* Adherence Score hidden as it is currently mocked/hardcoded */}
+        {/* 
         <div style={scoreLabelStyle}>
           Adherence Score:
           <span style={scoreValueStyle}>{adherenceScore}/100</span>
         </div>
+        */}
       </div>
 
       <div style={listStyle}>
