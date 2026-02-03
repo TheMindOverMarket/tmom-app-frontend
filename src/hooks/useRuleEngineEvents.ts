@@ -25,7 +25,7 @@ export function useRuleEngineEvents() {
       try {
         const rawData: RuleEngineRawMessage = JSON.parse(messageEvent.data);
         
-        // Transform for chart compatibility
+        // Transform for chart compatibility 
         // Convert ISO-8601 to Unix seconds and ms
         const date = new Date(rawData.timestamp);
         const unixSeconds = Math.floor(date.getTime() / 1000);
