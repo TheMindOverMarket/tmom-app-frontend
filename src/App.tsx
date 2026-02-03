@@ -5,17 +5,20 @@ import { useRuleEngineEvents } from './hooks/useRuleEngineEvents';
 
 function App() {
   // Centralized Data Source
-  const { events } = useRuleEngineEvents();
+  const { events, isMockMode, toggleMockMode } = useRuleEngineEvents();
   
-  // Interaction State
-  const [focusedTimestamp, setFocusedTimestamp] = useState<number | null>(null);
+// Interaction State
+  const [focusedView, setFocusedView] = useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);
 
-  const handleMarkerClick = useCallback((timestamp: number) => {
-    setFocusedTimestamp(timestamp);
+  const handleMarkerClick = useCallback((timestamp: number, type?: 'adherence' | 'deviation') => {
+    setFocusedView({
+      timestamp,
+      filter: type || null
+    });
   }, []);
 
   const clearFocus = useCallback(() => {
-    setFocusedTimestamp(null);
+    setFocusedView(null);
   }, []);
 
   return (
@@ -28,10 +31,37 @@ function App() {
       backgroundColor: '#f3f4f6', 
       fontFamily: 'sans-serif',
     }}>
-      <header style={{ marginBottom: '4px' }}>
+      <header style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111827', margin: 0 }}>
           Mind Over Market <span style={{ fontWeight: 'normal', color: '#6B7280' }}>| Demo Scaffolding</span>
         </h1>
+        
+        <button
+          onClick={toggleMockMode}
+          style={{
+            fontSize: '12px',
+            padding: '6px 12px',
+            borderRadius: '6px',
+            border: isMockMode ? '1px solid #059669' : '1px solid #D1D5DB',
+            backgroundColor: isMockMode ? '#059669' : '#FFFFFF',
+            color: isMockMode ? '#FFFFFF' : '#374151',
+            cursor: 'pointer',
+            fontWeight: 500,
+            transition: 'all 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          <span style={{ 
+            width: '8px', 
+            height: '8px', 
+            borderRadius: '50%', 
+            backgroundColor: isMockMode ? '#FFFFFF' : '#9CA3AF',
+            display: 'inline-block'
+          }}></span>
+          {isMockMode ? 'Simulating Events' : 'Enable Mock Stream'}
+        </button>
       </header>
       
       {/* Chart Section */}
@@ -57,7 +87,8 @@ function App() {
       }}>
          <RuleEventInspector 
             events={events}
-            focusedTimestamp={focusedTimestamp}
+            focusedTimestamp={focusedView?.timestamp ?? null}
+            filterType={focusedView?.filter ?? null}
             onClearFocus={clearFocus}
          />
       </div>

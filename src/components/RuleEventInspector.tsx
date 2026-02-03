@@ -4,6 +4,7 @@ import { RuleEngineEvent } from '../domain/ruleEngine/types';
 interface RuleEventInspectorProps {
   events: RuleEngineEvent[];
   focusedTimestamp: number | null; // Unix timestamp (frames/candles usually minutely)
+  filterType?: 'adherence' | 'deviation' | null;
   onClearFocus: () => void;
 }
 
@@ -23,6 +24,15 @@ const formatMs = (date: Date) => {
 const EventRow: FC<{ event: RuleEngineEvent }> = React.memo(({ event }) => {
   const date = new Date(event.msTimestamp);
   
+  // Color Palette (User Req: Adherence = Blue, Deviation = Orange)
+  // Adherence: Bg = Blue-50 (#EFF6FF), Text = Blue-800 (#1E40AF), Icon = Blue-600 (#2563EB)
+  // Deviation: Bg = Orange-50 (#FFF7ED), Text = Orange-800 (#9A3412), Icon = Orange-600 (#EA580C)
+
+  const bgColor = event.deviation ? '#FFF7ED' : '#EFF6FF';
+  const iconColor = event.deviation ? '#EA580C' : '#2563EB';
+  const labelColor = event.deviation ? '#9A3412' : '#1E40AF';
+  const tagBg = event.deviation ? '#FFEDD5' : '#DBEAFE'; // Slightly darker for tag
+
   const rowStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
@@ -30,23 +40,23 @@ const EventRow: FC<{ event: RuleEngineEvent }> = React.memo(({ event }) => {
     borderBottom: '1px solid #f0f3fa',
     fontSize: '13px',
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-    backgroundColor: event.deviation ? '#FEF2F2' : '#F0FDF4', // Subtle background hint
+    backgroundColor: bgColor,
     transition: 'background-color 0.2s',
   };
 
   return (
     <div style={rowStyle}>
       {/* Time */}
-      <div style={{ flex: '0 0 100px', color: '#9CA3AF', fontSize: '12px' }}>
+      <div style={{ flex: '0 0 100px', color: '#6B7280', fontSize: '12px' }}>
         {formatDate(date)}<span style={{ fontSize: '10px', opacity: 0.7 }}>.{formatMs(date)}</span>
       </div>
 
       {/* Type Icon */}
       <div style={{ flex: '0 0 30px', display: 'flex', justifyContent: 'center', fontSize: '14px' }}>
         {event.deviation ? (
-          <span title="Deviation" style={{ color: '#EF4444' }}>⚠</span>
+          <span title="Deviation" style={{ color: iconColor }}>▼</span> // Down Arrow
         ) : (
-          <span title="Adherence" style={{ color: '#10B981' }}>✓</span>
+          <span title="Adherence" style={{ color: iconColor }}>▲</span> // Up Arrow
         )}
       </div>
 
@@ -55,8 +65,11 @@ const EventRow: FC<{ event: RuleEngineEvent }> = React.memo(({ event }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
            <span style={{ 
              fontWeight: 600, 
-             color: event.deviation ? '#991B1B' : '#065F46',
-             fontSize: '12px',
+             color: labelColor,
+             backgroundColor: tagBg,
+             padding: '1px 6px',
+             borderRadius: '4px',
+             fontSize: '11px',
              textTransform: 'uppercase',
              letterSpacing: '0.02em'
            }}>
@@ -88,6 +101,7 @@ const EventRow: FC<{ event: RuleEngineEvent }> = React.memo(({ event }) => {
 export const RuleEventInspector: FC<RuleEventInspectorProps> = ({ 
   events, 
   focusedTimestamp,
+  filterType,
   onClearFocus 
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -107,9 +121,16 @@ export const RuleEventInspector: FC<RuleEventInspectorProps> = ({
     
     return events.filter(e => {
         const t = e.timestamp; // unix seconds
-        return t >= start && t < end;
+        const inRange = t >= start && t < end;
+        
+        // Apply Type Filter if present
+        if (!inRange) return false;
+        if (filterType === 'adherence' && e.deviation) return false;
+        if (filterType === 'deviation' && !e.deviation) return false;
+        
+        return true;
     }).sort((a, b) => b.msTimestamp - a.msTimestamp); // Newest first within the group
-  }, [events, focusedTimestamp]);
+  }, [events, focusedTimestamp, filterType]);
 
   // Scroll to top on new events if in live mode (user might have scrolled down)
   // Actually, standard behavior for "log" is often stick-to-bottom or new-at-top.
@@ -170,6 +191,23 @@ export const RuleEventInspector: FC<RuleEventInspectorProps> = ({
                   <span style={{ fontSize: '13px', fontWeight: 500, color: '#111827' }}>
                     {formatHeaderDate(focusedTimestamp)}
                   </span>
+                  
+                  {/* Filter Chip */}
+                  {filterType && (
+                    <span style={{
+                      fontSize: '10px',
+                      padding: '2px 6px',
+                      backgroundColor: filterType === 'deviation' ? '#FFF7ED' : '#EFF6FF',
+                      color: filterType === 'deviation' ? '#C2410C' : '#1D4ED8',
+                      border: `1px solid ${filterType === 'deviation' ? '#FDBA74' : '#93C5FD'}`,
+                      borderRadius: '12px',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      marginLeft: '4px'
+                    }}>
+                      Viewing: {filterType}
+                    </span>
+                  )}
                </div>
             ) : (
                 <span style={{ 
