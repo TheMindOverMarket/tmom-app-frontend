@@ -15,7 +15,7 @@ export const BackendMarketDataProvider: MarketDataProvider = {
     else if (interval === 3600) timeframe = '1Hour';
     else if (interval === 86400) timeframe = '1Day';
 
-    const response = await fetch(`/api/backend/market-data/history?symbol=${encodeURIComponent(symbol)}&timeframe=${timeframe}&limit=100`);
+    const response = await fetch(`https://tmom-app-backend.onrender.com/market-data/history?symbol=${encodeURIComponent(symbol)}&timeframe=${timeframe}&limit=100`);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch history from backend: ${response.status}`);

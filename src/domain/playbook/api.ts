@@ -1,6 +1,6 @@
 import { Playbook, PlaybookCreate } from './types';
 
-const API_BASE = '/api/backend';
+const API_BASE = 'https://tmom-app-backend.onrender.com';
 
 export const playbookApi = {
   createPlaybook: async (data: PlaybookCreate): Promise<Playbook> => {
@@ -37,7 +37,7 @@ export const playbookApi = {
   },
 
   triggerPlaybook: async (userId: string, playbookId: string): Promise<void> => {
-    const response = await fetch(`/api/engine/api/rules/trigger?user_id=${userId}&playbook_id=${playbookId}`);
+    const response = await fetch(`https://rule-engine-rcg9.onrender.com/api/rules/trigger?user_id=${userId}&playbook_id=${playbookId}`);
     if (!response.ok) {
       let errorMessage = 'Failed to trigger playbook in rule engine';
       try {

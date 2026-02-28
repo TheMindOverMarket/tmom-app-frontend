@@ -5,18 +5,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    proxy: {
-      // TODO Proxy for TMOM Backend (Rule Engine) to bypass CORS (move cors * to backend)
-      '/api/backend': {
-        target: 'https://tmom-app-backend.onrender.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/backend/, ''),
-      },
-      '/api/engine': {
-        target: 'https://rule-engine-rcg9.onrender.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/engine/, ''),
-      },
-    },
+    // Relying strictly on cross-origin backend deployments.
   },
 })

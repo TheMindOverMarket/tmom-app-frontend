@@ -1,6 +1,6 @@
 import { User, UserCreate } from './types';
 
-const API_BASE = '/api/backend';
+const API_BASE = 'https://tmom-app-backend.onrender.com';
 
 export const userApi = {
   listUsers: async (): Promise<User[]> => {

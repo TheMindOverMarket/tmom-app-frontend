@@ -1,14 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/api/backend/(.*)",
-      "destination": "https://tmom-app-backend.onrender.com/$1"
-    },
-    {
-      "source": "/api/engine/(.*)",
-      "destination": "https://rule-engine-rcg9.onrender.com/$1"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
