@@ -36,7 +36,7 @@ function App() {
     setIsSubmitting(true);
     setNotification(null);
 
-    const TEMP_USER_ID = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
+    const TEMP_USER_ID = '0ea839a8-dd23-45ce-b631-9c28335983d7';
 
     try {
         await playbookApi.createPlaybook({
@@ -99,6 +99,23 @@ function App() {
           {isMockMode ? 'Simulating Events' : 'Enable Mock Stream'}
         </button>
       </header>
+
+      {/* Global Hardcoded User Banner */}
+      <div style={{
+        padding: '6px 12px',
+        borderRadius: '6px',
+        backgroundColor: '#E0E7FF',
+        color: '#3730A3',
+        border: '1px solid #C7D2FE',
+        fontSize: '13px',
+        display: 'flex',
+        alignItems: 'center',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+        fontWeight: 500
+      }}>
+        <span style={{ marginRight: '8px' }}>👤</span>
+        <strong>DEBUG:</strong> &nbsp;Using default hardcoded user ID ({'0ea839a8-dd23-45ce-b631-9c28335983d7'})
+      </div>
 
       {/* Notification Banner */}
       {notification && (
