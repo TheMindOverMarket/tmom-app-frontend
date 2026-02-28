@@ -140,11 +140,13 @@ function App() {
       {/* Chart Section */}
       <div style={{ 
         flex: 3, // Chart takes more space
-        minHeight: '400px', 
+        minHeight: 0, 
         backgroundColor: '#fff', 
         borderRadius: '8px', 
         overflow: 'hidden',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+        position: 'relative',
+        display: 'flex'
       }}>
         <PriceChart 
           events={events} 
@@ -155,8 +157,10 @@ function App() {
       {/* Inspector Section */}
       <div style={{ 
         flex: 2, // Inspector takes less space but is substantial
-        minHeight: '250px',
-        overflow: 'hidden' 
+        minHeight: 0,
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column'
       }}>
          <RuleEventInspector 
             events={events}

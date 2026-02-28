@@ -186,12 +186,15 @@ interface MarkerData {
         
         // Helper to get Y coordinate
         const getY = (isDeviation: boolean): number | null => {
+            // Priority 1: Use actual event price so marker is perfectly aligned.
+            const evt = groupEvents.find(e => e.deviation === isDeviation);
+            if (evt) return series.priceToCoordinate(evt.price);
+
+            // Fallback: use candle boundaries if event price missing
             if (candle) {
                 return series.priceToCoordinate(isDeviation ? candle.high : candle.low);
             }
-            // Fallback: use first event price
-            const evt = groupEvents.find(e => e.deviation === isDeviation);
-            return evt ? series.priceToCoordinate(evt.price) : null;
+            return null;
         };
  
         if (hasDeviation) {
@@ -250,7 +253,7 @@ interface MarkerData {
    }, [events, candles, currentCandle, deduplicateEvents]);
  
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '400px' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 0, flex: 1 }}>
       <div ref={chartContainerRef} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
       
       {/* React Rendered Markers Layer */}
@@ -260,7 +263,7 @@ interface MarkerData {
             const color = isDeviation ? '#F97316' : '#3B82F6';
             const icon = isDeviation ? '▼' : '▲';
             
-            const yTransform = isDeviation ? '-100% - 12px' : '12px';
+            const yTransform = isDeviation ? 'calc(-100% - 12px)' : '12px';
 
             return (
                 <div
@@ -269,13 +272,13 @@ interface MarkerData {
                         e.stopPropagation();
                         onMarkerClick(m.timestamp, m.type);
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.transform = `translateX(-50%) translate(0, ${yTransform}) scale(1.3)`}
-                    onMouseLeave={(e) => e.currentTarget.style.transform = `translateX(-50%) translate(0, ${yTransform}) scale(1.0)`}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = `translateX(-50%) translateY(${yTransform}) scale(1.3)`}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = `translateX(-50%) translateY(${yTransform}) scale(1.0)`}
                     style={{
                         position: 'absolute',
                         left: m.x,
                         top: m.y,
-                        transform: `translateX(-50%) translate(0, ${yTransform})`, // Dynamic Transform
+                        transform: `translateX(-50%) translateY(${yTransform})`, // Dynamic Transform
                         cursor: 'pointer',
                         pointerEvents: 'auto',
                         zIndex: 50,
