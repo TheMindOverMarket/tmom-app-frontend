@@ -36,7 +36,7 @@ function App() {
     setIsSubmitting(true);
     setNotification(null);
 
-    const TEMP_USER_ID = '0ea839a8-dd23-45ce-b631-9c28335983d7';
+    const TEMP_USER_ID = '1d4d88c7-bcd1-4813-8f34-59c9776e5b3f';
 
     try {
         const playbook = await playbookApi.createPlaybook({
@@ -118,7 +118,7 @@ function App() {
         fontWeight: 500
       }}>
         <span style={{ marginRight: '8px' }}>👤</span>
-        <strong>DEBUG:</strong> &nbsp;Using default hardcoded user ID ({'0ea839a8-dd23-45ce-b631-9c28335983d7'})
+        <strong>DEBUG:</strong> &nbsp;Using default hardcoded user ID ({'1d4d88c7-bcd1-4813-8f34-59c9776e5b3f'})
       </div>
 
       {/* Notification Banner */}
