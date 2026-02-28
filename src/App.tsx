@@ -1,27 +1,23 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { PriceChart } from './components/PriceChart';
 import { RuleEventInspector } from './components/RuleEventInspector';
 import { useRuleEngineEvents } from './hooks/useRuleEngineEvents';
 import { playbookApi } from './domain/playbook/api';
-import { userApi } from './domain/user/api';
-import { User } from './domain/user/types';
+
 
 function App() {
   // Centralized Data Source
   const { events, isMockMode, toggleMockMode } = useRuleEngineEvents();
   
   // Interaction State
-  const [user, setUser] = useState<User | null>(null);
+  // Interaction State
   const [focusedView, setFocusedView] = useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);
   
   // Rule Ingestion State
   const [ruleInput, setRuleInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string; } | null>(null);
 
-  // Initialize User
-  useEffect(() => {
-    userApi.ensureDefaultUser().then(setUser).catch(console.error);
-  }, []);
 
   const handleMarkerClick = useCallback((timestamp: number, type?: 'adherence' | 'deviation') => {
     setFocusedView({
@@ -35,20 +31,27 @@ function App() {
   }, []);
 
   const handleRuleSubmit = async () => {
-    if (!ruleInput.trim() || !user) return;
+    if (!ruleInput.trim()) return;
     
     setIsSubmitting(true);
+    setNotification(null);
+
+    const TEMP_USER_ID = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
+
     try {
         await playbookApi.createPlaybook({
           name: `Playbook ${new Date().toLocaleTimeString()}`,
-          user_id: user.id,
+          user_id: TEMP_USER_ID,
           original_nl_input: ruleInput
         });
         setRuleInput(''); // Clear on success
-        alert('Playbook created successfully!'); // Simple feedback
+        setNotification({ type: 'success', message: 'Strategy playbook successfully created and deployed!' });
+        
+        // Auto-dismiss success notification after 5 seconds
+        setTimeout(() => setNotification(null), 5000);
     } catch (error: any) {
-        console.error(error);
-        alert(`Failed to create playbook: ${error.message}`);
+        console.error('Failed to create playbook:', error);
+        setNotification({ type: 'error', message: `Failed to deploy strategy: ${error.message || 'Unknown error'}` });
     } finally {
         setIsSubmitting(false);
     }
@@ -97,11 +100,43 @@ function App() {
         </button>
       </header>
 
+      {/* Notification Banner */}
+      {notification && (
+        <div style={{
+          padding: '12px 16px',
+          borderRadius: '6px',
+          backgroundColor: notification.type === 'success' ? '#DEF7EC' : '#FDE8E8',
+          color: notification.type === 'success' ? '#03543F' : '#9B1C1C',
+          border: `1px solid ${notification.type === 'success' ? '#31C48D' : '#F8B4B4'}`,
+          fontSize: '14px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+        }}>
+          <span>{notification.message}</span>
+          <button 
+            onClick={() => setNotification(null)}
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: 'inherit', 
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              opacity: 0.6,
+              marginLeft: '16px'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Rule Ingestion Section */}
       <div style={{ display: 'flex', gap: '8px' }}>
           <input 
             type="text" 
-            placeholder="Describe your rule in natural language (e.g. 'Alert if price drops 5% in 1 hour')..."
+            placeholder="Describe your strategy in natural language (e.g. 'Alert if price drops 5% in 1 hour')..."
             value={ruleInput}
             onChange={(e) => setRuleInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleRuleSubmit()}
@@ -133,7 +168,7 @@ function App() {
                 whiteSpace: 'nowrap'
             }}
           >
-            {isSubmitting ? 'Ingesting...' : 'Ingest Rule'}
+            {isSubmitting ? 'Ingesting...' : 'Ingest Strategy'}
           </button>
       </div>
       
