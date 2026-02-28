@@ -39,13 +39,17 @@ function App() {
     const TEMP_USER_ID = '0ea839a8-dd23-45ce-b631-9c28335983d7';
 
     try {
-        await playbookApi.createPlaybook({
+        const playbook = await playbookApi.createPlaybook({
           name: `Playbook ${new Date().toLocaleTimeString()}`,
           user_id: TEMP_USER_ID,
           original_nl_input: ruleInput
         });
+
+        // Final step: trigger the newly created playbook in the rule engine
+        await playbookApi.triggerPlaybook(TEMP_USER_ID, playbook.id);
+
         setRuleInput(''); // Clear on success
-        setNotification({ type: 'success', message: 'Strategy playbook successfully created and deployed!' });
+        setNotification({ type: 'success', message: 'Strategy playbook successfully created and triggered!' });
         
         // Auto-dismiss success notification after 5 seconds
         setTimeout(() => setNotification(null), 5000);

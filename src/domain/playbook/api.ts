@@ -34,5 +34,20 @@ export const playbookApi = {
     const response = await fetch(`${API_BASE}/playbooks/${id}`);
     if (!response.ok) throw new Error('Failed to get playbook');
     return response.json();
+  },
+
+  triggerPlaybook: async (userId: string, playbookId: string): Promise<void> => {
+    const response = await fetch(`/api/engine/api/rules/trigger?user_id=${userId}&playbook_id=${playbookId}`);
+    if (!response.ok) {
+      let errorMessage = 'Failed to trigger playbook in rule engine';
+      try {
+        const err = await response.json();
+        errorMessage = err.detail?.[0]?.msg || err.detail || 'Failed to trigger playbook in rule engine';
+      } catch (e) {
+        const text = await response.text();
+        errorMessage = text || 'Internal Server Error';
+      }
+      throw new Error(errorMessage);
+    }
   }
 };
