@@ -61,7 +61,7 @@ interface MarkerData {
          horzLines: { color: '#f0f3fa' },
        },
        width: chartContainerRef.current.clientWidth,
-       height: 500,
+       height: chartContainerRef.current.clientHeight || 400,
        timeScale: {
          timeVisible: true,
          secondsVisible: false,
@@ -95,6 +95,7 @@ interface MarkerData {
        if (chartContainerRef.current && chartRef.current) {
          chartRef.current.applyOptions({
            width: chartContainerRef.current.clientWidth,
+           height: chartContainerRef.current.clientHeight || 400,
          });
        }
      };
@@ -248,86 +249,79 @@ interface MarkerData {
      updateMarkersOverlay();
    }, [events, candles, currentCandle, deduplicateEvents]);
  
-   return (
-     <div className="relative w-full h-[500px]">
-       <div ref={chartContainerRef} className="absolute inset-0" />
-       
-       {/* React Rendered Markers Layer */}
-       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-         {markers.map(m => {
-             // Positioning Logic
-             // Deviation = Above Candle (Translate Y -100%)
-             // Adherence = Below Candle (Translate Y 0)
-             // We use translateY to create the gap
-             
-             const isDeviation = m.type === 'deviation';
-             const color = isDeviation ? '#F97316' : '#3B82F6';
-             const icon = isDeviation ? '▼' : '▲';
-             
-             // Offset away from candle
-             const yTransform = isDeviation ? '-100% - 12px' : '12px';
- 
-             return (
-                 <div
-                     key={m.id}
-                     className="marker-pop"
-                     onClick={(e) => {
-                         e.stopPropagation(); // Stop click from hitting chart
-                         onMarkerClick(m.timestamp, m.type);
-                     }}
-                     onMouseEnter={(e) => e.currentTarget.style.transform = `translateX(-50%) translate(0, ${yTransform}) scale(1.3)`}
-                     onMouseLeave={(e) => e.currentTarget.style.transform = `translateX(-50%) translate(0, ${yTransform}) scale(1.0)`}
-                     style={{
-                         position: 'absolute',
-                         left: m.x,
-                         top: m.y,
-                         transform: `translateX(-50%) translate(0, ${yTransform})`, // Dynamic Transform
-                         cursor: 'pointer',
-                         pointerEvents: 'auto',
-                         zIndex: 50,
-                         width: '24px',
-                         height: '24px',
-                         display: 'flex',
-                         alignItems: 'center',
-                         justifyContent: 'center',
-                         fontSize: '18px',
-                         color: color,
-                         filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.15))',
-                         transition: 'transform 0.1s ease', 
-                     }}
-                 >
-                     {icon}
-                 </div>
-             );
-         })}
-       </div>
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '400px' }}>
+      <div ref={chartContainerRef} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
       
-      {/* Controls Overlay */}
-      <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-1">
-         <button 
-           onClick={() => setDeduplicateEvents(!deduplicateEvents)}
-           className="bg-white/90 backdrop-blur border border-gray-200 shadow-sm px-3 py-1.5 rounded text-xs font-semibold hover:bg-gray-50 transition-colors text-gray-700"
-         >
-           {deduplicateEvents ? 'Mode: Grouped' : 'Mode: Debug Stream'}
-         </button>
-         <span className="text-[10px] text-gray-500 bg-white/50 backdrop-blur px-1 rounded">
-           {deduplicateEvents 
-             ? 'Showing 1 marker per minute (clean)' 
-             : 'Showing all raw events (stacked)'}
-         </span>
-      </div>
+      {/* React Rendered Markers Layer */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+        {markers.map(m => {
+            const isDeviation = m.type === 'deviation';
+            const color = isDeviation ? '#F97316' : '#3B82F6';
+            const icon = isDeviation ? '▼' : '▲';
+            
+            const yTransform = isDeviation ? '-100% - 12px' : '12px';
 
-      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2 items-start pointer-events-none">
-        <div className="bg-white/90 backdrop-blur px-3 py-1 rounded shadow text-xs font-mono text-gray-600">
-          BTC/USD • 1m • Alpaca • EMA-9
-        </div>
-        
-        {isMockData && (
-          <div className="bg-amber-100/90 backdrop-blur px-3 py-1 rounded shadow text-xs font-mono text-amber-800 border-l-4 border-amber-500 font-bold shadow-sm animate-pulse">
-            ⚠️ USING MOCK CANDLE DATA
-          </div>
-        )}
+            return (
+                <div
+                    key={m.id}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onMarkerClick(m.timestamp, m.type);
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = `translateX(-50%) translate(0, ${yTransform}) scale(1.3)`}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = `translateX(-50%) translate(0, ${yTransform}) scale(1.0)`}
+                    style={{
+                        position: 'absolute',
+                        left: m.x,
+                        top: m.y,
+                        transform: `translateX(-50%) translate(0, ${yTransform})`, // Dynamic Transform
+                        cursor: 'pointer',
+                        pointerEvents: 'auto',
+                        zIndex: 50,
+                        width: '24px',
+                        height: '24px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '18px',
+                        color: color,
+                        filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.15))',
+                        transition: 'transform 0.1s ease', 
+                    }}
+                >
+                    {icon}
+                </div>
+            );
+        })}
       </div>
-    </div>
+     
+     {/* Controls Overlay */}
+     <div style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 20, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+        <button 
+          onClick={() => setDeduplicateEvents(!deduplicateEvents)}
+          style={{ backgroundColor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', border: '1px solid #E5E7EB', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', fontWeight: 600, color: '#374151', cursor: 'pointer' }}
+        >
+          {deduplicateEvents ? 'Mode: Grouped' : 'Mode: Debug Stream'}
+        </button>
+        <span style={{ fontSize: '10px', color: '#6B7280', backgroundColor: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(4px)', padding: '0 4px', borderRadius: '4px' }}>
+          {deduplicateEvents 
+            ? 'Showing 1 marker per minute (clean)' 
+            : 'Showing all raw events (stacked)'}
+        </span>
+     </div>
+
+     <div style={{ position: 'absolute', top: '16px', left: '16px', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start', pointerEvents: 'none' }}>
+       <div style={{ backgroundColor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', padding: '4px 12px', borderRadius: '4px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', fontSize: '12px', fontFamily: 'monospace', color: '#4B5563' }}>
+         BTC/USD • 1m • Alpaca • EMA-9
+       </div>
+       
+       {isMockData && (
+         <div style={{ backgroundColor: 'rgba(254,243,199,0.9)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '4px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', fontSize: '12px', fontFamily: 'monospace', color: '#92400E', borderLeft: '4px solid #F59E0B', fontWeight: 'bold' }}>
+           ⚠️ USING MOCK CANDLE DATA
+         </div>
+       )}
+     </div>
+   </div>
   );
 }
