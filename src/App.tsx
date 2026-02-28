@@ -1,19 +1,27 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { PriceChart } from './components/PriceChart';
 import { RuleEventInspector } from './components/RuleEventInspector';
 import { useRuleEngineEvents } from './hooks/useRuleEngineEvents';
-import { ingestRule } from './domain/ruleEngine/api';
+import { playbookApi } from './domain/playbook/api';
+import { userApi } from './domain/user/api';
+import { User } from './domain/user/types';
 
 function App() {
   // Centralized Data Source
   const { events, isMockMode, toggleMockMode } = useRuleEngineEvents();
   
   // Interaction State
+  const [user, setUser] = useState<User | null>(null);
   const [focusedView, setFocusedView] = useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);
   
   // Rule Ingestion State
   const [ruleInput, setRuleInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Initialize User
+  useEffect(() => {
+    userApi.ensureDefaultUser().then(setUser).catch(console.error);
+  }, []);
 
   const handleMarkerClick = useCallback((timestamp: number, type?: 'adherence' | 'deviation') => {
     setFocusedView({
@@ -27,16 +35,20 @@ function App() {
   }, []);
 
   const handleRuleSubmit = async () => {
-    if (!ruleInput.trim()) return;
+    if (!ruleInput.trim() || !user) return;
     
     setIsSubmitting(true);
     try {
-        await ingestRule(ruleInput);
+        await playbookApi.createPlaybook({
+          name: `Playbook ${new Date().toLocaleTimeString()}`,
+          user_id: user.id,
+          original_nl_input: ruleInput
+        });
         setRuleInput(''); // Clear on success
-        alert('Rule submitted successfully!'); // Simple feedback
-    } catch (error) {
+        alert('Playbook created successfully!'); // Simple feedback
+    } catch (error: any) {
         console.error(error);
-        alert('Failed to submit rule. Check console.');
+        alert(`Failed to create playbook: ${error.message}`);
     } finally {
         setIsSubmitting(false);
     }

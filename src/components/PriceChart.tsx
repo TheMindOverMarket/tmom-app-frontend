@@ -24,7 +24,7 @@ interface MarkerData {
    const emaSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
  
    // Use Canonical Market Data Hook
-   const { candles, currentCandle } = useMarketData('BTC-USD', 60);
+   const { candles, currentCandle, isMockData } = useMarketData('BTC/USD', 60);
    
    // Use Derived Signals (EMA-9)
    const { ema9, currentEMA9 } = useDerivedSignals(candles, currentCandle);
@@ -317,8 +317,16 @@ interface MarkerData {
          </span>
       </div>
 
-      <div className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur px-3 py-1 rounded shadow text-xs font-mono text-gray-600">
-        BTC-USD • 1m • Coinbase • EMA-9
+      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2 items-start pointer-events-none">
+        <div className="bg-white/90 backdrop-blur px-3 py-1 rounded shadow text-xs font-mono text-gray-600">
+          BTC/USD • 1m • Alpaca • EMA-9
+        </div>
+        
+        {isMockData && (
+          <div className="bg-amber-100/90 backdrop-blur px-3 py-1 rounded shadow text-xs font-mono text-amber-800 border-l-4 border-amber-500 font-bold shadow-sm animate-pulse">
+            ⚠️ USING MOCK CANDLE DATA
+          </div>
+        )}
       </div>
     </div>
   );
