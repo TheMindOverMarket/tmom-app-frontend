@@ -1,6 +1,7 @@
+import { CONFIG } from '../../config/constants';
 import { Playbook, PlaybookCreate } from './types';
 
-const API_BASE = '/api/backend';
+const API_BASE = CONFIG.BACKEND_BASE_URL;
 
 export const playbookApi = {
   createPlaybook: async (data: PlaybookCreate): Promise<Playbook> => {
@@ -37,7 +38,7 @@ export const playbookApi = {
   },
 
   triggerPlaybook: async (userId: string, playbookId: string): Promise<void> => {
-    const response = await fetch(`/api/engine/api/rules/trigger?user_id=${userId}&playbook_id=${playbookId}`);
+    const response = await fetch(`${CONFIG.ENGINE_BASE_URL}/api/rules/trigger?user_id=${userId}&playbook_id=${playbookId}`);
     if (!response.ok) {
       let errorMessage = 'Failed to trigger playbook in rule engine';
       try {

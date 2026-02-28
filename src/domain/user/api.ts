@@ -1,6 +1,7 @@
+import { CONFIG } from '../../config/constants';
 import { User, UserCreate } from './types';
 
-const API_BASE = '/api/backend';
+const API_BASE = CONFIG.BACKEND_BASE_URL;
 
 export const userApi = {
   listUsers: async (): Promise<User[]> => {
