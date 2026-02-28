@@ -155,75 +155,72 @@ interface MarkerData {
  
      const newMarkers: MarkerData[] = [];
  
-     // 1. Group events by Snapped Timestamp (1m buckets)
+     // 1. Group events by Snapped Timestamp (1m buckets) if deduplicating
      const groupedEvents = new Map<number, RuleEngineEvent[]>();
      
-     refEvents.forEach(event => {
-        const snappedTime = Math.floor(event.timestamp / 60) * 60;
-        if (!groupedEvents.has(snappedTime)) {
-           groupedEvents.set(snappedTime, []);
-        }
-        groupedEvents.get(snappedTime)?.push(event);
-     });
- 
-     // 2. Process each Group
-     groupedEvents.forEach((groupEvents, snappedTime) => {
-        const time = snappedTime as Time;
-        const x = timeScale.timeToCoordinate(time);
- 
-        // Skip off-screen
-        if (x === null || x < 0 || x > width) return;
- 
-        // Find matching candle for Y positioning
-        let candle = refCandles.find(c => Number(c.time) === snappedTime);
-        if (!candle && refCurrentCandle && Number(refCurrentCandle.time) === snappedTime) {
-            candle = refCurrentCandle;
-        }
- 
-        // 3. Determine Presence
-        const hasDeviation = groupEvents.some(e => e.deviation);
-        const hasAdherence = groupEvents.some(e => !e.deviation);
-        
-        // Helper to get Y coordinate
-        const getY = (isDeviation: boolean): number | null => {
-            // Priority 1: Use actual event price so marker is perfectly aligned.
-            const evt = groupEvents.find(e => e.deviation === isDeviation);
-            if (evt) return series.priceToCoordinate(evt.price);
+     if (dataRef.current.deduplicateEvents) {
+         refEvents.forEach(event => {
+            const snappedTime = Math.floor(event.timestamp / 60) * 60;
+            if (!groupedEvents.has(snappedTime)) {
+               groupedEvents.set(snappedTime, []);
+            }
+            groupedEvents.get(snappedTime)?.push(event);
+         });
 
-            // Fallback: use candle boundaries if event price missing
-            if (candle) {
-                return series.priceToCoordinate(isDeviation ? candle.high : candle.low);
+         // 2. Process each Group
+         groupedEvents.forEach((groupEvents, snappedTime) => {
+            const time = snappedTime as Time;
+            const x = timeScale.timeToCoordinate(time);
+            if (x === null || x < 0 || x > width) return;
+
+            let candle = refCandles.find(c => Number(c.time) === snappedTime) || 
+                         (refCurrentCandle && Number(refCurrentCandle.time) === snappedTime ? refCurrentCandle : undefined);
+
+            const hasDeviation = groupEvents.some(e => e.deviation);
+            const hasAdherence = groupEvents.some(e => !e.deviation);
+            
+            const getY = (isDeviation: boolean): number | null => {
+                const evt = groupEvents.find(e => e.deviation === isDeviation);
+                if (evt) return series.priceToCoordinate(evt.price);
+                if (candle) return series.priceToCoordinate(isDeviation ? candle.high : candle.low);
+                return null;
+            };
+
+            if (hasDeviation) {
+                const y = getY(true);
+                if (y !== null) {
+                    newMarkers.push({ id: `${snappedTime}-dev`, timestamp: snappedTime, type: 'deviation', x, y });
+                }
             }
-            return null;
-        };
- 
-        if (hasDeviation) {
-            const y = getY(true);
-            if (y !== null) {
-                newMarkers.push({
-                    id: `${snappedTime}-dev`,
-                    timestamp: snappedTime,
-                    type: 'deviation',
-                    x: x,
-                    y: y
-                });
+            if (hasAdherence) {
+                const y = getY(false);
+                if (y !== null) {
+                    newMarkers.push({ id: `${snappedTime}-adh`, timestamp: snappedTime, type: 'adherence', x, y });
+                }
             }
-        }
- 
-        if (hasAdherence) {
-            const y = getY(false);
-            if (y !== null) {
-                newMarkers.push({
-                    id: `${snappedTime}-adh`,
-                    timestamp: snappedTime,
-                    type: 'adherence',
-                    x: x,
-                    y: y
-                });
-            }
-        }
-     });
- 
+         });
+     } else {
+         // Debug Mode: Show every individual event
+         refEvents.forEach(evt => {
+            // Find its X coordinate using the snapped time mapping
+            const snappedTime = Math.floor(evt.timestamp / 60) * 60;
+            const time = snappedTime as Time;
+            const x = timeScale.timeToCoordinate(time);
+            if (x === null || x < 0 || x > width) return;
+
+            const y = series.priceToCoordinate(evt.price);
+            if (y === null) return;
+
+            newMarkers.push({ 
+                id: evt.id, // Ensure unique event ID
+                timestamp: evt.timestamp, 
+                type: evt.deviation ? 'deviation' : 'adherence', 
+                x, 
+                y 
+            });
+         });
+     }
+
      setMarkers(newMarkers);
    };
  
