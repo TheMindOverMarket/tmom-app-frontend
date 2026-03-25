@@ -108,7 +108,7 @@ export function usePriceChart(symbol: string, interval: number, events: RuleEngi
         const x = timeScale.timeToCoordinate(time);
         if (x === null || x < 0 || x > width) return;
 
-        let candle = refCandles.find(c => Number(c.time) === snappedTime) || 
+        const candle = refCandles.find(c => Number(c.time) === snappedTime) || 
                      (refCurrentCandle && Number(refCurrentCandle.time) === snappedTime ? refCurrentCandle : undefined);
 
         const hasDeviation = groupEvents.some(e => e.deviation);

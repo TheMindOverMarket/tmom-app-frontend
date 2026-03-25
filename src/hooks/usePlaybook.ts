@@ -22,9 +22,9 @@ export function usePlaybook() {
       setIsStreaming(true);
       setNotification({ type: 'success', message: 'Session started. Recording events...' });
       return session;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to start session:', error);
-      setNotification({ type: 'error', message: `Failed to start session: ${error.message}` });
+      setNotification({ type: 'error', message: `Failed to start session: ${error instanceof Error ? error.message : 'Unknown error'}` });
     }
   };
 
@@ -35,8 +35,8 @@ export function usePlaybook() {
       setActiveSession(null);
       setIsStreaming(false);
       setNotification({ type: 'success', message: 'Session completed and saved.' });
-    } catch (error: any) {
-      setNotification({ type: 'error', message: `Failed to stop session: ${error.message}` });
+    } catch (error: unknown) {
+      setNotification({ type: 'error', message: `Failed to stop session: ${error instanceof Error ? error.message : 'Unknown error'}` });
     }
   };
 
@@ -62,9 +62,9 @@ export function usePlaybook() {
         
         // Auto-dismiss success notification after 5 seconds
         setTimeout(() => setNotification(null), 5000);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Failed to create playbook:', error);
-        setNotification({ type: 'error', message: `Failed to deploy strategy: ${error.message || 'Unknown error'}` });
+        setNotification({ type: 'error', message: `Failed to deploy strategy: ${error instanceof Error ? error.message : 'Unknown error'}` });
     } finally {
         setIsSubmitting(false);
     }

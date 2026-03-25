@@ -19,7 +19,7 @@ export interface Session {
   start_time: string; // ISO-8601
   end_time: string | null;
   status: SessionStatus;
-  session_metadata?: Record<string, any>;
+  session_metadata?: Record<string, unknown>;
   created_at: string;
 }
 
@@ -29,25 +29,25 @@ export interface SessionEvent {
   type: SessionEventType;
   timestamp: string; // ISO-8601
   tick?: number;
-  event_data: Record<string, any>;
-  event_metadata?: Record<string, any>;
+  event_data: Record<string, unknown>;
+  event_metadata?: Record<string, unknown>;
   created_at: string;
 }
 
 export interface SessionCreate {
   user_id: string;
   playbook_id: string;
-  session_metadata?: Record<string, any>;
+  session_metadata?: Record<string, unknown>;
 }
 
 export interface SessionUpdate {
   status?: SessionStatus;
-  session_metadata?: Record<string, any>;
+  session_metadata?: Record<string, unknown>;
 }
 
 export interface SessionEventCreate {
   type: SessionEventType;
   tick?: number;
-  event_data: Record<string, any>;
-  event_metadata?: Record<string, any>;
+  event_data: Record<string, unknown>;
+  event_metadata?: Record<string, unknown>;
 }

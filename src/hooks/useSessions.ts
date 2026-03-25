@@ -16,8 +16,8 @@ export function useSessions() {
     try {
       const data = await sessionApi.listSessions(CONFIG.USER_ID);
       setSessions(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch sessions');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch sessions');
     } finally {
       setLoading(false);
     }
@@ -29,8 +29,8 @@ export function useSessions() {
     try {
       const events = await sessionApi.getSessionReplay(sessionId);
       setReplayEvents(events);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load replay');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load replay');
     } finally {
       setLoadingReplay(false);
     }
