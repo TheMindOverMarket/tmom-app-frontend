@@ -1,9 +1,16 @@
+import { CONFIG } from '../../config/constants';
+
 interface HeaderProps {
   isMockMode: boolean;
   onToggleMockMode: () => void;
 }
 
 export function Header({ isMockMode, onToggleMockMode }: HeaderProps) {
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(CONFIG.USER_ID);
+    alert('User ID copied to clipboard!');
+  };
+
   return (
     <header style={{ 
       padding: '8px 24px', 
@@ -18,18 +25,29 @@ export function Header({ isMockMode, onToggleMockMode }: HeaderProps) {
       </h1>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{
-          padding: '2px 8px',
-          backgroundColor: '#f1f5f9',
-          borderRadius: '4px',
-          fontSize: '10px',
-          fontWeight: '700',
-          color: '#64748b',
-          border: '1px solid #e2e8f0',
-          letterSpacing: '0.02em'
-        }}>
+        <div 
+          onClick={copyToClipboard}
+          title={`Click to copy User ID: ${CONFIG.USER_ID}`}
+          style={{
+            padding: '2px 8px',
+            backgroundColor: '#f1f5f9',
+            borderRadius: '100px',
+            fontSize: '10px',
+            fontWeight: '700',
+            color: '#64748b',
+            border: '1px solid #e2e8f0',
+            letterSpacing: '0.02em',
+            cursor: 'help',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            transition: 'all 0.2s'
+          }}
+        >
+          <span style={{ fontSize: '10px' }}>👤</span>
           DEBUG USER
         </div>
+
         
         <button
           onClick={onToggleMockMode}
