@@ -1,4 +1,3 @@
-import React from 'react';
 import { SessionAnalytics } from '../components/session/SessionAnalytics';
 
 export function AnalyticsPage() {

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { useRuleEngineEvents } from '../hooks/useRuleEngineEvents';
@@ -11,7 +11,7 @@ export function MonitorPage() {
   const { events } = useRuleEngineEvents();
   const navigate = useNavigate();
 
-  const [focusedView, setFocusedView] = React.useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);
+  const [focusedView, setFocusedView] = useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);
 
   // Guard: Redirect if no playbook selected
   useEffect(() => {
