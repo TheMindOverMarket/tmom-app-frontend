@@ -12,6 +12,7 @@ export function PlaybooksPage() {
     isSubmitting,
     playbooks,
     selectedPlaybook,
+    setSelectedPlaybook,
     activatePlaybook,
     rules,
     isLoadingPlaybooks,
@@ -20,11 +21,8 @@ export function PlaybooksPage() {
 
   const navigate = useNavigate();
 
-  const handleSelect = async (pb: any) => {
-    await activatePlaybook(pb);
-    if (pb.generation_status === 'COMPLETED') {
-      navigate('/supervision');
-    }
+  const handleSelect = (pb: any) => {
+    setSelectedPlaybook(pb);
   };
 
   return (
@@ -96,7 +94,7 @@ export function PlaybooksPage() {
                     overflow: 'hidden',
                     cursor: 'pointer'
                   }}
-                  onClick={() => activatePlaybook(pb)}
+                  onClick={() => handleSelect(pb)}
                 >
                   {pb.generation_status === 'PENDING' && (
                     <div style={{ 
@@ -119,13 +117,13 @@ export function PlaybooksPage() {
                       <div style={{ fontSize: '14px', fontWeight: '800', color: 'var(--slate-900)' }}>{pb.name}</div>
                       <div style={{ fontSize: '10px', color: 'var(--slate-400)', marginTop: '2px' }}>Created {new Date(pb.created_at).toLocaleDateString()}</div>
                     </div>
-                    {selectedPlaybook?.id === pb.id && (
+                    {pb.is_active && (
                       <div style={{ 
                         width: '8px', 
                         height: '8px', 
                         borderRadius: '50%', 
-                        backgroundColor: 'var(--brand)', 
-                        boxShadow: '0 0 0 4px var(--brand-alpha)' 
+                        backgroundColor: 'var(--success)', 
+                        boxShadow: '0 0 0 4px var(--success-alpha)' 
                       }} />
                     )}
                   </div>
@@ -150,7 +148,6 @@ export function PlaybooksPage() {
                   <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleSelect(pb); }}
-                      disabled={pb.generation_status !== 'COMPLETED'}
                       style={{
                         padding: '6px 12px',
                         backgroundColor: selectedPlaybook?.id === pb.id ? 'var(--brand)' : 'var(--slate-100)',
@@ -159,12 +156,12 @@ export function PlaybooksPage() {
                         borderRadius: 'var(--radius-md)',
                         fontSize: '10px',
                         fontWeight: '800',
-                        cursor: pb.generation_status === 'COMPLETED' ? 'pointer' : 'not-allowed',
+                        cursor: 'pointer',
                         flex: 1,
-                        opacity: pb.generation_status === 'COMPLETED' ? 1 : 0.5
+                        transition: 'var(--transition)'
                       }}
                     >
-                      {selectedPlaybook?.id === pb.id ? 'GO TO SUPERVISION' : 'VIEW ANALYSIS'}
+                      {selectedPlaybook?.id === pb.id ? 'VIEWING ANALYSIS' : 'VIEW ANALYSIS'}
                     </button>
                   </div>
                 </div>
@@ -191,8 +188,38 @@ export function PlaybooksPage() {
             minHeight: 0
           }}>
             <div style={{ padding: '20px', borderBottom: '1px solid var(--slate-100)', backgroundColor: 'var(--slate-50)', flexShrink: 0 }}>
-              <div style={{ fontSize: '12px', fontWeight: 900, color: 'var(--slate-400)', letterSpacing: '0.05em' }}>STRATEGY ANALYSIS</div>
-              <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--slate-900)', marginTop: '4px' }}>{selectedPlaybook.name}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: '12px', fontWeight: 900, color: 'var(--slate-400)', letterSpacing: '0.05em' }}>STRATEGY ANALYSIS</div>
+                {selectedPlaybook.is_active ? (
+                  <div style={{ 
+                    fontSize: '9px', 
+                    padding: '2px 8px', 
+                    borderRadius: '12px', 
+                    backgroundColor: 'var(--success-alpha)', 
+                    color: 'var(--success)',
+                    fontWeight: 900
+                  }}>ACTIVE</div>
+                ) : (
+                  <button 
+                    onClick={() => activatePlaybook(selectedPlaybook)}
+                    disabled={selectedPlaybook.generation_status !== 'COMPLETED'}
+                    style={{
+                      fontSize: '10px',
+                      fontWeight: 800,
+                      backgroundColor: 'var(--brand)',
+                      color: 'white',
+                      border: 'none',
+                      padding: '4px 12px',
+                      borderRadius: '8px',
+                      cursor: selectedPlaybook.generation_status === 'COMPLETED' ? 'pointer' : 'not-allowed',
+                      opacity: selectedPlaybook.generation_status === 'COMPLETED' ? 1 : 0.5
+                    }}
+                  >
+                    ACTIVATE
+                  </button>
+                )}
+              </div>
+              <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--slate-900)', marginTop: '8px' }}>{selectedPlaybook.name}</div>
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>

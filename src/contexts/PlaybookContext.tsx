@@ -14,6 +14,7 @@ interface PlaybookContextType {
   createPlaybookFromNL: () => Promise<Playbook | undefined>;
   playbooks: Playbook[];
   selectedPlaybook: Playbook | null;
+  setSelectedPlaybook: (pb: Playbook | null) => void;
   isLoadingPlaybooks: boolean;
   fetchPlaybooks: () => Promise<void>;
   activatePlaybook: (pb: Playbook) => Promise<void>;
@@ -303,7 +304,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
   const value = {
     playbookInput, setPlaybookInput,
     isSubmitting, notification, setNotification,
-    createPlaybookFromNL, playbooks, selectedPlaybook,
+    createPlaybookFromNL, playbooks, selectedPlaybook, setSelectedPlaybook,
     isLoadingPlaybooks, fetchPlaybooks, activatePlaybook,
     activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream,
     rules
