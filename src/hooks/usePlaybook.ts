@@ -86,7 +86,9 @@ export function usePlaybook() {
   const fetchPlaybooks = useCallback(async () => {
     setIsLoadingPlaybooks(true);
     try {
+      console.log(`Fetching playbooks for user: ${CONFIG.USER_ID}`);
       const data = await playbookApi.listUserPlaybooks(CONFIG.USER_ID);
+      console.log(`Fetched ${data.length} playbooks:`, data);
       setPlaybooks(data);
       
       // If none selected but we have data, select the newest if applicable
