@@ -56,36 +56,68 @@ export function ReplayPlayer({ session, events, loading, onClose }: ReplayPlayer
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#ffffff' }}>
       <div style={{
-        padding: '24px',
-        borderBottom: '1px solid #e5e7eb',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        background: '#ffffff'
+        padding: '32px',
+        borderBottom: '1px solid var(--slate-200)',
+        backgroundColor: '#ffffff',
+        flexShrink: 0
       }}>
-        <div>
-          <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#111827', margin: 0 }}>
-            Session Replay: <span style={{ color: '#6366f1' }}>{session.id.slice(0, 8)}</span>
-          </h2>
-          <p style={{ margin: '4px 0 0 0', color: '#6b7280', fontSize: '12px' }}>
-            Started {new Date(session.start_time).toLocaleString()} • {events.length} Events Total
-          </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+          <div>
+            <div style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '6px', 
+              padding: '4px 10px', 
+              borderRadius: '20px', 
+              backgroundColor: session.status === 'COMPLETED' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+              color: session.status === 'COMPLETED' ? 'var(--success)' : 'var(--danger)',
+              fontSize: '10px',
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              marginBottom: '12px'
+            }}>
+              <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'currentColor' }} />
+              {session.status}
+            </div>
+            <h2 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--slate-900)', margin: 0, letterSpacing: '-0.025em' }}>
+              Archive: <span style={{ color: 'var(--brand)' }}>{session.id.slice(0, 8)}</span>
+            </h2>
+          </div>
+          <button 
+            onClick={onClose}
+            style={{
+              padding: '10px',
+              borderRadius: '50%',
+              border: '1px solid var(--slate-200)',
+              backgroundColor: 'white',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'var(--transition)'
+            }}
+            onMouseOver={e => e.currentTarget.style.backgroundColor = 'var(--slate-50)'}
+            onMouseOut={e => e.currentTarget.style.backgroundColor = 'white'}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--slate-600)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+          </button>
         </div>
-        <button 
-          onClick={onClose}
-          style={{
-            padding: '8px',
-            borderRadius: '50%',
-            border: 'none',
-            backgroundColor: '#f3f4f6',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-        </button>
+
+        {/* Metadata Audit Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+          {[
+            { label: 'FULL UUID', value: session.id },
+            { label: 'USER CONTEXT', value: session.user_id.slice(0, 12) + '...' },
+            { label: 'START TIME', value: new Date(session.start_time).toLocaleString() },
+            { label: 'END TIME', value: session.end_time ? new Date(session.end_time).toLocaleString() : 'Active / Forced Stop' }
+          ].map(meta => (
+            <div key={meta.label}>
+              <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--slate-400)', textTransform: 'uppercase', marginBottom: '4px' }}>{meta.label}</div>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--slate-600)', fontFamily: 'monospace' }}>{meta.value}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {loading ? (
