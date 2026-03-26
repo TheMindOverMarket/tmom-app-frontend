@@ -110,13 +110,20 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
   const fetchPlaybooks = useCallback(async () => {
     setIsLoadingPlaybooks(true);
     try {
-      console.log(`Fetching playbooks for user: ${CONFIG.USER_ID}`);
       const data = await playbookApi.listUserPlaybooks(CONFIG.USER_ID);
-      console.log(`Fetched ${data.length} playbooks:`, data);
-      setPlaybooks(data);
+      
+      // Sort: Active first, then by date descending
+      const sorted = [...data].sort((a, b) => {
+        if (a.is_active) return -1;
+        if (b.is_active) return 1;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+
+      console.log(`Fetched and sorted ${sorted.length} playbooks.`);
+      setPlaybooks(sorted);
       
       // Only auto-select the one active in the DB if we don't have a selection yet
-      const activeInDb = data.find(pb => pb.is_active);
+      const activeInDb = sorted.find(pb => pb.is_active);
       if (activeInDb && !selectedPlaybook) {
         setSelectedPlaybook(activeInDb);
       }
