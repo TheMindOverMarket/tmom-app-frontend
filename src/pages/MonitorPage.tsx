@@ -8,7 +8,7 @@ import { Activity } from 'lucide-react';
 
 export function MonitorPage() {
   const { selectedPlaybook, isStreaming, startStream, stopStream } = usePlaybookContext();
-  const { events } = useRuleEngineEvents();
+  const { events } = useRuleEngineEvents(isStreaming);
   const navigate = useNavigate();
 
   const [focusedView, setFocusedView] = useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);
