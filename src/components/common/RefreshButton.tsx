@@ -4,14 +4,12 @@ interface RefreshButtonProps {
   onRefresh: () => void;
   isLoading: boolean;
   label?: string;
-  style?: React.CSSProperties;
 }
 
 export function RefreshButton({ 
   onRefresh, 
   isLoading, 
-  label = 'REFRESH',
-  style 
+  label = 'REFRESH'
 }: RefreshButtonProps) {
   return (
     <button 
@@ -20,9 +18,9 @@ export function RefreshButton({
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '6px',
-        padding: '6px 14px',
-        fontSize: '11px',
+        gap: '8px',
+        padding: '8px 16px',
+        fontSize: '12px',
         fontWeight: '800',
         backgroundColor: isLoading ? 'var(--slate-50)' : '#ffffff',
         border: `1px solid var(--slate-200)`,
@@ -31,7 +29,7 @@ export function RefreshButton({
         cursor: isLoading ? 'default' : 'pointer',
         transition: 'var(--transition)',
         boxShadow: 'var(--shadow-sm)',
-        ...style
+        letterSpacing: '0.025em'
       }}
       onMouseOver={e => !isLoading && (e.currentTarget.style.backgroundColor = 'var(--slate-50)')}
       onMouseOut={e => !isLoading && (e.currentTarget.style.backgroundColor = '#ffffff')}

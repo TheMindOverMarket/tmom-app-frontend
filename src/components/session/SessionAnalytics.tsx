@@ -64,7 +64,6 @@ export function SessionAnalytics() {
           onRefresh={fetchSessions}
           isLoading={loading}
           label="Refresh List"
-          style={{ padding: '10px 16px', fontSize: '14px', borderRadius: '10px' }}
         />
       </div>
 
