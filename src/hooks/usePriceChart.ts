@@ -143,11 +143,27 @@ export function usePriceChart(symbol: string, interval: number, events: RuleEngi
 
         if (hasDeviation) {
             const y = getY(true);
-            if (y !== null) newMarkers.push({ id: `${snappedTime}-dev`, timestamp: snappedTime, type: 'deviation', x, y });
+            if (y !== null) {
+                newMarkers.push({ 
+                    id: `${snappedTime}-dev`, 
+                    timestamp: snappedTime, 
+                    type: 'deviation', 
+                    x: Math.min(x, width - 4), 
+                    y 
+                });
+            }
         }
         if (hasAdherence) {
             const y = getY(false);
-            if (y !== null) newMarkers.push({ id: `${snappedTime}-adh`, timestamp: snappedTime, type: 'adherence', x, y });
+            if (y !== null) {
+                newMarkers.push({ 
+                    id: `${snappedTime}-adh`, 
+                    timestamp: snappedTime, 
+                    type: 'adherence', 
+                    x: Math.min(x, width - 4), 
+                    y 
+                });
+            }
         }
       });
     } else {
@@ -155,7 +171,10 @@ export function usePriceChart(symbol: string, interval: number, events: RuleEngi
         const snappedTime = Math.floor(evt.timestamp / 60) * 60;
         const time = snappedTime as Time;
         const x = timeScale.timeToCoordinate(time);
-        if (x === null || x < 0 || x > width) return;
+        
+        // Use right-most edge for live updates if coordinate is not yet cached but the event is at the current minute
+        const finalX = x !== null ? x : (width - 4);
+        if (finalX < 0 || finalX > width + 50) return;
 
         const y = series.priceToCoordinate(evt.price);
         if (y === null) return;
@@ -164,7 +183,8 @@ export function usePriceChart(symbol: string, interval: number, events: RuleEngi
             id: evt.id, 
             timestamp: evt.timestamp, 
             type: evt.deviation ? 'deviation' : 'adherence', 
-            x, y 
+            x: finalX, 
+            y 
         });
       });
     }
