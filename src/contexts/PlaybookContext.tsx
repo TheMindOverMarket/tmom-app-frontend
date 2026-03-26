@@ -132,14 +132,15 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
         // Resilience: If backend hasn't deployed the field yet, but we are in a pending state locally
         const status = updated.generation_status || 'COMPLETED'; 
 
-        if (status === 'COMPLETED') {
+        if (status === 'COMPLETED' || status === 'FAILED') {
           setSelectedPlaybook(updated);
-          const newRules = await playbookApi.listPlaybookRules(updated.id);
-          setRules(newRules);
           
-          const data = await playbookApi.listUserPlaybooks(CONFIG.USER_ID);
-          setPlaybooks(data);
+          if (status === 'COMPLETED') {
+            const newRules = await playbookApi.listPlaybookRules(updated.id);
+            setRules(newRules);
+          }
           
+          await fetchPlaybooks();
           if (pollInterval) clearInterval(pollInterval);
         }
       } catch (e) {

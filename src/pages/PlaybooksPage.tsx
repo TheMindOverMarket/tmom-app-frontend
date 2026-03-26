@@ -108,12 +108,12 @@ export function PlaybooksPage() {
                     e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.01)';
                   }}
                 >
-                  {pb.generation_status === 'PENDING' && (
+                  {(pb.generation_status === 'PENDING' || pb.generation_status === 'FAILED') && (
                     <div style={{ 
                       position: 'absolute', 
                       top: 0, 
                       right: 0, 
-                      backgroundColor: 'var(--brand)', 
+                      backgroundColor: pb.generation_status === 'FAILED' ? 'var(--danger)' : 'var(--brand)', 
                       color: 'white', 
                       padding: '4px 12px', 
                       fontSize: '10px', 
@@ -121,7 +121,7 @@ export function PlaybooksPage() {
                       borderBottomLeftRadius: '12px',
                       zIndex: 1
                     }}>
-                      GENERATING...
+                      {pb.generation_status === 'PENDING' ? 'GENERATING...' : 'EXTRACTION FAILED'}
                     </div>
                   )}
                   
@@ -151,12 +151,13 @@ export function PlaybooksPage() {
                         style={{
                           fontSize: '10px',
                           fontWeight: 900,
-                          backgroundColor: 'var(--slate-50)',
+                          backgroundColor: pb.generation_status === 'FAILED' ? 'var(--slate-50)' : 'var(--slate-50)',
                           color: 'var(--slate-500)',
                           border: '1.5px solid var(--slate-200)',
                           padding: '6px 14px',
                           borderRadius: '10px',
-                          cursor: 'pointer',
+                          cursor: pb.generation_status === 'COMPLETED' ? 'pointer' : 'default',
+                          opacity: pb.generation_status === 'COMPLETED' ? 1 : 0.5,
                           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}
                         onMouseEnter={e => {
@@ -281,6 +282,28 @@ export function PlaybooksPage() {
                     }} />
                     <div style={{ fontWeight: 950, fontSize: '24px', color: 'var(--slate-900)' }}>Extracting Intelligence...</div>
                     <div style={{ fontSize: '15px', color: 'var(--slate-500)', marginTop: '16px', maxWidth: '360px', margin: '16px auto 0 auto', lineHeight: '1.7' }}>Analyzing natural language signals to generate deterministic execution rules.</div>
+                  </div>
+                ) : selectedPlaybook.generation_status === 'FAILED' ? (
+                  <div style={{ padding: '80px 0', textAlign: 'center' }}>
+                    <div style={{ fontSize: '64px', marginBottom: '24px' }}>⚠️</div>
+                    <div style={{ fontWeight: 950, fontSize: '24px', color: 'var(--danger)', letterSpacing: '-0.02em' }}>Generation System Error</div>
+                    <div style={{ fontSize: '15px', color: 'var(--slate-500)', marginTop: '16px', maxWidth: '420px', margin: '16px auto 0 auto', lineHeight: '1.7' }}>
+                      We encountered an error while attempting to derive deterministic rules from your prompted input. This is typically due to ambiguous rule logic or service timeouts.
+                    </div>
+                    <button 
+                      onClick={() => setIsModalOpen(false)}
+                      style={{ 
+                        marginTop: '32px', 
+                        padding: '12px 32px', 
+                        borderRadius: '12px', 
+                        border: '1px solid var(--slate-200)', 
+                        background: 'white', 
+                        fontWeight: 900, 
+                        fontSize: '13px', 
+                        color: 'var(--slate-900)',
+                        cursor: 'pointer'
+                      }}
+                    >DISMISS</button>
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
