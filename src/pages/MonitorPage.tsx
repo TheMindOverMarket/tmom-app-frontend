@@ -8,7 +8,7 @@ import { Activity } from 'lucide-react';
 
 export function MonitorPage() {
   const { selectedPlaybook, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream } = usePlaybookContext();
-  const { events } = useRuleEngineEvents(isStreaming);
+  const { events, isMockMode, toggleMockMode } = useRuleEngineEvents(isStreaming);
   const navigate = useNavigate();
 
   const [focusedView, setFocusedView] = useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);
@@ -52,34 +52,63 @@ export function MonitorPage() {
             <div style={{ fontSize: '11px', color: '#1e293b', fontWeight: 700 }}>{selectedPlaybook.name}</div>
           </div>
           
-          <button
-            onClick={isStreaming ? stopStream : () => startStream(selectedPlaybook.id)}
-            disabled={isLoading}
-            style={{
-                padding: '6px 16px',
-                backgroundColor: isLoading ? '#e2e8f0' : (isStreaming ? '#EF4444' : '#059669'),
-                color: isLoading ? '#94a3b8' : 'white',
-                border: 'none',
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={toggleMockMode}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: isMockMode ? 'var(--brand)' : 'white',
+                color: isMockMode ? 'white' : 'var(--slate-400)',
+                border: `1px solid ${isMockMode ? 'var(--brand)' : 'var(--slate-200)'}`,
                 borderRadius: '6px',
-                fontSize: '11px',
-                fontWeight: 700,
-                cursor: isLoading ? 'default' : 'pointer',
+                fontSize: '10px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                transition: 'var(--transition)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                opacity: isLoading ? 0.8 : 1,
-                transition: 'all 0.2s'
-            }}
-          >
-            <div style={{ 
-              width: '6px', 
-              height: '6px', 
-              borderRadius: '50%', 
-              backgroundColor: 'white', 
-              animation: (isStreaming || isLoading) ? 'pulse 1.5s infinite' : 'none' 
-            }} />
-            {isStartingStream ? 'WARMING UP...' : (isStoppingStream ? 'CLOSING...' : (isStreaming ? 'STOP STREAM' : 'START LIVE SESSION'))}
-          </button>
+                gap: '6px'
+              }}
+              title="Toggle Local Engine Simulation"
+            >
+              <div style={{ 
+                width: '6px', 
+                height: '6px', 
+                borderRadius: '50%', 
+                backgroundColor: isMockMode ? 'white' : 'var(--slate-400)' 
+              }} />
+              {isMockMode ? 'SIMULATING' : 'MOCK ENGINE'}
+            </button>
+
+            <button
+              onClick={isStreaming ? stopStream : () => startStream(selectedPlaybook.id)}
+              disabled={isLoading}
+              style={{
+                  padding: '6px 16px',
+                  backgroundColor: isLoading ? 'var(--slate-100)' : (isStreaming ? 'var(--danger)' : 'var(--success)'),
+                  color: isLoading ? 'var(--slate-400)' : 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  cursor: isLoading ? 'default' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  opacity: isLoading ? 0.8 : 1,
+                  transition: 'var(--transition)'
+              }}
+            >
+              <div style={{ 
+                width: '6px', 
+                height: '6px', 
+                borderRadius: '50%', 
+                backgroundColor: 'white', 
+                animation: (isStreaming || isLoading) ? 'pulse 1.5s infinite' : 'none' 
+              }} />
+              {isStartingStream ? 'WARMING UP...' : (isStoppingStream ? 'CLOSING...' : (isStreaming ? 'STOP STREAM' : 'START LIVE SESSION'))}
+            </button>
+          </div>
         </div>
 
         <div style={{ flex: 1, minHeight: 0, position: 'relative', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #f1f5f9', overflow: 'hidden' }}>

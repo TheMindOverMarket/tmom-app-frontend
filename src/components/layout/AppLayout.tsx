@@ -3,11 +3,9 @@ import { Header } from './Header';
 import { Navbar } from './Navbar';
 import { NotificationBanner } from '../common/NotificationBanner';
 import { usePlaybookContext } from '../../contexts/PlaybookContext';
-import { useRuleEngineEvents } from '../../hooks/useRuleEngineEvents';
 
 export function AppLayout() {
   const { notification, setNotification } = usePlaybookContext();
-  const { isMockMode, toggleMockMode } = useRuleEngineEvents();
 
   return (
     <div style={{ 
@@ -18,7 +16,7 @@ export function AppLayout() {
       overflow: 'hidden'
     }}>
       <div style={{ flexShrink: 0 }}>
-        <Header isMockMode={isMockMode} onToggleMockMode={toggleMockMode} />
+        <Header />
         <Navbar />
       </div>
 
