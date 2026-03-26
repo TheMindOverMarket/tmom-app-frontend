@@ -61,5 +61,12 @@ export const sessionApi = {
       throw new Error(err.detail || 'Failed to add session event');
     }
     return response.json();
+  },
+
+  deleteSession: async (sessionId: string): Promise<void> => {
+    const response = await fetch(`${API_BASE}/sessions/${sessionId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Failed to delete session');
   }
 };

@@ -23,6 +23,7 @@ interface PlaybookContextType {
   isStoppingStream: boolean;
   startStream: (playbookId: string) => Promise<Session | undefined>;
   stopStream: () => Promise<void>;
+  rules: any[]; 
 }
 
 const PlaybookContext = createContext<PlaybookContextType | undefined>(undefined);
@@ -99,7 +100,56 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
   
   const [playbooks, setPlaybooks] = useState<Playbook[]>([]);
   const [selectedPlaybook, setSelectedPlaybook] = useState<Playbook | null>(null);
+  const [rules, setRules] = useState<any[]>([]); // Added rule state
   const [isLoadingPlaybooks, setIsLoadingPlaybooks] = useState(false);
+
+  // Polling logic for pending playbooks
+  useEffect(() => {
+    let pollInterval: number | null = null;
+
+    const poll = async () => {
+      if (!selectedPlaybook || selectedPlaybook.generation_status !== 'PENDING') {
+        if (pollInterval) clearInterval(pollInterval);
+        return;
+      }
+
+      try {
+        const updated = await playbookApi.getPlaybook(selectedPlaybook.id);
+        if (updated.generation_status === 'COMPLETED') {
+          setSelectedPlaybook(updated);
+          const newRules = await playbookApi.listPlaybookRules(updated.id);
+          setRules(newRules);
+          
+          // Also update the list to clear "PENDING" labels
+          const data = await playbookApi.listUserPlaybooks(CONFIG.USER_ID);
+          setPlaybooks(data);
+          
+          if (pollInterval) clearInterval(pollInterval);
+        }
+      } catch (e) {
+        console.error('Polling failed:', e);
+      }
+    };
+
+    if (selectedPlaybook?.generation_status === 'PENDING') {
+      pollInterval = window.setInterval(poll, 3000); 
+    }
+
+    return () => {
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  }, [selectedPlaybook]);
+
+  // Load rules when selected playbook changes and is already completed
+  useEffect(() => {
+    if (selectedPlaybook && selectedPlaybook.generation_status === 'COMPLETED') {
+      playbookApi.listPlaybookRules(selectedPlaybook.id)
+        .then(setRules)
+        .catch(console.error);
+    } else if (selectedPlaybook?.generation_status !== 'PENDING') {
+      setRules([]);
+    }
+  }, [selectedPlaybook]);
 
   const [activeSession, setActiveSession] = useState<Session | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -233,7 +283,8 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     isSubmitting, notification, setNotification,
     createPlaybookFromNL, playbooks, selectedPlaybook,
     isLoadingPlaybooks, fetchPlaybooks, activatePlaybook,
-    activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream
+    activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream,
+    rules
   };
 
   return <PlaybookContext.Provider value={value}>{children}</PlaybookContext.Provider>;

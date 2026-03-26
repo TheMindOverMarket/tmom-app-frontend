@@ -7,8 +7,8 @@ import { RuleEventInspector } from '../components/RuleEventInspector';
 import { Activity } from 'lucide-react';
 
 export function MonitorPage() {
-  const { selectedPlaybook, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream } = usePlaybookContext();
-  const { events, isMockMode, toggleMockMode } = useRuleEngineEvents(isStreaming);
+  const { selectedPlaybook, activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream } = usePlaybookContext();
+  const { events, isMockMode, toggleMockMode } = useRuleEngineEvents(isStreaming, activeSession?.id);
   const navigate = useNavigate();
 
   const [focusedView, setFocusedView] = useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);

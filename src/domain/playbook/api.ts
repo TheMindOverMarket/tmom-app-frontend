@@ -55,5 +55,11 @@ export const playbookApi = {
       throw new Error(errorMessage);
     }
     return response.json();
+  },
+
+  listPlaybookRules: async (id: string): Promise<any[]> => {
+    const response = await fetch(`${API_BASE}/playbooks/${id}/rules`);
+    if (!response.ok) throw new Error('Failed to list playbook rules');
+    return response.json();
   }
 };
