@@ -66,7 +66,7 @@ export function PlaybookIngestion({
         {/* Integrated Action Bar */}
         <div style={{ 
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           alignItems: 'center',
           padding: '16px 24px',
           backgroundColor: 'var(--slate-50)',
@@ -121,8 +121,8 @@ export function PlaybookIngestion({
             onClick={onSubmit}
             disabled={isSubmitting || !value.trim()}
             style={{
-                flex: 1,
                 height: '48px',
+                padding: '0 40px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
