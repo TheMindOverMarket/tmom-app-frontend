@@ -25,6 +25,26 @@ export const playbookApi = {
     return response.json();
   },
 
+  ingestPlaybook: async (data: PlaybookCreate): Promise<Playbook> => {
+    const response = await fetch(`${API_BASE}/playbooks/ingest`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      let errorMessage = 'Failed to ingest playbook';
+      try {
+        const err = await response.json();
+        errorMessage = err.detail?.[0]?.msg || err.detail || 'Failed to ingest playbook';
+      } catch (e) {
+        const text = await response.text();
+        errorMessage = text || 'Internal Server Error';
+      }
+      throw new Error(errorMessage);
+    }
+    return response.json();
+  },
+
   listUserPlaybooks: async (userId: string): Promise<Playbook[]> => {
     const response = await fetch(`${API_BASE}/users/${userId}/playbooks`);
     if (!response.ok) throw new Error('Failed to list playbooks');

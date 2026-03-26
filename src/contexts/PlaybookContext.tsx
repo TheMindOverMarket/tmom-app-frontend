@@ -261,7 +261,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     setNotification(null);
 
     try {
-        const playbook = await playbookApi.createPlaybook({
+        const playbook = await playbookApi.ingestPlaybook({
           name: `Playbook ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
           user_id: CONFIG.USER_ID,
           original_nl_input: playbookInput,
