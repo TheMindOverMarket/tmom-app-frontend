@@ -109,23 +109,12 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       console.log(`Fetching playbooks for user: ${CONFIG.USER_ID}`);
       const data = await playbookApi.listUserPlaybooks(CONFIG.USER_ID);
       console.log(`Fetched ${data.length} playbooks:`, data);
-      // 1. Normalize data: Ensure only one is active locally to avoid chart/UI confusion
-      // if the backend returns multiples (which the subagent observed)
-      const firstActiveId = data.find(pb => pb.is_active)?.id;
+      setPlaybooks(data);
       
-      const normalizedData = data.map(pb => ({
-        ...pb,
-        is_active: pb.id === firstActiveId
-      }));
-
-      setPlaybooks(normalizedData);
-      
-      // 2. Auto-select ONLY on initial load or if current selection is invalid
-      if (firstActiveId) {
-        setSelectedPlaybook(prev => {
-           if (prev && normalizedData.find(p => p.id === prev.id)) return prev;
-           return normalizedData.find(p => p.id === firstActiveId) || null;
-        });
+      // Auto-select the one active in the DB on initial load
+      const activeInDb = data.find(pb => pb.is_active);
+      if (activeInDb) {
+        setSelectedPlaybook(activeInDb);
       }
     } catch (error: unknown) {
       console.error('Failed to fetch playbooks:', error);
@@ -204,17 +193,10 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     try {
       // The backend now handles atomic deactivation of other playbooks 
       // when a new one is set to active. We only need one single call.
-      // 1. Optimistic Update: Reflect change immediately in the local list
-      setPlaybooks(prev => prev.map(p => ({
-        ...p,
-        is_active: p.id === pb.id
-      })));
-      setSelectedPlaybook(pb);
-
-      // 2. Persist to backend
       await playbookApi.updatePlaybook(pb.id, { is_active: true });
       
-      // 3. Refresh to ensure sync with any metadata changes
+      // Update local state and refresh the library list to sync with backend
+      setSelectedPlaybook(pb);
       await fetchPlaybooks();
       
       setNotification({ type: 'success', message: `Playbook "${pb.name}" is now the active strategy.` });
