@@ -1,7 +1,7 @@
 import { RuleEngineEvent } from './types';
 
 const MOCK_RULES = [
-    'Momentum Breakout Strategy', 
+    'Momentum Breakout Playbook', 
     'Mean Reversion Guard', 
     'Volume Spike Detector', 
     'RSI Divergence Check'

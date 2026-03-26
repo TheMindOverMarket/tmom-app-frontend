@@ -132,7 +132,7 @@ export function PlaybooksPage() {
           )}
           {!isLoadingPlaybooks && playbooks.length === 0 && (
             <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '48px', color: '#94a3b8', fontSize: '14px' }}>
-              No playbooks yet for User ID: {CONFIG.USER_ID.slice(0,8)}... Ingest your first strategy above!
+              No playbooks yet for User ID: {CONFIG.USER_ID.slice(0,8)}... Ingest your first playbook above!
             </div>
           )}
         </div>
