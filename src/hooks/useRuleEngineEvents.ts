@@ -8,7 +8,7 @@ const WS_URL = 'wss://rule-engine-rcg9.onrender.com/ws/engine-output';
  * Hook to connect to the Rule Engine WebSocket and manage event stream.
  * Can switch to Mock Mode to simulate events for frontend dev.
  */
-export function useRuleEngineEvents() {
+export function useRuleEngineEvents(isActive: boolean = false) {
   const [events, setEvents] = useState<RuleEngineEvent[]>([]);
   const [isMockMode, setIsMockMode] = useState(false);
   
@@ -16,35 +16,36 @@ export function useRuleEngineEvents() {
 
   const toggleMockMode = useCallback(() => {
     setIsMockMode(prev => !prev);
-    // Clear events on mode switch if desired, OR keep history. 
-    // Let's keep history for now, simpler UX.
   }, []);
 
   useEffect(() => {
-    // Cleanup previous connection
+    // 1. Cleanup previous connection if we are becoming inactive or switching modes
     if (wsRef.current) {
-      console.log('[useRuleEngineEvents] Cleaning up previous WS...');
       wsRef.current.close();
       wsRef.current = null;
     }
 
+    // 2. Only run effects if Mocking is on OR a Live Session is active
+    if (!isActive && !isMockMode) {
+      console.log('[useRuleEngineEvents] Monitoring idle. No connection needed.');
+      return;
+    }
+
     if (isMockMode) {
-      console.log('[useRuleEngineEvents] Starting Mock Mode (High Frequency Deviations, Sparse Adherence)...');
+      console.log('[useRuleEngineEvents] Starting Mock Mode...');
       
-      // Fast Interval: Deviations every 2.5 seconds
       const deviationInterval = setInterval(() => {
         setEvents(prev => {
             const lastPrice = prev.length > 0 ? prev[prev.length - 1].price : 71500;
-            const newEvent = generateMockEvent(lastPrice, true); // Force Deviation
+            const newEvent = generateMockEvent(lastPrice, true);
             return [...prev, newEvent];
         });
       }, 2500);
 
-      // Slow Interval: Adherence every 60 seconds (Every minute)
       const adherenceInterval = setInterval(() => {
         setEvents(prev => {
             const lastPrice = prev.length > 0 ? prev[prev.length - 1].price : 71500;
-            const newEvent = generateMockEvent(lastPrice, false); // Force Adherence
+            const newEvent = generateMockEvent(lastPrice, false);
             return [...prev, newEvent];
         });
       }, 60000);
@@ -54,49 +55,31 @@ export function useRuleEngineEvents() {
         clearInterval(adherenceInterval);
       };
 
-    } else {
-      console.log('[useRuleEngineEvents] Connecting to Rule Engine WS...');
+    } else if (isActive) {
+      console.log('[useRuleEngineEvents] Session Active. Connecting to Rule Engine WS...');
       
       const ws = new WebSocket(WS_URL);
       wsRef.current = ws;
 
-      ws.onopen = () => {
-        console.log('[useRuleEngineEvents] Connection established');
-      };
-
       ws.onmessage = (messageEvent) => {
         try {
           const rawData: RuleEngineRawMessage = JSON.parse(messageEvent.data);
-          
-          // Transform for chart compatibility 
           const date = new Date(rawData.timestamp);
           const unixSeconds = Math.floor(date.getTime() / 1000);
-          const msTimestamp = date.getTime();
           
           const newEvent: RuleEngineEvent = {
             ...rawData,
             id: crypto.randomUUID(),
             timestamp: unixSeconds,
-            msTimestamp: msTimestamp,
+            msTimestamp: date.getTime(),
             originalTimestamp: rawData.timestamp,
             rawRule: rawData.rule,
           };
 
           setEvents((prev) => [...prev, newEvent]);
         } catch (err) {
-          console.error('[useRuleEngineEvents] Failed to parse message:', err);
+          console.error('[useRuleEngineEvents] Parse error:', err);
         }
-      };
-
-      ws.onerror = (error) => {
-        console.error('[useRuleEngineEvents] WebSocket error:', error);
-      };
-
-      ws.onclose = (event) => {
-        console.log('[useRuleEngineEvents] Connection closed', {
-          code: event.code,
-          reason: event.reason,
-        });
       };
 
       return () => {
@@ -106,7 +89,7 @@ export function useRuleEngineEvents() {
         wsRef.current = null;
       };
     }
-  }, [isMockMode]);
+  }, [isMockMode, isActive]);
 
   return { events, isMockMode, toggleMockMode };
 }
