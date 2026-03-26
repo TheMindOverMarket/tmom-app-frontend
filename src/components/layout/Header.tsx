@@ -5,26 +5,33 @@ interface HeaderProps {
 
 export function Header({ isMockMode, onToggleMockMode }: HeaderProps) {
   return (
-    <header style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111827', margin: 0 }}>
-        TheMindOverMarket <span style={{ fontWeight: 'normal', color: '#6B7280' }}>| Demo Scaffolding</span>
+    <header style={{ 
+      padding: '8px 24px', 
+      display: 'flex', 
+      justifyContent: 'space-between', 
+      alignItems: 'center',
+      borderBottom: '1px solid #f1f5f9',
+      backgroundColor: '#ffffff'
+    }}>
+      <h1 style={{ fontSize: '0.95rem', fontWeight: '800', color: '#111827', margin: 0, letterSpacing: '-0.01em' }}>
+        TheMindOverMarket <span style={{ fontWeight: '400', color: '#64748b' }}>| Scaffolding</span>
       </h1>
       
       <button
         onClick={onToggleMockMode}
         style={{
-          fontSize: '12px',
-          padding: '6px 12px',
-          borderRadius: '6px',
-          border: isMockMode ? '1px solid #059669' : '1px solid #D1D5DB',
-          backgroundColor: isMockMode ? '#059669' : '#FFFFFF',
-          color: isMockMode ? '#FFFFFF' : '#374151',
+          fontSize: '11px',
+          padding: '4px 10px',
+          borderRadius: '4px',
+          border: isMockMode ? '1px solid #10b981' : '1px solid #e2e8f0',
+          backgroundColor: isMockMode ? '#10b981' : '#ffffff',
+          color: isMockMode ? '#ffffff' : '#64748b',
           cursor: 'pointer',
-          fontWeight: 500,
+          fontWeight: 600,
           transition: 'all 0.2s',
           display: 'flex',
           alignItems: 'center',
-          gap: '6px'
+          gap: '5px'
         }}
       >
         <span style={{ 

@@ -66,20 +66,22 @@ function App() {
         padding: '0 24px',
         borderBottom: '1px solid #e2e8f0',
         backgroundColor: '#ffffff',
-        flexShrink: 0
+        flexShrink: 0,
+        height: '40px'
       }}>
         <button 
           onClick={() => setActiveTab('monitor')}
           style={{
-            padding: '16px 4px',
-            fontSize: '14px',
+            padding: '0 4px',
+            fontSize: '13px',
             fontWeight: 700,
             color: activeTab === 'monitor' ? '#6366f1' : '#64748b',
             border: 'none',
             background: 'none',
             borderBottom: activeTab === 'monitor' ? '2px solid #6366f1' : '2px solid transparent',
             cursor: 'pointer',
-            transition: 'all 0.2s'
+            transition: 'all 0.2s',
+            height: '100%'
           }}
         >
           Monitor
@@ -87,20 +89,22 @@ function App() {
         <button 
           onClick={() => setActiveTab('analytics')}
           style={{
-            padding: '16px 4px',
-            fontSize: '14px',
+            padding: '0 4px',
+            fontSize: '13px',
             fontWeight: 700,
             color: activeTab === 'analytics' ? '#6366f1' : '#64748b',
             border: 'none',
             background: 'none',
             borderBottom: activeTab === 'analytics' ? '2px solid #6366f1' : '2px solid transparent',
             cursor: 'pointer',
-            transition: 'all 0.2s'
+            transition: 'all 0.2s',
+            height: '100%'
           }}
         >
           Session Analytics
         </button>
       </div>
+
 
       <main style={{ 
         flex: 1, 
