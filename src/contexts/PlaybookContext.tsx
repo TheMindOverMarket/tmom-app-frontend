@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { playbookApi } from '../domain/playbook/api';
 import { Playbook } from '../domain/playbook/types';
 import { sessionApi } from '../domain/session/api';
@@ -14,9 +14,9 @@ interface PlaybookContextType {
   submitStrategy: () => Promise<Playbook | undefined>;
   playbooks: Playbook[];
   selectedPlaybook: Playbook | null;
-  setSelectedPlaybook: (pb: Playbook | null) => void;
   isLoadingPlaybooks: boolean;
   fetchPlaybooks: () => Promise<void>;
+  activatePlaybook: (pb: Playbook) => Promise<void>;
   activeSession: Session | null;
   isStreaming: boolean;
   startStream: (playbookId: string) => Promise<Session | undefined>;
@@ -179,11 +179,31 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const activatePlaybook = async (pb: Playbook) => {
+    try {
+      // 1. Deactivate current active playbook in DB if it exists
+      if (selectedPlaybook && selectedPlaybook.id !== pb.id) {
+        await playbookApi.updatePlaybook(selectedPlaybook.id, { is_active: false });
+      }
+      
+      // 2. Activate new one in DB
+      await playbookApi.updatePlaybook(pb.id, { is_active: true });
+      
+      // 3. Update local state and refresh list
+      setSelectedPlaybook(pb);
+      await fetchPlaybooks();
+      setNotification({ type: 'success', message: `Playbook "${pb.name}" is now active.` });
+    } catch (error: unknown) {
+      console.error('Failed to activate playbook:', error);
+      setNotification({ type: 'error', message: `Failed to sync active state: ${error instanceof Error ? error.message : 'Unknown error'}` });
+    }
+  };
+
   const value = {
     strategyInput, setStrategyInput,
     isSubmitting, notification, setNotification,
     submitStrategy, playbooks, selectedPlaybook,
-    setSelectedPlaybook, isLoadingPlaybooks, fetchPlaybooks,
+    isLoadingPlaybooks, fetchPlaybooks, activatePlaybook,
     activeSession, isStreaming, startStream, stopStream
   };
 

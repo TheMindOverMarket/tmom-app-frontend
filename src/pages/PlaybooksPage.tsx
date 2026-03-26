@@ -12,7 +12,7 @@ export function PlaybooksPage() {
     isSubmitting,
     playbooks,
     selectedPlaybook,
-    setSelectedPlaybook,
+    activatePlaybook,
     isLoadingPlaybooks,
     fetchPlaybooks
   } = usePlaybookContext();
@@ -20,7 +20,7 @@ export function PlaybooksPage() {
   const navigate = useNavigate();
 
   const handleSelect = (pb: any) => {
-    setSelectedPlaybook(pb);
+    activatePlaybook(pb);
     navigate('/monitor');
   };
 
