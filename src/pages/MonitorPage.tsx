@@ -7,11 +7,12 @@ import { RuleEventInspector } from '../components/RuleEventInspector';
 import { Activity } from 'lucide-react';
 
 export function MonitorPage() {
-  const { selectedPlaybook, isStreaming, startStream, stopStream } = usePlaybookContext();
+  const { selectedPlaybook, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream } = usePlaybookContext();
   const { events } = useRuleEngineEvents(isStreaming);
   const navigate = useNavigate();
 
   const [focusedView, setFocusedView] = useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);
+  const isLoading = isStartingStream || isStoppingStream;
 
   // Guard: Redirect if no playbook selected
   useEffect(() => {
@@ -53,18 +54,21 @@ export function MonitorPage() {
           
           <button
             onClick={isStreaming ? stopStream : () => startStream(selectedPlaybook.id)}
+            disabled={isLoading}
             style={{
                 padding: '6px 16px',
-                backgroundColor: isStreaming ? '#EF4444' : '#059669',
-                color: 'white',
+                backgroundColor: isLoading ? '#e2e8f0' : (isStreaming ? '#EF4444' : '#059669'),
+                color: isLoading ? '#94a3b8' : 'white',
                 border: 'none',
                 borderRadius: '6px',
                 fontSize: '11px',
                 fontWeight: 700,
-                cursor: 'pointer',
+                cursor: isLoading ? 'default' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px'
+                gap: '6px',
+                opacity: isLoading ? 0.8 : 1,
+                transition: 'all 0.2s'
             }}
           >
             <div style={{ 
@@ -72,9 +76,9 @@ export function MonitorPage() {
               height: '6px', 
               borderRadius: '50%', 
               backgroundColor: 'white', 
-              animation: isStreaming ? 'pulse 1.5s infinite' : 'none' 
+              animation: (isStreaming || isLoading) ? 'pulse 1.5s infinite' : 'none' 
             }} />
-            {isStreaming ? 'STOP STREAM' : 'START LIVE SESSION'}
+            {isStartingStream ? 'WARMING UP...' : (isStoppingStream ? 'CLOSING...' : (isStreaming ? 'STOP STREAM' : 'START LIVE SESSION'))}
           </button>
         </div>
 

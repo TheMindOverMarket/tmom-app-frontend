@@ -92,10 +92,18 @@ export function SessionAnalytics() {
             padding: '24px',
             backgroundColor: '#f8fafc',
             borderRadius: '16px',
-            border: '1px solid #f1f5f9'
+            border: '1px solid #f1f5f9',
+            minHeight: '100px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center'
           }}>
             <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px', fontWeight: '500' }}>{stat.label}</div>
-            <div style={{ fontSize: '32px', fontWeight: '800', color: stat.color }}>{stat.value}</div>
+            {loading && sessions.length === 0 ? (
+              <div style={{ fontSize: '32px', fontWeight: '800', color: '#e2e8f0', animation: 'pulse 1.5s infinite' }}>...</div>
+            ) : (
+              <div style={{ fontSize: '32px', fontWeight: '800', color: stat.color }}>{stat.value}</div>
+            )}
           </div>
         ))}
       </div>

@@ -19,6 +19,8 @@ interface PlaybookContextType {
   activatePlaybook: (pb: Playbook) => Promise<void>;
   activeSession: Session | null;
   isStreaming: boolean;
+  isStartingStream: boolean;
+  isStoppingStream: boolean;
   startStream: (playbookId: string) => Promise<Session | undefined>;
   stopStream: () => Promise<void>;
 }
@@ -101,6 +103,8 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
 
   const [activeSession, setActiveSession] = useState<Session | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isStartingStream, setIsStartingStream] = useState(false);
+  const [isStoppingStream, setIsStoppingStream] = useState(false);
 
   // Fetch Playbooks
   const fetchPlaybooks = useCallback(async () => {
@@ -128,6 +132,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
   }, [fetchPlaybooks]);
 
   const startStream = async (playbookId: string) => {
+    setIsStartingStream(true);
     try {
       // 1. Safety Cleanup: If we already have a session active locally, ensure it is ended
       if (activeSession) {
@@ -147,15 +152,15 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     } catch (error: unknown) {
       console.error('Failed to start session:', error);
       setNotification({ type: 'error', message: `Failed to start session: ${error instanceof Error ? error.message : 'Unknown error'}` });
+    } finally {
+      setIsStartingStream(false);
     }
   };
 
   const stopStream = async () => {
     if (!activeSession) return;
+    setIsStoppingStream(true);
     try {
-      // Tell the rule engine to stop evaluating rules
-      await playbookApi.stopPlaybook(CONFIG.USER_ID, activeSession.playbook_id);
-      
       // Update session status in the DB
       await sessionApi.endSession(activeSession.id, { status: SessionStatus.COMPLETED });
       
@@ -164,6 +169,8 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       setNotification({ type: 'success', message: 'Session completed and saved.' });
     } catch (error: unknown) {
       setNotification({ type: 'error', message: `Failed to stop session: ${error instanceof Error ? error.message : 'Unknown error'}` });
+    } finally {
+      setIsStoppingStream(false);
     }
   };
 
@@ -219,7 +226,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     isSubmitting, notification, setNotification,
     createPlaybookFromNL, playbooks, selectedPlaybook,
     isLoadingPlaybooks, fetchPlaybooks, activatePlaybook,
-    activeSession, isStreaming, startStream, stopStream
+    activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream
   };
 
   return <PlaybookContext.Provider value={value}>{children}</PlaybookContext.Provider>;
