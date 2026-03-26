@@ -187,27 +187,18 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
 
   const activatePlaybook = async (pb: Playbook) => {
     try {
-      // 1. Deactivate any playbook in the list that is currently active (excluding the target one)
-      const activePlaybooks = playbooks.filter(p => p.is_active && p.id !== pb.id);
-      
-      if (activePlaybooks.length > 0) {
-        console.log(`Deactivating ${activePlaybooks.length} other active playbooks...`);
-        await Promise.all(activePlaybooks.map(p => 
-          playbookApi.updatePlaybook(p.id, { is_active: false })
-        ));
-      }
-      
-      // 2. Activate the new target playbook in DB
+      // The backend now handles atomic deactivation of other playbooks 
+      // when a new one is set to active. We only need one single call.
       await playbookApi.updatePlaybook(pb.id, { is_active: true });
       
-      // 3. Update local state and refresh the library list
+      // Update local state and refresh the library list to sync with backend
       setSelectedPlaybook(pb);
       await fetchPlaybooks();
       
-      setNotification({ type: 'success', message: `Playbook "${pb.name}" is now the sole active strategy.` });
+      setNotification({ type: 'success', message: `Playbook "${pb.name}" is now the active strategy.` });
     } catch (error: unknown) {
-      console.error('Failed to activate playbook sync:', error);
-      setNotification({ type: 'error', message: `Failed to sync active state: ${error instanceof Error ? error.message : 'Unknown error'}` });
+      console.error('Failed to activate playbook:', error);
+      setNotification({ type: 'error', message: `Failed to activate strategy: ${error instanceof Error ? error.message : 'Unknown error'}` });
     }
   };
 
