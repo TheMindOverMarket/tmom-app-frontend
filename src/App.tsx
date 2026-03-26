@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { usePlaybook } from './hooks/usePlaybook';
+import { Playbook } from './domain/playbook/types';
 import { useRuleEngineEvents } from './hooks/useRuleEngineEvents';
 import { Header } from './components/layout/Header';
 import { PriceChart } from './components/PriceChart';
@@ -20,7 +21,6 @@ function App() {
     playbooks,
     selectedPlaybook,
     setSelectedPlaybook,
-    activeSession,
     isStreaming,
     startStream,
     stopStream
@@ -41,7 +41,7 @@ function App() {
     });
   }, []);
 
-  const handleSelectAndMonitor = (playbook: any) => {
+  const handleSelectAndMonitor = (playbook: Playbook) => {
     setSelectedPlaybook(playbook);
     setActiveTab('monitor');
   };
@@ -76,10 +76,10 @@ function App() {
         flexShrink: 0,
         height: '32px'
       }}>
-        {['playbooks', 'monitor', 'analytics'].map((tab) => (
+        {(['playbooks', 'monitor', 'analytics'] as const).map((tab) => (
           <button 
             key={tab}
-            onClick={() => setActiveTab(tab as any)}
+            onClick={() => setActiveTab(tab)}
             style={{
               padding: '0 4px',
               fontSize: '11px',
