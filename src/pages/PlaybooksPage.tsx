@@ -40,10 +40,6 @@ export function PlaybooksPage() {
           onChange={setStrategyInput}
           onSubmit={submitStrategy}
           isSubmitting={isSubmitting}
-          onStartSession={() => {}} 
-          onStopSession={() => {}}
-          isStreaming={false}
-          disabled={true}
         />
       </section>
 
