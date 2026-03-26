@@ -48,9 +48,14 @@ export function SessionAnalytics() {
       backgroundColor: '#ffffff',
       borderRadius: '24px',
       boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)',
-      border: '1px solid #f1f5f9'
+      border: '1px solid #f1f5f9',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+      minHeight: 0,
+      overflow: 'hidden'
     }}>
-      <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexShrink: 0 }}>
         <div>
           <h2 style={{ fontSize: '1.875rem', fontWeight: '800', margin: 0, color: '#0f172a', letterSpacing: '-0.025em' }}>
             Session Analytics
@@ -67,7 +72,7 @@ export function SessionAnalytics() {
       </div>
 
       {/* Stats Dashboard */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '40px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '40px', flexShrink: 0 }}>
         {[
           { label: 'Total Sessions', value: stats.total, color: '#6366f1' },
           { label: 'Completed Audit', value: stats.completed, color: '#10b981' },
@@ -94,7 +99,7 @@ export function SessionAnalytics() {
       </div>
 
       {/* Search Bar */}
-      <div style={{ marginBottom: '24px' }}>
+      <div style={{ marginBottom: '24px', flexShrink: 0 }}>
         <input 
           type="text" 
           placeholder="Filter by Session ID..."
@@ -113,18 +118,20 @@ export function SessionAnalytics() {
         />
       </div>
 
-      {error ? (
-        <div style={{ padding: '24px', backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '16px', color: '#b91c1c' }}>
-          <div style={{ fontWeight: '700', marginBottom: '4px' }}>Connection Error</div>
-          <div style={{ fontSize: '14px', opacity: 0.9 }}>{error}</div>
-        </div>
-      ) : (
-        <SessionList 
-          sessions={filteredSessions} 
-          onSelect={handleSelectSession} 
-          selectedId={selectedSession?.id} 
-        />
-      )}
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: '4px' }}>
+        {error ? (
+          <div style={{ padding: '24px', backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '16px', color: '#b91c1c' }}>
+            <div style={{ fontWeight: '700', marginBottom: '4px' }}>Connection Error</div>
+            <div style={{ fontSize: '14px', opacity: 0.9 }}>{error}</div>
+          </div>
+        ) : (
+          <SessionList 
+            sessions={filteredSessions} 
+            onSelect={handleSelectSession} 
+            selectedId={selectedSession?.id} 
+          />
+        )}
+      </div>
 
       {selectedSession && (
         <div style={{

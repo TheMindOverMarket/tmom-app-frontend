@@ -21,7 +21,7 @@ export function PlaybooksPage() {
 
   const handleSelect = async (pb: any) => {
     await activatePlaybook(pb);
-    navigate('/monitor');
+    navigate('/supervision');
   };
 
   return (
@@ -45,8 +45,14 @@ export function PlaybooksPage() {
       </section>
 
       {/* Library Section */}
-      <section style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+      <section style={{ 
+        flex: 1, 
+        minHeight: 0, 
+        display: 'flex', 
+        flexDirection: 'column',
+        overflow: 'hidden' // Root section doesn't scroll
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexShrink: 0 }}>
           <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#1e293b' }}>YOUR PLAYBOOKS</h3>
           <RefreshButton 
             onRefresh={fetchPlaybooks}
@@ -58,8 +64,10 @@ export function PlaybooksPage() {
           display: 'grid', 
           gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', 
           gap: '16px', 
-          overflowY: 'auto',
-          paddingBottom: '24px'
+          overflowY: 'auto', // Inner grid scrolls
+          paddingBottom: '24px',
+          flex: 1,
+          minHeight: 0
         }}>
           {isLoadingPlaybooks && playbooks.length === 0 ? (
             <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '48px', color: '#94a3b8' }}>
