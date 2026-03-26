@@ -2,8 +2,8 @@ import { useState, useCallback } from 'react';
 import { usePlaybook } from './hooks/usePlaybook';
 import { useRuleEngineEvents } from './hooks/useRuleEngineEvents';
 import { Header } from './components/layout/Header';
-import { UserIDBanner } from './components/layout/UserIDBanner';
 import { PriceChart } from './components/PriceChart';
+
 import { RuleEventInspector } from './components/RuleEventInspector';
 import { StrategyIngestion } from './components/strategy/StrategyIngestion';
 import { NotificationBanner } from './components/common/NotificationBanner';
@@ -49,8 +49,8 @@ function App() {
     }}>
       <div style={{ flexShrink: 0 }}>
         <Header isMockMode={isMockMode} onToggleMockMode={toggleMockMode} />
-        <UserIDBanner />
       </div>
+
       
       {notification && (
         <NotificationBanner 
@@ -67,13 +67,13 @@ function App() {
         borderBottom: '1px solid #e2e8f0',
         backgroundColor: '#ffffff',
         flexShrink: 0,
-        height: '40px'
+        height: '32px'
       }}>
         <button 
           onClick={() => setActiveTab('monitor')}
           style={{
             padding: '0 4px',
-            fontSize: '13px',
+            fontSize: '12px',
             fontWeight: 700,
             color: activeTab === 'monitor' ? '#6366f1' : '#64748b',
             border: 'none',
@@ -81,16 +81,17 @@ function App() {
             borderBottom: activeTab === 'monitor' ? '2px solid #6366f1' : '2px solid transparent',
             cursor: 'pointer',
             transition: 'all 0.2s',
-            height: '100%'
+            height: '100%',
+            letterSpacing: '0.02em'
           }}
         >
-          Monitor
+          MONITOR
         </button>
         <button 
           onClick={() => setActiveTab('analytics')}
           style={{
             padding: '0 4px',
-            fontSize: '13px',
+            fontSize: '12px',
             fontWeight: 700,
             color: activeTab === 'analytics' ? '#6366f1' : '#64748b',
             border: 'none',
@@ -98,12 +99,14 @@ function App() {
             borderBottom: activeTab === 'analytics' ? '2px solid #6366f1' : '2px solid transparent',
             cursor: 'pointer',
             transition: 'all 0.2s',
-            height: '100%'
+            height: '100%',
+            letterSpacing: '0.02em'
           }}
         >
-          Session Analytics
+          SESSION ANALYTICS
         </button>
       </div>
+
 
 
       <main style={{ 
