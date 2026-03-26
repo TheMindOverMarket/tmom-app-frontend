@@ -49,7 +49,7 @@ export function PlaybookIngestion({
           onChange={(e) => onChange(e.target.value)}
           style={{ 
               width: '100%',
-              padding: '24px 80px 24px 24px', 
+              padding: '24px', 
               border: 'none', 
               fontSize: '15px',
               outline: 'none',
@@ -63,38 +63,57 @@ export function PlaybookIngestion({
           }} 
         />
 
-        {/* Integrated Action Button */}
+        {/* Integrated Action Bar */}
         <div style={{ 
-          position: 'absolute', 
-          bottom: '16px', 
-          right: '16px',
           display: 'flex',
-          gap: '8px',
-          alignItems: 'center'
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '16px 24px',
+          backgroundColor: 'var(--slate-50)',
+          borderTop: '1px solid var(--slate-100)',
+          gap: '16px'
         }}>
           {showSessionControls && (
             <button
               onClick={isStreaming ? onStopSession : onStartSession}
               disabled={disabled && !isStreaming}
               style={{
-                  height: '40px',
-                  padding: '8px 16px',
+                  height: '48px',
+                  padding: '0 24px',
                   backgroundColor: isStreaming ? 'var(--danger-alpha)' : 'var(--success-alpha)',
                   color: isStreaming ? 'var(--danger)' : 'var(--success)',
                   border: `1px solid ${isStreaming ? 'var(--danger)' : 'var(--success)'}`,
-                  borderRadius: '12px',
+                  borderRadius: '16px',
                   fontSize: '11px',
-                  fontWeight: 900,
+                  fontWeight: 950,
+                  letterSpacing: '0.05em',
                   cursor: (disabled && !isStreaming) ? 'not-allowed' : 'pointer',
                   opacity: (disabled && !isStreaming) ? 0.5 : 1,
-                  transition: 'all 0.2s',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px'
+                  gap: '10px'
+              }}
+              onMouseEnter={e => {
+                if (!(disabled && !isStreaming)) {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }
+              }}
+              onMouseLeave={e => {
+                if (!(disabled && !isStreaming)) {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }
               }}
             >
-              <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isStreaming ? 'var(--danger)' : 'var(--success)', animation: isStreaming ? 'pulse 1.5s infinite' : 'none' }}></div>
-              {isStreaming ? 'STOP' : 'SUPERVISE'}
+              <div style={{ 
+                width: '8px', 
+                height: '8px', 
+                borderRadius: '50%', 
+                backgroundColor: isStreaming ? 'var(--danger)' : 'var(--success)', 
+                animation: isStreaming ? 'pulse 1.5s infinite' : 'none',
+                boxShadow: isStreaming ? '0 0 10px var(--danger)' : 'none'
+              }}></div>
+              {isStreaming ? 'STOP SUPERVISION' : 'START LIVE SUPERVISION'}
             </button>
           )}
 
@@ -102,38 +121,54 @@ export function PlaybookIngestion({
             onClick={onSubmit}
             disabled={isSubmitting || !value.trim()}
             style={{
-                width: isSubmitting ? '140px' : '40px',
-                height: '40px',
+                flex: 1,
+                height: '48px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '10px',
+                gap: '12px',
                 backgroundColor: isSubmitting ? 'var(--brand)' : (value.trim() ? 'var(--brand)' : 'var(--slate-100)'),
-                color: isSubmitting ? 'white' : (value.trim() ? 'white' : 'var(--slate-300)'),
+                color: isSubmitting ? 'white' : (value.trim() ? 'white' : 'var(--slate-400)'),
                 border: 'none',
-                borderRadius: '12px',
-                fontSize: '14px',
-                fontWeight: 800,
+                borderRadius: '16px',
+                fontSize: '13px',
+                fontWeight: 950,
+                letterSpacing: '0.05em',
                 cursor: (isSubmitting || !value.trim()) ? 'default' : 'pointer',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: (isSubmitting || !value.trim()) ? 'none' : '0 4px 12px -2px var(--brand-alpha)',
+                transition: 'all 0.4s cubic-bezier(0.19, 1, 0.22, 1)',
+                boxShadow: (isSubmitting || !value.trim()) ? 'none' : '0 10px 20px -5px var(--brand-alpha)',
                 overflow: 'hidden'
+            }}
+            onMouseEnter={e => {
+              if (!isSubmitting && value.trim()) {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 15px 30px -8px var(--brand-alpha)';
+              }
+            }}
+            onMouseLeave={e => {
+              if (!isSubmitting && value.trim()) {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 10px 20px -5px var(--brand-alpha)';
+              }
             }}
           >
             {isSubmitting ? (
               <>
                 <div style={{ 
-                  width: '14px', 
-                  height: '14px', 
+                  width: '18px', 
+                  height: '18px', 
                   borderRadius: '50%', 
-                  border: '2px solid rgba(255,255,255,0.3)', 
+                  border: '2.5px solid rgba(255,255,255,0.3)', 
                   borderTopColor: 'white', 
                   animation: 'spin 0.8s linear infinite' 
                 }} />
-                <span style={{ fontSize: '11px', letterSpacing: '0.05em' }}>ANALYZING PLAYBOOK...</span>
+                <span>EXTRACTING INTELLIGENCE...</span>
               </>
             ) : (
-              <span style={{ transition: 'transform 0.2s' }}>✨</span>
+              <>
+                <span style={{ fontSize: '18px' }}>✨</span>
+                <span>INGEST PLAYBOOK</span>
+              </>
             )}
           </button>
         </div>
