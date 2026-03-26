@@ -14,13 +14,17 @@ interface PlaybookContextType {
   createPlaybookFromNL: () => Promise<Playbook | undefined>;
   playbooks: Playbook[];
   selectedPlaybook: Playbook | null;
+  setSelectedPlaybook: (pb: Playbook | null) => void;
   isLoadingPlaybooks: boolean;
   fetchPlaybooks: () => Promise<void>;
   activatePlaybook: (pb: Playbook) => Promise<void>;
   activeSession: Session | null;
   isStreaming: boolean;
+  isStartingStream: boolean;
+  isStoppingStream: boolean;
   startStream: (playbookId: string) => Promise<Session | undefined>;
   stopStream: () => Promise<void>;
+  rules: any[]; 
 }
 
 const PlaybookContext = createContext<PlaybookContextType | undefined>(undefined);
@@ -97,22 +101,96 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
   
   const [playbooks, setPlaybooks] = useState<Playbook[]>([]);
   const [selectedPlaybook, setSelectedPlaybook] = useState<Playbook | null>(null);
+  const [rules, setRules] = useState<any[]>([]); // Added rule state
   const [isLoadingPlaybooks, setIsLoadingPlaybooks] = useState(false);
+
+  // Polling logic for pending playbooks
+  useEffect(() => {
+    let pollInterval: number | null = null;
+
+    const poll = async () => {
+      if (!selectedPlaybook) {
+        if (pollInterval) clearInterval(pollInterval);
+        return;
+      }
+
+      // If we don't even have the field in our domain yet (legacy backend), 
+      // we should eventually stop polling to avoid infinite loops.
+      if (selectedPlaybook.generation_status === undefined) {
+          if (pollInterval) clearInterval(pollInterval);
+          return;
+      }
+
+      if (selectedPlaybook.generation_status !== 'PENDING') {
+        if (pollInterval) clearInterval(pollInterval);
+        return;
+      }
+
+      try {
+        const updated = await playbookApi.getPlaybook(selectedPlaybook.id);
+        
+        // Resilience: If backend hasn't deployed the field yet, but we are in a pending state locally
+        const status = updated.generation_status || 'COMPLETED'; 
+
+        if (status === 'COMPLETED' || status === 'FAILED') {
+          setSelectedPlaybook(updated);
+          
+          if (status === 'COMPLETED') {
+            const newRules = await playbookApi.listPlaybookRules(updated.id);
+            setRules(newRules);
+          }
+          
+          await fetchPlaybooks();
+          if (pollInterval) clearInterval(pollInterval);
+        }
+      } catch (e) {
+        console.error('Polling failed:', e);
+      }
+    };
+
+    if (selectedPlaybook?.generation_status === 'PENDING') {
+      pollInterval = window.setInterval(poll, 3000); 
+    }
+
+    return () => {
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  }, [selectedPlaybook]);
+
+  // Load rules when selected playbook changes and is already completed
+  useEffect(() => {
+    if (selectedPlaybook && selectedPlaybook.generation_status === 'COMPLETED') {
+      playbookApi.listPlaybookRules(selectedPlaybook.id)
+        .then(setRules)
+        .catch(console.error);
+    } else if (selectedPlaybook?.generation_status !== 'PENDING') {
+      setRules([]);
+    }
+  }, [selectedPlaybook]);
 
   const [activeSession, setActiveSession] = useState<Session | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isStartingStream, setIsStartingStream] = useState(false);
+  const [isStoppingStream, setIsStoppingStream] = useState(false);
 
   // Fetch Playbooks
   const fetchPlaybooks = useCallback(async () => {
     setIsLoadingPlaybooks(true);
     try {
-      console.log(`Fetching playbooks for user: ${CONFIG.USER_ID}`);
       const data = await playbookApi.listUserPlaybooks(CONFIG.USER_ID);
-      console.log(`Fetched ${data.length} playbooks:`, data);
-      setPlaybooks(data);
+      
+      // Sort: Active first, then by date descending
+      const sorted = [...data].sort((a, b) => {
+        if (a.is_active) return -1;
+        if (b.is_active) return 1;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+
+      console.log(`Fetched and sorted ${sorted.length} playbooks.`);
+      setPlaybooks(sorted);
       
       // Only auto-select the one active in the DB if we don't have a selection yet
-      const activeInDb = data.find(pb => pb.is_active);
+      const activeInDb = sorted.find(pb => pb.is_active);
       if (activeInDb && !selectedPlaybook) {
         setSelectedPlaybook(activeInDb);
       }
@@ -128,6 +206,8 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
   }, [fetchPlaybooks]);
 
   const startStream = async (playbookId: string) => {
+    setIsStartingStream(true);
+    setNotification(null);
     try {
       // Setup backend session and UI
       const session = await sessionApi.startSession({
@@ -140,16 +220,19 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       
       setActiveSession(session);
       setIsStreaming(true);
-      setNotification({ type: 'success', message: 'Session started. Recording events...' });
+      setNotification({ type: 'success', message: 'New session started. Previous session (if any) has been finalized.' });
       return session;
     } catch (error: unknown) {
       console.error('Failed to start session:', error);
       setNotification({ type: 'error', message: `Failed to start session: ${error instanceof Error ? error.message : 'Unknown error'}` });
+    } finally {
+      setIsStartingStream(false);
     }
   };
 
   const stopStream = async () => {
     if (!activeSession) return;
+    setIsStoppingStream(true);
     try {
       // Tell the rule engine to stop evaluating rules
       await playbookApi.stopPlaybook(activeSession.playbook_id);
@@ -162,6 +245,8 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       setNotification({ type: 'success', message: 'Session completed and saved.' });
     } catch (error: unknown) {
       setNotification({ type: 'error', message: `Failed to stop session: ${error instanceof Error ? error.message : 'Unknown error'}` });
+    } finally {
+      setIsStoppingStream(false);
     }
   };
 
@@ -172,7 +257,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     setNotification(null);
 
     try {
-        const playbook = await playbookApi.createPlaybook({
+        const playbook = await playbookApi.ingestPlaybook({
           name: `Playbook ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
           user_id: CONFIG.USER_ID,
           original_nl_input: playbookInput,
@@ -209,19 +294,20 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       setSelectedPlaybook(pb);
       await fetchPlaybooks();
       
-      setNotification({ type: 'success', message: `Playbook "${pb.name}" is now the active strategy.` });
+      setNotification({ type: 'success', message: `Playbook "${pb.name}" is now the active playbook.` });
     } catch (error: unknown) {
       console.error('Failed to activate playbook:', error);
-      setNotification({ type: 'error', message: `Failed to activate strategy: ${error instanceof Error ? error.message : 'Unknown error'}` });
+      setNotification({ type: 'error', message: `Failed to activate playbook: ${error instanceof Error ? error.message : 'Unknown error'}` });
     }
   };
 
   const value = {
     playbookInput, setPlaybookInput,
     isSubmitting, notification, setNotification,
-    createPlaybookFromNL, playbooks, selectedPlaybook,
+    createPlaybookFromNL, playbooks, selectedPlaybook, setSelectedPlaybook,
     isLoadingPlaybooks, fetchPlaybooks, activatePlaybook,
-    activeSession, isStreaming, startStream, stopStream
+    activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream,
+    rules
   };
 
   return <PlaybookContext.Provider value={value}>{children}</PlaybookContext.Provider>;

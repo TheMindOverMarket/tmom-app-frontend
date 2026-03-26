@@ -1,5 +1,6 @@
 interface InspectorHeaderProps {
   focusedTimestamp: number | null;
+  isActive: boolean;
   filterType?: 'adherence' | 'deviation' | null;
   onClearFocus: () => void;
 }
@@ -14,7 +15,7 @@ const formatHeaderDate = (ts: number) => {
   });
 };
 
-export function InspectorHeader({ focusedTimestamp, filterType, onClearFocus }: InspectorHeaderProps) {
+export function InspectorHeader({ focusedTimestamp, isActive, filterType, onClearFocus }: InspectorHeaderProps) {
   return (
     <div style={{
       display: 'flex',
@@ -64,7 +65,7 @@ export function InspectorHeader({ focusedTimestamp, filterType, onClearFocus }: 
                   </span>
                 )}
              </div>
-          ) : (
+          ) : isActive ? (
               <span style={{ 
                   fontSize: '11px', 
                   padding: '2px 6px', 
@@ -78,8 +79,20 @@ export function InspectorHeader({ focusedTimestamp, filterType, onClearFocus }: 
                   textTransform: 'uppercase'
               }}>
                  <span style={{ display: 'block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#059669' }}></span>
-                 Live Stream
+                 Live Feed
               </span>
+          ) : (
+            <span style={{ 
+                fontSize: '11px', 
+                padding: '2px 6px', 
+                backgroundColor: '#f3f4f6', 
+                color: '#6b7280', 
+                borderRadius: '4px',
+                fontWeight: 600,
+                textTransform: 'uppercase'
+            }}>
+               Idle
+            </span>
           )}
       </div>
 

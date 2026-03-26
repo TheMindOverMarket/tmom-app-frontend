@@ -7,7 +7,7 @@ import { CONFIG } from '../config/constants';
  * Hook to connect to the Rule Engine WebSocket and manage event stream.
  * Optimized for production with exponential backoff retries and dependency gating.
  */
-export function useRuleEngineEvents(isActive: boolean = false) {
+export function useRuleEngineEvents(isActive: boolean = false, sessionId?: string) {
   const [events, setEvents] = useState<RuleEngineEvent[]>([]);
   const [isMockMode, setIsMockMode] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
@@ -26,11 +26,16 @@ export function useRuleEngineEvents(isActive: boolean = false) {
     if (wsRef.current || !isActive || isMockMode) return;
 
     try {
-      const ws = new WebSocket(CONFIG.WS_ENGINE_URL);
+      // Append session_id if available to enable server-side filtering
+      const wsUrl = sessionId 
+        ? `${CONFIG.WS_ENGINE_URL}?session_id=${sessionId}`
+        : CONFIG.WS_ENGINE_URL;
+
+      const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('[useRuleEngineEvents] Connected to stream.');
+        console.log(`[useRuleEngineEvents] Connected to stream${sessionId ? ` (session: ${sessionId})` : ''}.`);
         setIsConnected(true);
         retryCountRef.current = 0; // Reset on success
       };
@@ -76,7 +81,7 @@ export function useRuleEngineEvents(isActive: boolean = false) {
     } catch (err) {
       console.error('[useRuleEngineEvents] Connection failed:', err);
     }
-  }, [isActive, isMockMode]);
+  }, [isActive, isMockMode, sessionId]);
 
   useEffect(() => {
     // 1. Teardown & Isolation
@@ -114,7 +119,7 @@ export function useRuleEngineEvents(isActive: boolean = false) {
       if (wsRef.current) wsRef.current.close();
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
     };
-  }, [isActive, isMockMode, connect]);
+  }, [isActive, isMockMode, sessionId, connect]);
 
   return { events, isMockMode, toggleMockMode, isConnected, clearEvents };
 }

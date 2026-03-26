@@ -7,11 +7,12 @@ import { RuleEventInspector } from '../components/RuleEventInspector';
 import { Activity } from 'lucide-react';
 
 export function MonitorPage() {
-  const { selectedPlaybook, isStreaming, startStream, stopStream } = usePlaybookContext();
-  const { events } = useRuleEngineEvents(isStreaming);
+  const { selectedPlaybook, activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream } = usePlaybookContext();
+  const { events, isMockMode, toggleMockMode } = useRuleEngineEvents(isStreaming, activeSession?.id);
   const navigate = useNavigate();
 
   const [focusedView, setFocusedView] = useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);
+  const isLoading = isStartingStream || isStoppingStream;
 
   // Guard: Redirect if no playbook selected
   useEffect(() => {
@@ -46,36 +47,69 @@ export function MonitorPage() {
           border: '1px solid #f1f5f9'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Activity size={14} color="#6366f1" />
-            <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b' }}>ACTIVE MONITORING:</div>
+            <Activity size={14} color="var(--brand)" />
+            <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--slate-400)' }}>PLAYBOOK SUPERVISION:</div>
             <div style={{ fontSize: '11px', color: '#1e293b', fontWeight: 700 }}>{selectedPlaybook.name}</div>
           </div>
           
-          <button
-            onClick={isStreaming ? stopStream : () => startStream(selectedPlaybook.id)}
-            style={{
-                padding: '6px 16px',
-                backgroundColor: isStreaming ? '#EF4444' : '#059669',
-                color: 'white',
-                border: 'none',
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={toggleMockMode}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: isMockMode ? 'var(--brand)' : 'white',
+                color: isMockMode ? 'white' : 'var(--slate-400)',
+                border: `1px solid ${isMockMode ? 'var(--brand)' : 'var(--slate-200)'}`,
                 borderRadius: '6px',
-                fontSize: '11px',
-                fontWeight: 700,
+                fontSize: '10px',
+                fontWeight: 800,
                 cursor: 'pointer',
+                transition: 'var(--transition)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px'
-            }}
-          >
-            <div style={{ 
-              width: '6px', 
-              height: '6px', 
-              borderRadius: '50%', 
-              backgroundColor: 'white', 
-              animation: isStreaming ? 'pulse 1.5s infinite' : 'none' 
-            }} />
-            {isStreaming ? 'STOP STREAM' : 'START LIVE SESSION'}
-          </button>
+              }}
+              title="Toggle Live Session Simulation"
+            >
+              <div style={{ 
+                width: '6px', 
+                height: '6px', 
+                borderRadius: '50%', 
+                backgroundColor: isMockMode ? 'white' : 'var(--slate-400)' 
+              }} />
+              {isMockMode ? 'SIMULATING' : 'VIRTUAL FEED'}
+            </button>
+
+            <button
+              onClick={isStreaming ? stopStream : () => startStream(selectedPlaybook.id)}
+              disabled={isLoading || (!isStreaming && selectedPlaybook.generation_status !== 'COMPLETED')}
+              style={{
+                  padding: '6px 16px',
+                  backgroundColor: isLoading ? 'var(--slate-100)' : (isStreaming ? 'var(--danger)' : (selectedPlaybook.generation_status === 'COMPLETED' ? 'var(--success)' : 'var(--slate-200)')),
+                  color: (isLoading || (selectedPlaybook.generation_status !== 'COMPLETED' && !isStreaming)) ? 'var(--slate-400)' : 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  cursor: (isLoading || (!isStreaming && selectedPlaybook.generation_status !== 'COMPLETED')) ? 'default' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  opacity: (isLoading || (selectedPlaybook.generation_status !== 'COMPLETED' && !isStreaming)) ? 0.7 : 1,
+                  transition: 'var(--transition)'
+              }}
+              title={selectedPlaybook.generation_status !== 'COMPLETED' ? "Strategy analysis in progress..." : "Start real-time supervision"}
+            >
+              <div style={{ 
+                width: '6px', 
+                height: '6px', 
+                borderRadius: '50%', 
+                backgroundColor: 'white', 
+                animation: (isStreaming || isLoading) ? 'pulse 1.5s infinite' : 'none' 
+              }} />
+              {isStartingStream ? 'WARMING UP...' : (isStoppingStream ? 'CLOSING...' : (isStreaming ? 'STOP STREAM' : (selectedPlaybook.generation_status === 'COMPLETED' ? 'START LIVE SESSION' : 'ANALYZING...')))}
+            </button>
+          </div>
         </div>
 
         <div style={{ flex: 1, minHeight: 0, position: 'relative', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #f1f5f9', overflow: 'hidden' }}>
@@ -91,6 +125,7 @@ export function MonitorPage() {
         <RuleEventInspector 
           events={events} 
           focusedTimestamp={focusedView?.timestamp || null}
+          isActive={isStreaming}
           filterType={focusedView?.filter || null}
           onClearFocus={() => setFocusedView(null)}
         />

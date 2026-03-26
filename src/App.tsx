@@ -13,7 +13,7 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/" element={<Navigate to="/playbooks" replace />} />
             <Route path="/playbooks" element={<PlaybooksPage />} />
-            <Route path="/monitor" element={<MonitorPage />} />
+            <Route path="/supervision" element={<MonitorPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="*" element={<Navigate to="/playbooks" replace />} />
           </Route>

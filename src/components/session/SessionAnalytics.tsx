@@ -3,6 +3,7 @@ import { useSessions } from '../../hooks/useSessions';
 import { Session, SessionStatus } from '../../domain/session/types';
 import { SessionList } from './SessionList';
 import { ReplayPlayer } from './ReplayPlayer';
+import { RefreshButton } from '../common/RefreshButton';
 
 export function SessionAnalytics() {
   const { 
@@ -47,42 +48,31 @@ export function SessionAnalytics() {
       backgroundColor: '#ffffff',
       borderRadius: '24px',
       boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)',
-      border: '1px solid #f1f5f9'
+      border: '1px solid #f1f5f9',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+      minHeight: 0,
+      overflow: 'hidden'
     }}>
-      <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexShrink: 0 }}>
         <div>
           <h2 style={{ fontSize: '1.875rem', fontWeight: '800', margin: 0, color: '#0f172a', letterSpacing: '-0.025em' }}>
             Session Analytics
           </h2>
           <p style={{ margin: '8px 0 0 0', color: '#64748b', fontSize: '1rem' }}>
-            Audit compliance, evaluate playbook performance, and reconstruct trading sessions.
+            Quantify cost of deviation, evaluate playbook performance, and audit strategy consistency.
           </p>
         </div>
         
-        <button 
-          onClick={fetchSessions}
-          disabled={loading}
-          style={{
-            padding: '10px 16px',
-            backgroundColor: '#f1f5f9',
-            border: 'none',
-            borderRadius: '10px',
-            color: '#475569',
-            fontSize: '14px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
-          <svg style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" /></svg>
-          {loading ? 'Refreshing...' : 'Refresh List'}
-        </button>
+        <RefreshButton 
+          onRefresh={fetchSessions}
+          isLoading={loading}
+        />
       </div>
 
       {/* Stats Dashboard */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '40px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '40px', flexShrink: 0 }}>
         {[
           { label: 'Total Sessions', value: stats.total, color: '#6366f1' },
           { label: 'Completed Audit', value: stats.completed, color: '#10b981' },
@@ -92,16 +82,24 @@ export function SessionAnalytics() {
             padding: '24px',
             backgroundColor: '#f8fafc',
             borderRadius: '16px',
-            border: '1px solid #f1f5f9'
+            border: '1px solid #f1f5f9',
+            minHeight: '100px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center'
           }}>
             <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px', fontWeight: '500' }}>{stat.label}</div>
-            <div style={{ fontSize: '32px', fontWeight: '800', color: stat.color }}>{stat.value}</div>
+            {loading && sessions.length === 0 ? (
+              <div style={{ fontSize: '32px', fontWeight: '800', color: '#e2e8f0', animation: 'pulse 1.5s infinite' }}>...</div>
+            ) : (
+              <div style={{ fontSize: '32px', fontWeight: '800', color: stat.color }}>{stat.value}</div>
+            )}
           </div>
         ))}
       </div>
 
       {/* Search Bar */}
-      <div style={{ marginBottom: '24px' }}>
+      <div style={{ marginBottom: '24px', flexShrink: 0 }}>
         <input 
           type="text" 
           placeholder="Filter by Session ID..."
@@ -120,18 +118,20 @@ export function SessionAnalytics() {
         />
       </div>
 
-      {error ? (
-        <div style={{ padding: '24px', backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '16px', color: '#b91c1c' }}>
-          <div style={{ fontWeight: '700', marginBottom: '4px' }}>Connection Error</div>
-          <div style={{ fontSize: '14px', opacity: 0.9 }}>{error}</div>
-        </div>
-      ) : (
-        <SessionList 
-          sessions={filteredSessions} 
-          onSelect={handleSelectSession} 
-          selectedId={selectedSession?.id} 
-        />
-      )}
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: '4px' }}>
+        {error ? (
+          <div style={{ padding: '24px', backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '16px', color: '#b91c1c' }}>
+            <div style={{ fontWeight: '700', marginBottom: '4px' }}>Connection Error</div>
+            <div style={{ fontSize: '14px', opacity: 0.9 }}>{error}</div>
+          </div>
+        ) : (
+          <SessionList 
+            sessions={filteredSessions} 
+            onSelect={handleSelectSession} 
+            selectedId={selectedSession?.id} 
+          />
+        )}
+      </div>
 
       {selectedSession && (
         <div style={{
