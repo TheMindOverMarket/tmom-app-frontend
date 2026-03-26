@@ -25,48 +25,50 @@ export function PlaybookIngestion({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
         <textarea 
-          placeholder="Describe your playbook in natural language... (e.g. 'If price stays below EMA-9 for 3 minutes, then rises above it, alert me.')"
+          placeholder="Describe your playbook... (e.g. 'If price stays below EMA-9 for 3 minutes, then rises above it, alert me.')"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) && onSubmit()}
           style={{ 
               flex: 1, 
-              padding: '12px 16px', 
-              borderRadius: '12px', 
-              border: '1px solid #e2e8f0', 
-              fontSize: '13px',
+              padding: '16px', 
+              borderRadius: 'var(--radius-lg)', 
+              border: '1px solid var(--slate-200)', 
+              fontSize: '14px',
               outline: 'none',
-              boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)',
-              color: '#1e293b',
-              backgroundColor: '#f8fafc',
+              boxShadow: 'var(--shadow-sm)',
+              color: 'var(--slate-900)',
+              backgroundColor: 'white',
               resize: 'none',
-              minHeight: '140px',
+              minHeight: '160px',
               fontFamily: 'inherit',
-              lineHeight: '1.5',
-              transition: 'all 0.2s focus'
+              lineHeight: '1.6',
+              transition: 'var(--transition)'
           }} 
-
+          onFocus={e => (e.currentTarget.style.borderColor = 'var(--brand)', e.currentTarget.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.1)')}
+          onBlur={e => (e.currentTarget.style.borderColor = 'var(--slate-200)', e.currentTarget.style.boxShadow = 'var(--shadow-sm)')}
         />
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '150px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '160px' }}>
           <button
             onClick={onSubmit}
             disabled={isSubmitting || !value.trim()}
             style={{
-                padding: '10px 16px',
-                backgroundColor: '#111827',
+                padding: '12px 16px',
+                backgroundColor: 'var(--slate-900)',
                 color: 'white',
                 border: 'none',
-                borderRadius: '8px',
+                borderRadius: 'var(--radius-md)',
                 fontSize: '13px',
-                fontWeight: 600,
-                cursor: (isSubmitting || !value.trim()) ? 'not-allowed' : 'pointer',
-                opacity: (isSubmitting || !value.trim()) ? 0.7 : 1,
-                transition: 'background-color 0.2s',
-                whiteSpace: 'nowrap'
+                fontWeight: 800,
+                cursor: (isSubmitting || !value.trim()) ? 'default' : 'pointer',
+                opacity: (isSubmitting || !value.trim()) ? 0.5 : 1,
+                transition: 'var(--transition)',
+                whiteSpace: 'nowrap',
+                boxShadow: 'var(--shadow-sm)'
             }}
           >
-            {isSubmitting ? 'Ingesting...' : 'Ingest Playbook'}
+            {isSubmitting ? 'INGESTING...' : 'INGEST PLAYBOOK'}
           </button>
 
           {showSessionControls && (

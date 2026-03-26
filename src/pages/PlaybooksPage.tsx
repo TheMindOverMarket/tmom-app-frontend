@@ -71,33 +71,36 @@ export function PlaybooksPage() {
               <div 
                 key={pb.id} 
                 style={{ 
-                  padding: '20px', 
+                  padding: '24px', 
                   backgroundColor: 'white', 
-                  borderRadius: '16px', 
-                  border: selectedPlaybook?.id === pb.id ? '2px solid #6366f1' : '1px solid #e2e8f0',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+                  borderRadius: 'var(--radius-xl)', 
+                  border: selectedPlaybook?.id === pb.id ? '2px solid var(--brand)' : '1px solid var(--slate-200)',
+                  boxShadow: selectedPlaybook?.id === pb.id ? 'var(--shadow-md)' : 'var(--shadow-sm)',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '12px',
-                  transition: 'all 0.2s'
+                  gap: '16px',
+                  transition: 'var(--transition)',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
-                    <div style={{ fontSize: '14px', fontWeight: '800', color: '#1e293b' }}>{pb.name}</div>
-                    <div style={{ fontSize: '10px', color: '#64748b', marginTop: '4px' }}>Created {new Date(pb.created_at).toLocaleDateString()}</div>
+                    <div style={{ fontSize: '15px', fontWeight: '800', color: 'var(--slate-900)' }}>{pb.name}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--slate-400)', marginTop: '4px' }}>Created {new Date(pb.created_at).toLocaleDateString()}</div>
                   </div>
                   <button 
                     onClick={() => handleSelect(pb)}
                     style={{
-                      padding: '6px 12px',
-                      backgroundColor: selectedPlaybook?.id === pb.id ? '#6366f1' : '#f1f5f9',
-                      color: selectedPlaybook?.id === pb.id ? 'white' : '#475569',
+                      padding: '8px 16px',
+                      backgroundColor: selectedPlaybook?.id === pb.id ? 'var(--brand)' : 'var(--slate-100)',
+                      color: selectedPlaybook?.id === pb.id ? 'white' : 'var(--slate-600)',
                       border: 'none',
-                      borderRadius: '6px',
+                      borderRadius: 'var(--radius-md)',
                       fontSize: '11px',
-                      fontWeight: '700',
-                      cursor: 'pointer'
+                      fontWeight: '800',
+                      cursor: 'pointer',
+                      transition: 'var(--transition)'
                     }}
                   >
                     {selectedPlaybook?.id === pb.id ? 'ACTIVE' : 'SELECT'}
@@ -105,14 +108,16 @@ export function PlaybooksPage() {
                 </div>
                 <div style={{ 
                   fontSize: '12px', 
-                  color: '#475569', 
-                  backgroundColor: '#f8fafc', 
-                  padding: '10px', 
-                  borderRadius: '8px',
-                  maxHeight: '100px',
+                  lineHeight: '1.6',
+                  color: 'var(--slate-600)', 
+                  backgroundColor: 'var(--slate-50)', 
+                  padding: '14px', 
+                  borderRadius: 'var(--radius-lg)',
+                  maxHeight: '120px',
                   overflowY: 'auto',
                   whiteSpace: 'pre-wrap',
-                  fontFamily: 'monospace'
+                  fontFamily: 'monospace',
+                  border: '1px solid var(--slate-100)'
                 }}>
                   {pb.original_nl_input}
                 </div>

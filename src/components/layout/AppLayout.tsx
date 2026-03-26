@@ -12,8 +12,7 @@ export function AppLayout() {
   return (
     <div style={{ 
       height: '100vh', 
-      backgroundColor: '#f8fafc',
-      fontFamily: '"Inter", sans-serif',
+      backgroundColor: 'var(--slate-50)',
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden'
@@ -43,14 +42,6 @@ export function AppLayout() {
       }}>
         <Outlet />
       </main>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes pulse {
-          0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
-          70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
-          100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
-        }
-      ` }} />
     </div>
   );
 }

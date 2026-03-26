@@ -21,34 +21,29 @@ export function RefreshButton({
         display: 'flex',
         alignItems: 'center',
         gap: '6px',
-        padding: '6px 12px',
+        padding: '6px 14px',
         fontSize: '11px',
         fontWeight: '800',
-        backgroundColor: isLoading ? '#f8fafc' : '#ffffff',
-        border: '1px solid #e2e8f0',
-        borderRadius: '8px',
-        color: isLoading ? '#94a3b8' : '#64748b',
+        backgroundColor: isLoading ? 'var(--slate-50)' : '#ffffff',
+        border: `1px solid var(--slate-200)`,
+        borderRadius: 'var(--radius-md)',
+        color: isLoading ? 'var(--slate-400)' : 'var(--slate-600)',
         cursor: isLoading ? 'default' : 'pointer',
-        transition: 'all 0.2s',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+        transition: 'var(--transition)',
+        boxShadow: 'var(--shadow-sm)',
         ...style
       }}
+      onMouseOver={e => !isLoading && (e.currentTarget.style.backgroundColor = 'var(--slate-50)')}
+      onMouseOut={e => !isLoading && (e.currentTarget.style.backgroundColor = '#ffffff')}
     >
       <RefreshCw 
         size={12} 
         style={{ 
-          color: isLoading ? '#6366f1' : '#64748b',
+          color: isLoading ? 'var(--brand)' : 'var(--slate-600)',
           animation: isLoading ? 'spin 1.5s linear infinite' : 'none' 
         }} 
       />
       <span>{isLoading ? 'REFRESHING...' : label}</span>
-      
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </button>
   );
 }
