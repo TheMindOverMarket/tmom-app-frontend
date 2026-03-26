@@ -131,34 +131,6 @@ function App() {
 
             {/* Right Column: Rule Engine & Mocking */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <section style={{ 
-                padding: '16px 20px', 
-                backgroundColor: 'white', 
-                borderRadius: '16px', 
-                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
-                border: '1px solid #f1f5f9',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-                <span style={{ fontSize: '14px', fontWeight: '600', color: '#64748b' }}>Simulation Controls</span>
-                <button
-                  onClick={toggleMockMode}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                    fontWeight: '700',
-                    border: 'none',
-                    backgroundColor: isMockMode ? '#fee2e2' : '#f1f5f9',
-                    color: isMockMode ? '#ef4444' : '#64748b',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  {isMockMode ? 'Disable Mock Stream' : 'Enable Mock Stream'}
-                </button>
-              </section>
 
               <RuleEventInspector 
                 events={events} 
@@ -166,6 +138,7 @@ function App() {
                 filterType={focusedView?.filter || null}
                 onClearFocus={() => setFocusedView(null)}
               />
+
             </div>
           </div>
         ) : (
