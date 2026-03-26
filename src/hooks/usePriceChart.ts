@@ -67,13 +67,33 @@ export function usePriceChart(symbol: string, interval: number, events: RuleEngi
     };
   }, []);
 
+  const initialRangeSetRef = useRef(false);
+
   // Data Updates
   useEffect(() => {
     if (seriesRef.current && candles.length > 0) {
       seriesRef.current.setData(candles);
-      chartRef.current?.timeScale().fitContent();
+      
+      // On initial history load, zoom into the last 60 bars for a better focused view
+      // This also ensures the Y-axis auto-scales to the recent relevant prices.
+      if (!initialRangeSetRef.current && chartRef.current) {
+        const timeScale = chartRef.current.timeScale();
+        const DEFAULT_BARS = 60;
+        const width = chartContainerRef.current?.clientWidth || 800;
+        
+        // Match standard trading platforms: roughly show last 60 bars or fill 75% of container width
+        const barsToDisplay = Math.min(candles.length, Math.floor(width / 15), DEFAULT_BARS);
+        
+        timeScale.setVisibleLogicalRange({
+          from: candles.length - barsToDisplay,
+          to: candles.length,
+        });
+        
+        initialRangeSetRef.current = true;
+      }
     }
   }, [candles]);
+
 
   useEffect(() => {
     if (emaSeriesRef.current && ema9.length > 0) emaSeriesRef.current.setData(ema9);
