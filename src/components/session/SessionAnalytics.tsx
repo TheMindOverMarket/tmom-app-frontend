@@ -63,7 +63,6 @@ export function SessionAnalytics() {
         <RefreshButton 
           onRefresh={fetchSessions}
           isLoading={loading}
-          label="Refresh List"
         />
       </div>
 

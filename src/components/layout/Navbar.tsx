@@ -4,7 +4,7 @@ import { usePlaybookContext } from '../../contexts/PlaybookContext';
 
 const NAV_ITEMS = [
   { path: '/playbooks', label: 'PLAYBOOKS', icon: Database },
-  { path: '/monitor', label: 'LIVE SUPERVISION', icon: Activity, requiresPlaybook: true },
+  { path: '/supervision', label: 'LIVE SUPERVISION', icon: Activity, requiresPlaybook: true },
   { path: '/analytics', label: 'SESSION ANALYTICS', icon: ShieldCheck },
 ];
 
