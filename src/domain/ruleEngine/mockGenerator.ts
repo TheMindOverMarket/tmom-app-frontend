@@ -12,7 +12,7 @@ const MOCK_RULES = [
  * @param basePrice The current price to walk from
  * @param forceDeviation Optional boolean to force the type (true = deviation, false = adherence)
  */
-export function generateMockEvent(basePrice: number = 50000, forceDeviation?: boolean): RuleEngineEvent {
+export function generateMockEvent(basePrice: number = 71500, forceDeviation?: boolean): RuleEngineEvent {
     // 1. Determine Type
     // If forceDeviation is provided, use it. Otherwise default to deviation (high noise)
     const isDeviation = forceDeviation !== undefined ? forceDeviation : Math.random() < 0.8;
