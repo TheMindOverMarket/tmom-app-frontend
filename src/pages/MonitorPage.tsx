@@ -69,7 +69,7 @@ export function MonitorPage() {
                 alignItems: 'center',
                 gap: '6px'
               }}
-              title="Toggle Local Engine Simulation"
+              title="Toggle Live Session Simulation"
             >
               <div style={{ 
                 width: '6px', 
@@ -77,7 +77,7 @@ export function MonitorPage() {
                 borderRadius: '50%', 
                 backgroundColor: isMockMode ? 'white' : 'var(--slate-400)' 
               }} />
-              {isMockMode ? 'SIMULATING' : 'MOCK ENGINE'}
+              {isMockMode ? 'SIMULATING' : 'VIRTUAL FEED'}
             </button>
 
             <button
@@ -124,6 +124,7 @@ export function MonitorPage() {
         <RuleEventInspector 
           events={events} 
           focusedTimestamp={focusedView?.timestamp || null}
+          isActive={isStreaming}
           filterType={focusedView?.filter || null}
           onClearFocus={() => setFocusedView(null)}
         />

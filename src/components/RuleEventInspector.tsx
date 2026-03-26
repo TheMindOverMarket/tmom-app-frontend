@@ -7,6 +7,7 @@ import { InspectorHeader } from './inspector/InspectorHeader';
 interface RuleEventInspectorProps {
   events: RuleEngineEvent[];
   focusedTimestamp: number | null; 
+  isActive: boolean;
   filterType?: 'adherence' | 'deviation' | null;
   onClearFocus: () => void;
 }
@@ -24,6 +25,7 @@ const formatHeaderDate = (ts: number) => {
 export const RuleEventInspector: FC<RuleEventInspectorProps> = ({ 
   events, 
   focusedTimestamp,
+  isActive,
   filterType,
   onClearFocus 
 }) => {
@@ -42,6 +44,7 @@ export const RuleEventInspector: FC<RuleEventInspectorProps> = ({
     }}>
       <InspectorHeader 
         focusedTimestamp={focusedTimestamp}
+        isActive={isActive}
         filterType={filterType}
         onClearFocus={onClearFocus}
       />
@@ -61,6 +64,11 @@ export const RuleEventInspector: FC<RuleEventInspectorProps> = ({
                 <>
                   <span style={{ fontWeight: 500 }}>No events found for {formatHeaderDate(focusedTimestamp)}</span>
                   <span style={{ fontSize: '12px', color: '#9CA3AF' }}>Try selecting a different marker.</span>
+                </>
+              ) : !isActive ? (
+                <>
+                  <span style={{ fontWeight: 600, color: '#4B5563' }}>SUPERVISION INACTIVE</span>
+                  <span style={{ fontSize: '12px', color: '#9CA3AF' }}>Start a live session to begin monitoring your playbook.</span>
                 </>
               ) : (
                 <>
