@@ -2,6 +2,8 @@ import { type Time } from 'lightweight-charts';
 import { type Candle, type MarketDataProvider } from '../types';
 import { CONFIG } from '../../config/constants';
 
+let lastKnownPrice = 71500;
+
 /**
  * BackendMarketDataProvider
  * 
@@ -9,8 +11,6 @@ import { CONFIG } from '../../config/constants';
  */
 export const BackendMarketDataProvider: MarketDataProvider = {
   getHistory: async (symbol: string, interval: number): Promise<Candle[]> => {
-    // interval mapped to timeframe. Frontend interval is seconds (e.g. 60). Backend might want '1Min'.
-    // Let's pass what backend expects based on spec (timeframe=1Min)
     let timeframe = '1Min';
     if (interval === 60) timeframe = '1Min';
     else if (interval === 3600) timeframe = '1Hour';
@@ -22,22 +22,37 @@ export const BackendMarketDataProvider: MarketDataProvider = {
       throw new Error(`Failed to fetch history from backend: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data: Candle[] = await response.json();
+    
+    // Update our baseline for the live simulator to ensure continuity
+    if (data.length > 0) {
+      lastKnownPrice = data[data.length - 1].close;
+    }
+    
     return data;
   },
 
   subscribeLive: (_symbol: string, _interval: number, onCandleUpdate: (candle: Candle) => void): () => void => {
     // TODO: Connect to the backend Market Data WebSocket once available.
-    // For now, we simulate live updates locally with random noise around 65000.
+    // For now, we simulate live updates locally with random noise around the last known price.
     const intervalId = setInterval(() => {
-      const lastPrice = 65000 + (Math.random() - 0.5) * 50;
+      // Walk the price logically from where we left off
+      const change = (Math.random() - 0.5) * 50;
+      const open = lastKnownPrice;
+      const close = lastKnownPrice + change;
+      const high = Math.max(open, close) + Math.random() * 10;
+      const low = Math.min(open, close) - Math.random() * 10;
+      
       onCandleUpdate({
         time: (Math.floor(Date.now() / 1000 / 60) * 60) as Time,
-        open: lastPrice,
-        high: lastPrice + 10,
-        low: lastPrice - 10,
-        close: lastPrice + (Math.random() - 0.5) * 10,
+        open,
+        high,
+        low,
+        close,
       });
+
+      // Update baseline for next tick
+      lastKnownPrice = close;
     }, 5000);
 
     return () => clearInterval(intervalId);

@@ -34,7 +34,7 @@ export function useRuleEngineEvents() {
       // Fast Interval: Deviations every 2.5 seconds
       const deviationInterval = setInterval(() => {
         setEvents(prev => {
-            const lastPrice = prev.length > 0 ? prev[prev.length - 1].price : 96000;
+            const lastPrice = prev.length > 0 ? prev[prev.length - 1].price : 71500;
             const newEvent = generateMockEvent(lastPrice, true); // Force Deviation
             return [...prev, newEvent];
         });
@@ -43,7 +43,7 @@ export function useRuleEngineEvents() {
       // Slow Interval: Adherence every 60 seconds (Every minute)
       const adherenceInterval = setInterval(() => {
         setEvents(prev => {
-            const lastPrice = prev.length > 0 ? prev[prev.length - 1].price : 96000;
+            const lastPrice = prev.length > 0 ? prev[prev.length - 1].price : 71500;
             const newEvent = generateMockEvent(lastPrice, false); // Force Adherence
             return [...prev, newEvent];
         });

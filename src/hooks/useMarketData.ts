@@ -75,7 +75,7 @@ function generateRealisticMockHistory(interval: number): Candle[] {
   const data: Candle[] = [];
   const now = Math.floor(Date.now() / 1000 / 60) * 60;
   // Start at a realistic BTC price instead of 96k
-  let price = 65000;
+  let price = 71500;
 
   for (let i = 100; i >= 0; i--) {
     const time = (now - i * interval) as Time;

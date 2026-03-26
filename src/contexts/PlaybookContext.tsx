@@ -1,11 +1,31 @@
-import { useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { playbookApi } from '../domain/playbook/api';
 import { Playbook } from '../domain/playbook/types';
 import { sessionApi } from '../domain/session/api';
 import { Session, SessionStatus } from '../domain/session/types';
 import { CONFIG } from '../config/constants';
 
-const SAMPLE_STRATEGY = `I’m using BTC.
+interface PlaybookContextType {
+  playbookInput: string;
+  setPlaybookInput: (val: string) => void;
+  isSubmitting: boolean;
+  notification: { type: 'success' | 'error'; message: string } | null;
+  setNotification: (val: { type: 'success' | 'error'; message: string } | null) => void;
+  createPlaybookFromNL: () => Promise<Playbook | undefined>;
+  playbooks: Playbook[];
+  selectedPlaybook: Playbook | null;
+  isLoadingPlaybooks: boolean;
+  fetchPlaybooks: () => Promise<void>;
+  activatePlaybook: (pb: Playbook) => Promise<void>;
+  activeSession: Session | null;
+  isStreaming: boolean;
+  startStream: (playbookId: string) => Promise<Session | undefined>;
+  stopStream: () => Promise<void>;
+}
+
+const PlaybookContext = createContext<PlaybookContextType | undefined>(undefined);
+
+const SAMPLE_PLAYBOOK = `I’m using BTC.
 1. Setup Logic (Deterministic Inputs)
 
 Derived State:
@@ -70,8 +90,8 @@ Cooldown:
 	•	10 minutes after stop loss
 	•	30 minutes after 2 consecutive losses`;
 
-export function usePlaybook() {
-  const [strategyInput, setStrategyInput] = useState(SAMPLE_STRATEGY);
+export function PlaybookProvider({ children }: { children: ReactNode }) {
+  const [playbookInput, setPlaybookInput] = useState(SAMPLE_PLAYBOOK);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   
@@ -91,17 +111,17 @@ export function usePlaybook() {
       console.log(`Fetched ${data.length} playbooks:`, data);
       setPlaybooks(data);
       
-      // If none selected but we have data, select the newest if applicable
-      if (!selectedPlaybook && data.length > 0) {
-          // Keep it null so user has to explicitly select or we auto-select the first
-          // Actually, let's not auto-select unless it's a new ingestion
+      // Auto-select the one active in the DB on initial load
+      const activeInDb = data.find(pb => pb.is_active);
+      if (activeInDb) {
+        setSelectedPlaybook(activeInDb);
       }
     } catch (error: unknown) {
       console.error('Failed to fetch playbooks:', error);
     } finally {
       setIsLoadingPlaybooks(false);
     }
-  }, [selectedPlaybook]);
+  }, []);
 
   useEffect(() => {
     fetchPlaybooks();
@@ -139,8 +159,8 @@ export function usePlaybook() {
     }
   };
 
-  const submitStrategy = async () => {
-    if (!strategyInput.trim()) return;
+  const createPlaybookFromNL = async () => {
+    if (!playbookInput.trim()) return;
     
     setIsSubmitting(true);
     setNotification(null);
@@ -149,43 +169,58 @@ export function usePlaybook() {
         const playbook = await playbookApi.createPlaybook({
           name: `Playbook ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
           user_id: CONFIG.USER_ID,
-          original_nl_input: strategyInput
+          original_nl_input: playbookInput
         });
 
-        // Final step: trigger it
         await playbookApi.triggerPlaybook(CONFIG.USER_ID, playbook.id);
         
         await fetchPlaybooks();
-        setSelectedPlaybook(playbook); // Auto-select the newly created one
-        setStrategyInput(''); 
-        setNotification({ type: 'success', message: 'Strategy playbook successfully created and activated!' });
+        await activatePlaybook(playbook);
+        setPlaybookInput(''); 
+        setNotification({ type: 'success', message: 'Playbook successfully created and activated!' });
         
         setTimeout(() => setNotification(null), 5000);
         return playbook;
     } catch (error: unknown) {
         console.error('Failed to create playbook:', error);
-        setNotification({ type: 'error', message: `Failed to deploy strategy: ${error instanceof Error ? error.message : 'Unknown error'}` });
+        setNotification({ type: 'error', message: `Failed to deploy playbook: ${error instanceof Error ? error.message : 'Unknown error'}` });
     } finally {
         setIsSubmitting(false);
     }
   };
 
-  return {
-    strategyInput,
-    setStrategyInput,
-    isSubmitting,
-    notification,
-    setNotification,
-    submitStrategy,
-    playbooks,
-    selectedPlaybook,
-    setSelectedPlaybook,
-    isLoadingPlaybooks,
-    fetchPlaybooks,
-    activeSession,
-    isStreaming,
-    startStream,
-    stopStream
+  const activatePlaybook = async (pb: Playbook) => {
+    try {
+      // The backend now handles atomic deactivation of other playbooks 
+      // when a new one is set to active. We only need one single call.
+      await playbookApi.updatePlaybook(pb.id, { is_active: true });
+      
+      // Update local state and refresh the library list to sync with backend
+      setSelectedPlaybook(pb);
+      await fetchPlaybooks();
+      
+      setNotification({ type: 'success', message: `Playbook "${pb.name}" is now the active strategy.` });
+    } catch (error: unknown) {
+      console.error('Failed to activate playbook:', error);
+      setNotification({ type: 'error', message: `Failed to activate strategy: ${error instanceof Error ? error.message : 'Unknown error'}` });
+    }
   };
+
+  const value = {
+    playbookInput, setPlaybookInput,
+    isSubmitting, notification, setNotification,
+    createPlaybookFromNL, playbooks, selectedPlaybook,
+    isLoadingPlaybooks, fetchPlaybooks, activatePlaybook,
+    activeSession, isStreaming, startStream, stopStream
+  };
+
+  return <PlaybookContext.Provider value={value}>{children}</PlaybookContext.Provider>;
 }
 
+export function usePlaybookContext() {
+  const context = useContext(PlaybookContext);
+  if (context === undefined) {
+    throw new Error('usePlaybookContext must be used within a PlaybookProvider');
+  }
+  return context;
+}
