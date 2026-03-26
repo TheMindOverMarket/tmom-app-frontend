@@ -4,7 +4,7 @@ import { usePlaybookContext } from '../../contexts/PlaybookContext';
 
 const NAV_ITEMS = [
   { path: '/playbooks', label: 'PLAYBOOKS', icon: Database },
-  { path: '/monitor', label: 'LIVE MONITOR', icon: Activity, requiresPlaybook: true },
+  { path: '/monitor', label: 'LIVE SUPERVISION', icon: Activity, requiresPlaybook: true },
   { path: '/analytics', label: 'SESSION ANALYTICS', icon: ShieldCheck },
 ];
 
@@ -32,7 +32,7 @@ export function Navbar() {
             onClick={(e) => {
               if (isDisabled) e.preventDefault();
             }}
-            title={isDisabled ? "Select or Create a Playbook first to enable Live Monitoring" : ""}
+            title={isDisabled ? "Select or Create a Playbook first to enable Live Supervision" : ""}
             style={({ isActive }) => ({
               display: 'flex',
               alignItems: 'center',
