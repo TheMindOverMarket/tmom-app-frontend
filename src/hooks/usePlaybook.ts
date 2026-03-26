@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { playbookApi } from '../domain/playbook/api';
+import { Playbook } from '../domain/playbook/types';
 import { sessionApi } from '../domain/session/api';
 import { Session, SessionStatus } from '../domain/session/types';
 import { CONFIG } from '../config/constants';
@@ -70,13 +71,39 @@ Cooldown:
 	•	30 minutes after 2 consecutive losses`;
 
 export function usePlaybook() {
-  const [ruleInput, setRuleInput] = useState(SAMPLE_STRATEGY);
-
+  const [strategyInput, setStrategyInput] = useState(SAMPLE_STRATEGY);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  
+  const [playbooks, setPlaybooks] = useState<Playbook[]>([]);
+  const [selectedPlaybook, setSelectedPlaybook] = useState<Playbook | null>(null);
+  const [isLoadingPlaybooks, setIsLoadingPlaybooks] = useState(false);
+
   const [activeSession, setActiveSession] = useState<Session | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [lastPlaybookId, setLastPlaybookId] = useState<string | null>(null);
+
+  // Fetch Playbooks
+  const fetchPlaybooks = useCallback(async () => {
+    setIsLoadingPlaybooks(true);
+    try {
+      const data = await playbookApi.listUserPlaybooks(CONFIG.USER_ID);
+      setPlaybooks(data);
+      
+      // If none selected but we have data, select the newest if applicable
+      if (!selectedPlaybook && data.length > 0) {
+          // Keep it null so user has to explicitly select or we auto-select the first
+          // Actually, let's not auto-select unless it's a new ingestion
+      }
+    } catch (error: unknown) {
+      console.error('Failed to fetch playbooks:', error);
+    } finally {
+      setIsLoadingPlaybooks(false);
+    }
+  }, [selectedPlaybook]);
+
+  useEffect(() => {
+    fetchPlaybooks();
+  }, [fetchPlaybooks]);
 
   const startStream = async (playbookId: string) => {
     try {
@@ -107,27 +134,28 @@ export function usePlaybook() {
   };
 
   const submitStrategy = async () => {
-    if (!ruleInput.trim()) return;
+    if (!strategyInput.trim()) return;
     
     setIsSubmitting(true);
     setNotification(null);
 
     try {
         const playbook = await playbookApi.createPlaybook({
-          name: `Playbook ${new Date().toLocaleTimeString()}`,
+          name: `Playbook ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
           user_id: CONFIG.USER_ID,
-          original_nl_input: ruleInput
+          original_nl_input: strategyInput
         });
 
-        // Final step: trigger the newly created playbook in the rule engine
+        // Final step: trigger it
         await playbookApi.triggerPlaybook(CONFIG.USER_ID, playbook.id);
         
-        setLastPlaybookId(playbook.id);
-        setRuleInput(''); // Clear on success
-        setNotification({ type: 'success', message: 'Strategy playbook successfully created and triggered!' });
+        await fetchPlaybooks();
+        setSelectedPlaybook(playbook); // Auto-select the newly created one
+        setStrategyInput(''); 
+        setNotification({ type: 'success', message: 'Strategy playbook successfully created and activated!' });
         
-        // Auto-dismiss success notification after 5 seconds
         setTimeout(() => setNotification(null), 5000);
+        return playbook;
     } catch (error: unknown) {
         console.error('Failed to create playbook:', error);
         setNotification({ type: 'error', message: `Failed to deploy strategy: ${error instanceof Error ? error.message : 'Unknown error'}` });
@@ -137,16 +165,21 @@ export function usePlaybook() {
   };
 
   return {
-    ruleInput,
-    setRuleInput,
+    strategyInput,
+    setStrategyInput,
     isSubmitting,
     notification,
     setNotification,
     submitStrategy,
+    playbooks,
+    selectedPlaybook,
+    setSelectedPlaybook,
+    isLoadingPlaybooks,
+    fetchPlaybooks,
     activeSession,
     isStreaming,
     startStream,
-    stopStream,
-    lastPlaybookId
+    stopStream
   };
 }
+
