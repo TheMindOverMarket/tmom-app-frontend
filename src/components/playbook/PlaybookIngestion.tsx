@@ -28,12 +28,6 @@ export function PlaybookIngestion({
           placeholder="Describe your strategy in natural language... (e.g. 'If BTC drops below VWAP $-1.5*ATR, alert me on the next 5-min candle close if EMA-20 is trending up.')"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-              e.preventDefault();
-              if (!isSubmitting && value.trim()) onSubmit();
-            }
-          }}
           style={{ 
               width: '100%',
               padding: '24px 24px 80px 24px', 
@@ -70,7 +64,7 @@ export function PlaybookIngestion({
           left: '12px', 
           right: '12px',
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           alignItems: 'center',
           padding: '12px 16px',
           backgroundColor: 'white',
@@ -78,19 +72,6 @@ export function PlaybookIngestion({
           border: '1px solid #f1f5f9',
           boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ 
-              padding: '4px 8px', 
-              backgroundColor: 'var(--slate-100)', 
-              borderRadius: '6px', 
-              fontSize: '10px', 
-              fontWeight: 800, 
-              color: 'var(--slate-500)',
-              letterSpacing: '0.02em'
-            }}>⌘ + ↵</div>
-            <span style={{ fontSize: '10px', color: 'var(--slate-400)', fontWeight: 600 }}>QUICK ANALYZE</span>
-          </div>
-
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             {showSessionControls && (
               <button
