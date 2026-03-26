@@ -1,5 +1,22 @@
 export type GenerationStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
 
+export interface RuleCondition {
+  id: string;
+  rule_id: string;
+  metric: string;
+  comparator: string;
+  value: string | number;
+  is_active: boolean;
+}
+
+export interface ConditionEdge {
+  id: string;
+  rule_id: string;
+  parent_condition_id: string;
+  child_condition_id: string;
+  logical_operator: 'AND' | 'OR';
+}
+
 export interface Rule {
   id: string;
   name: string;
@@ -8,6 +25,8 @@ export interface Rule {
   is_active: boolean;
   playbook_id: string;
   created_at: string;
+  conditions?: RuleCondition[];
+  edges?: ConditionEdge[];
 }
 
 export interface Playbook {

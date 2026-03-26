@@ -108,19 +108,34 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     let pollInterval: number | null = null;
 
     const poll = async () => {
-      if (!selectedPlaybook || selectedPlaybook.generation_status !== 'PENDING') {
+      if (!selectedPlaybook) {
+        if (pollInterval) clearInterval(pollInterval);
+        return;
+      }
+
+      // If we don't even have the field in our domain yet (legacy backend), 
+      // we should eventually stop polling to avoid infinite loops.
+      if (selectedPlaybook.generation_status === undefined) {
+          if (pollInterval) clearInterval(pollInterval);
+          return;
+      }
+
+      if (selectedPlaybook.generation_status !== 'PENDING') {
         if (pollInterval) clearInterval(pollInterval);
         return;
       }
 
       try {
         const updated = await playbookApi.getPlaybook(selectedPlaybook.id);
-        if (updated.generation_status === 'COMPLETED') {
+        
+        // Resilience: If backend hasn't deployed the field yet, but we are in a pending state locally
+        const status = updated.generation_status || 'COMPLETED'; 
+
+        if (status === 'COMPLETED') {
           setSelectedPlaybook(updated);
           const newRules = await playbookApi.listPlaybookRules(updated.id);
           setRules(newRules);
           
-          // Also update the list to clear "PENDING" labels
           const data = await playbookApi.listUserPlaybooks(CONFIG.USER_ID);
           setPlaybooks(data);
           
@@ -190,8 +205,15 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
 
   const startStream = async (playbookId: string) => {
     setIsStartingStream(true);
+    setNotification(null);
     try {
-      // 1. Safety Cleanup: If we already have a session active locally, ensure it is ended
+      // 1. Hard Guard: Integrity Check
+      const data = await playbookApi.getPlaybook(playbookId);
+      if (data.generation_status !== 'COMPLETED') {
+        throw new Error('This strategy is still being analyzed by the AI. Please wait for the analysis to complete (Approx 30s) before starting a live session.');
+      }
+
+      // 2. Safety Cleanup
       if (activeSession) {
         console.warn(`[PlaybookContext] Terminating existing session ${activeSession.id} before starting new one.`);
         await stopStream();

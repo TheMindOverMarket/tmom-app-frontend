@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { PlaybookIngestion } from '../components/playbook/PlaybookIngestion';
 import { RefreshButton } from '../components/common/RefreshButton';
-import { CONFIG } from '../config/constants';
+import { RuleCondition, ConditionEdge } from '../domain/playbook/types';
 
 export function PlaybooksPage() {
   const { 
@@ -234,7 +234,54 @@ export function PlaybooksPage() {
                       <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: rule.is_active ? 'var(--success)' : 'var(--slate-300)' }} />
                     </div>
                     <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--slate-800)', marginBottom: '4px' }}>{rule.name}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--slate-500)', lineHeight: '1.4' }}>{rule.description}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--slate-500)', lineHeight: '1.4', marginBottom: (rule.conditions && rule.conditions.length > 0) ? '12px' : '0' }}>{rule.description}</div>
+
+                    {rule.conditions && rule.conditions.length > 0 && (
+                      <div style={{ 
+                        marginTop: '12px', 
+                        padding: '12px', 
+                        backgroundColor: 'var(--slate-50)', 
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px dashed var(--slate-200)'
+                      }}>
+                        <div style={{ fontSize: '9px', fontWeight: 900, color: 'var(--slate-400)', marginBottom: '8px', letterSpacing: '0.05em' }}>LOGIC ENGINE</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {rule.conditions.map((cond: RuleCondition, cIdx: number) => (
+                            <div key={cond.id || cIdx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              <div style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '8px', 
+                                backgroundColor: 'white', 
+                                padding: '6px 10px', 
+                                borderRadius: '6px',
+                                border: '1px solid var(--slate-100)'
+                              }}>
+                                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand)' }}>{cond.metric}</span>
+                                <span style={{ fontSize: '10px', color: 'var(--slate-400)' }}>{cond.comparator}</span>
+                                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--slate-700)' }}>{cond.value}</span>
+                              </div>
+                              
+                              {/* Show Edge Logic (AND/OR) if this is not the last condition and we have edges */}
+                              {rule.edges && rule.edges.some((e: ConditionEdge) => e.parent_condition_id === cond.id) && (
+                                <div style={{ 
+                                  marginLeft: '20px', 
+                                  fontSize: '9px', 
+                                  fontWeight: 900, 
+                                  color: 'var(--brand)',
+                                  padding: '2px 6px',
+                                  backgroundColor: 'var(--brand-alpha)',
+                                  borderRadius: '4px',
+                                  width: 'fit-content'
+                                }}>
+                                  {rule.edges.find((e: ConditionEdge) => e.parent_condition_id === cond.id)?.logical_operator}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))
               ) : (

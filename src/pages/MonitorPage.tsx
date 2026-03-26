@@ -82,22 +82,23 @@ export function MonitorPage() {
 
             <button
               onClick={isStreaming ? stopStream : () => startStream(selectedPlaybook.id)}
-              disabled={isLoading}
+              disabled={isLoading || (!isStreaming && selectedPlaybook.generation_status !== 'COMPLETED')}
               style={{
                   padding: '6px 16px',
-                  backgroundColor: isLoading ? 'var(--slate-100)' : (isStreaming ? 'var(--danger)' : 'var(--success)'),
-                  color: isLoading ? 'var(--slate-400)' : 'white',
+                  backgroundColor: isLoading ? 'var(--slate-100)' : (isStreaming ? 'var(--danger)' : (selectedPlaybook.generation_status === 'COMPLETED' ? 'var(--success)' : 'var(--slate-200)')),
+                  color: (isLoading || (selectedPlaybook.generation_status !== 'COMPLETED' && !isStreaming)) ? 'var(--slate-400)' : 'white',
                   border: 'none',
                   borderRadius: '6px',
                   fontSize: '11px',
                   fontWeight: 800,
-                  cursor: isLoading ? 'default' : 'pointer',
+                  cursor: (isLoading || (!isStreaming && selectedPlaybook.generation_status !== 'COMPLETED')) ? 'default' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  opacity: isLoading ? 0.8 : 1,
+                  opacity: (isLoading || (selectedPlaybook.generation_status !== 'COMPLETED' && !isStreaming)) ? 0.7 : 1,
                   transition: 'var(--transition)'
               }}
+              title={selectedPlaybook.generation_status !== 'COMPLETED' ? "Strategy analysis in progress..." : "Start real-time supervision"}
             >
               <div style={{ 
                 width: '6px', 
@@ -106,7 +107,7 @@ export function MonitorPage() {
                 backgroundColor: 'white', 
                 animation: (isStreaming || isLoading) ? 'pulse 1.5s infinite' : 'none' 
               }} />
-              {isStartingStream ? 'WARMING UP...' : (isStoppingStream ? 'CLOSING...' : (isStreaming ? 'STOP STREAM' : 'START LIVE SESSION'))}
+              {isStartingStream ? 'WARMING UP...' : (isStoppingStream ? 'CLOSING...' : (isStreaming ? 'STOP STREAM' : (selectedPlaybook.generation_status === 'COMPLETED' ? 'START LIVE SESSION' : 'ANALYZING...')))}
             </button>
           </div>
         </div>
