@@ -129,6 +129,12 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
 
   const startStream = async (playbookId: string) => {
     try {
+      // 1. Safety Cleanup: If we already have a session active locally, ensure it is ended
+      if (activeSession) {
+        console.warn(`[PlaybookContext] Terminating existing session ${activeSession.id} before starting new one.`);
+        await stopStream();
+      }
+
       const session = await sessionApi.startSession({
         user_id: CONFIG.USER_ID,
         playbook_id: playbookId
@@ -136,7 +142,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       
       setActiveSession(session);
       setIsStreaming(true);
-      setNotification({ type: 'success', message: 'Session started. Recording events...' });
+      setNotification({ type: 'success', message: 'New session started. Previous session (if any) has been finalized.' });
       return session;
     } catch (error: unknown) {
       console.error('Failed to start session:', error);
