@@ -113,6 +113,10 @@ export function usePlaybook() {
         user_id: CONFIG.USER_ID,
         playbook_id: playbookId
       });
+      
+      // Trigger the rule engine to start processing this playbook
+      await playbookApi.triggerPlaybook(CONFIG.USER_ID, playbookId);
+      
       setActiveSession(session);
       setIsStreaming(true);
       setNotification({ type: 'success', message: 'Session started. Recording events...' });
