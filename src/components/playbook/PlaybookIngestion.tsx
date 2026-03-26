@@ -44,7 +44,7 @@ export function PlaybookIngestion({
       }}
       >
         <textarea 
-          placeholder="Describe your strategy in natural language... (e.g. 'If BTC drops below VWAP $-1.5*ATR, alert me on the next 5-min candle close if EMA-20 is trending up.')"
+          placeholder="Describe your playbook in natural language... (e.g. 'If BTC drops below VWAP $-1.5*ATR, alert me on the next 5-min candle close if EMA-20 is trending up.')"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           style={{ 
@@ -130,7 +130,7 @@ export function PlaybookIngestion({
                   borderTopColor: 'white', 
                   animation: 'spin 0.8s linear infinite' 
                 }} />
-                <span style={{ fontSize: '11px', letterSpacing: '0.05em' }}>ANALYZING...</span>
+                <span style={{ fontSize: '11px', letterSpacing: '0.05em' }}>ANALYZING PLAYBOOK...</span>
               </>
             ) : (
               <span style={{ transition: 'transform 0.2s' }}>✨</span>

@@ -56,7 +56,7 @@ export function PlaybooksPage() {
           overflow: 'hidden'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexShrink: 0 }}>
-            <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#1e293b' }}>STRATEGY LIBRARY</h3>
+            <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#1e293b' }}>PLAYBOOK LIBRARY</h3>
             <RefreshButton 
               onRefresh={fetchPlaybooks}
               isLoading={isLoadingPlaybooks}
@@ -197,7 +197,7 @@ export function PlaybooksPage() {
             )}
             {!isLoadingPlaybooks && playbooks.length === 0 && (
               <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '48px', color: '#94a3b8', fontSize: '14px' }}>
-                No playbooks yet. Ingest your first strategy above!
+                No playbooks yet. Ingest your first playbook above!
               </div>
             )}
           </div>
@@ -238,7 +238,7 @@ export function PlaybooksPage() {
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                       <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--brand)', boxShadow: '0 0 0 4px var(--brand-alpha)' }} />
-                      <div style={{ fontSize: '11px', fontWeight: 900, color: 'var(--brand)', letterSpacing: '0.15em' }}>STRATEGY INSPECTOR</div>
+                      <div style={{ fontSize: '11px', fontWeight: 900, color: 'var(--brand)', letterSpacing: '0.15em' }}>PLAYBOOK INSPECTOR</div>
                     </div>
                     <div style={{ fontSize: '28px', fontWeight: 900, color: 'var(--slate-900)', letterSpacing: '-0.02em' }}>{selectedPlaybook.name}</div>
                   </div>
@@ -373,7 +373,7 @@ export function PlaybooksPage() {
                       ) : (
                         <div style={{ textAlign: 'center', padding: '60px', backgroundColor: 'var(--slate-50)', borderRadius: '24px', border: '1.5px dashed var(--slate-200)' }}>
                           <span style={{ fontSize: '24px', display: 'block', marginBottom: '12px' }}>🔎</span>
-                          <span style={{ fontSize: '14px', color: 'var(--slate-400)', fontWeight: 600 }}>No deterministic rules derived for this strategy.</span>
+                          <span style={{ fontSize: '14px', color: 'var(--slate-400)', fontWeight: 600 }}>No deterministic rules derived for this playbook.</span>
                         </div>
                       )}
                     </div>
@@ -422,7 +422,7 @@ export function PlaybooksPage() {
                     onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
                     onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
                   >
-                    ACTIVATE STRATEGY
+                    ACTIVATE PLAYBOOK
                   </button>
                 )}
               </div>

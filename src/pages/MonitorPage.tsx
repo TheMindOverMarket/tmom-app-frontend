@@ -48,7 +48,7 @@ export function MonitorPage() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Activity size={14} color="var(--brand)" />
-            <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--slate-400)' }}>STRATEGY SUPERVISION:</div>
+            <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--slate-400)' }}>PLAYBOOK SUPERVISION:</div>
             <div style={{ fontSize: '11px', color: '#1e293b', fontWeight: 700 }}>{selectedPlaybook.name}</div>
           </div>
           

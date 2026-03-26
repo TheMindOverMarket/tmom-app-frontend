@@ -211,7 +211,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       // 1. Hard Guard: Integrity Check
       const data = await playbookApi.getPlaybook(playbookId);
       if (data.generation_status !== 'COMPLETED') {
-        throw new Error('This strategy is still being analyzed by the AI. Please wait for the analysis to complete (Approx 30s) before starting a live session.');
+        throw new Error('This playbook is still being analyzed by the AI. Please wait for the analysis to complete (Approx 30s) before starting a live session.');
       }
 
       // 2. Safety Cleanup
@@ -294,10 +294,10 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       setSelectedPlaybook(pb);
       await fetchPlaybooks();
       
-      setNotification({ type: 'success', message: `Playbook "${pb.name}" is now the active strategy.` });
+      setNotification({ type: 'success', message: `Playbook "${pb.name}" is now the active playbook.` });
     } catch (error: unknown) {
       console.error('Failed to activate playbook:', error);
-      setNotification({ type: 'error', message: `Failed to activate strategy: ${error instanceof Error ? error.message : 'Unknown error'}` });
+      setNotification({ type: 'error', message: `Failed to activate playbook: ${error instanceof Error ? error.message : 'Unknown error'}` });
     }
   };
 
