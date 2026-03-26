@@ -1,13 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { usePlaybookContext } from '../contexts/PlaybookContext';
-import { StrategyIngestion } from '../components/strategy/StrategyIngestion';
+import { PlaybookIngestion } from '../components/playbook/PlaybookIngestion';
 import { CONFIG } from '../config/constants';
 
 export function PlaybooksPage() {
   const { 
-    strategyInput, 
-    setStrategyInput, 
-    submitStrategy, 
+    playbookInput, 
+    setPlaybookInput, 
+    createPlaybookFromNL, 
     isSubmitting,
     playbooks,
     selectedPlaybook,
@@ -35,10 +35,10 @@ export function PlaybooksPage() {
         flexShrink: 0
       }}>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '14px', fontWeight: 800, color: '#1e293b' }}>INGEST NEW PLAYBOOK</h3>
-        <StrategyIngestion 
-          value={strategyInput}
-          onChange={setStrategyInput}
-          onSubmit={submitStrategy}
+        <PlaybookIngestion 
+          value={playbookInput}
+          onChange={setPlaybookInput}
+          onSubmit={createPlaybookFromNL}
           isSubmitting={isSubmitting}
         />
       </section>

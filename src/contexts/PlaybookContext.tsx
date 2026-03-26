@@ -6,12 +6,12 @@ import { Session, SessionStatus } from '../domain/session/types';
 import { CONFIG } from '../config/constants';
 
 interface PlaybookContextType {
-  strategyInput: string;
-  setStrategyInput: (val: string) => void;
+  playbookInput: string;
+  setPlaybookInput: (val: string) => void;
   isSubmitting: boolean;
   notification: { type: 'success' | 'error'; message: string } | null;
   setNotification: (val: { type: 'success' | 'error'; message: string } | null) => void;
-  submitStrategy: () => Promise<Playbook | undefined>;
+  createPlaybookFromNL: () => Promise<Playbook | undefined>;
   playbooks: Playbook[];
   selectedPlaybook: Playbook | null;
   isLoadingPlaybooks: boolean;
@@ -25,7 +25,7 @@ interface PlaybookContextType {
 
 const PlaybookContext = createContext<PlaybookContextType | undefined>(undefined);
 
-const SAMPLE_STRATEGY = `I’m using BTC.
+const SAMPLE_PLAYBOOK = `I’m using BTC.
 1. Setup Logic (Deterministic Inputs)
 
 Derived State:
@@ -91,7 +91,7 @@ Cooldown:
 	•	30 minutes after 2 consecutive losses`;
 
 export function PlaybookProvider({ children }: { children: ReactNode }) {
-  const [strategyInput, setStrategyInput] = useState(SAMPLE_STRATEGY);
+  const [playbookInput, setPlaybookInput] = useState(SAMPLE_PLAYBOOK);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   
@@ -155,8 +155,8 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const submitStrategy = async () => {
-    if (!strategyInput.trim()) return;
+  const createPlaybookFromNL = async () => {
+    if (!playbookInput.trim()) return;
     
     setIsSubmitting(true);
     setNotification(null);
@@ -165,21 +165,21 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
         const playbook = await playbookApi.createPlaybook({
           name: `Playbook ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
           user_id: CONFIG.USER_ID,
-          original_nl_input: strategyInput
+          original_nl_input: playbookInput
         });
 
         await playbookApi.triggerPlaybook(CONFIG.USER_ID, playbook.id);
         
         await fetchPlaybooks();
         await activatePlaybook(playbook);
-        setStrategyInput(''); 
-        setNotification({ type: 'success', message: 'Strategy playbook successfully created and activated!' });
+        setPlaybookInput(''); 
+        setNotification({ type: 'success', message: 'Playbook successfully created and activated!' });
         
         setTimeout(() => setNotification(null), 5000);
         return playbook;
     } catch (error: unknown) {
         console.error('Failed to create playbook:', error);
-        setNotification({ type: 'error', message: `Failed to deploy strategy: ${error instanceof Error ? error.message : 'Unknown error'}` });
+        setNotification({ type: 'error', message: `Failed to deploy playbook: ${error instanceof Error ? error.message : 'Unknown error'}` });
     } finally {
         setIsSubmitting(false);
     }
@@ -203,9 +203,9 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
   };
 
   const value = {
-    strategyInput, setStrategyInput,
+    playbookInput, setPlaybookInput,
     isSubmitting, notification, setNotification,
-    submitStrategy, playbooks, selectedPlaybook,
+    createPlaybookFromNL, playbooks, selectedPlaybook,
     isLoadingPlaybooks, fetchPlaybooks, activatePlaybook,
     activeSession, isStreaming, startStream, stopStream
   };
