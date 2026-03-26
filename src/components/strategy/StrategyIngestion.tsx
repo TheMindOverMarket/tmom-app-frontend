@@ -32,17 +32,18 @@ export function StrategyIngestion({
               padding: '12px 16px', 
               borderRadius: '12px', 
               border: '1px solid #e2e8f0', 
-              fontSize: '14px',
+              fontSize: '13px',
               outline: 'none',
               boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)',
               color: '#1e293b',
               backgroundColor: '#f8fafc',
               resize: 'none',
-              minHeight: '70px',
+              minHeight: '140px',
               fontFamily: 'inherit',
               lineHeight: '1.5',
               transition: 'all 0.2s focus'
           }} 
+
         />
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '150px' }}>

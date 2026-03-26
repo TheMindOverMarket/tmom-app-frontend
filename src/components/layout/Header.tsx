@@ -8,7 +8,6 @@ interface HeaderProps {
 export function Header({ isMockMode, onToggleMockMode }: HeaderProps) {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(CONFIG.USER_ID);
-    alert('User ID copied to clipboard!');
   };
 
   return (
@@ -20,33 +19,33 @@ export function Header({ isMockMode, onToggleMockMode }: HeaderProps) {
       borderBottom: '1px solid #f1f5f9',
       backgroundColor: '#ffffff'
     }}>
-      <h1 style={{ fontSize: '0.95rem', fontWeight: '800', color: '#111827', margin: 0, letterSpacing: '-0.01em' }}>
+      <h1 style={{ fontSize: '0.9rem', fontWeight: '800', color: '#111827', margin: 0, letterSpacing: '-0.01em' }}>
         TheMindOverMarket <span style={{ fontWeight: '400', color: '#64748b' }}>| Scaffolding</span>
       </h1>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <div 
           onClick={copyToClipboard}
-          title={`Click to copy User ID: ${CONFIG.USER_ID}`}
+          title={`Copy User ID: ${CONFIG.USER_ID}`}
           style={{
-            padding: '2px 8px',
-            backgroundColor: '#f1f5f9',
+            padding: '4px 12px',
+            backgroundColor: '#f8fafc',
             borderRadius: '100px',
-            fontSize: '10px',
-            fontWeight: '700',
+            fontSize: '11px',
+            fontWeight: '600',
             color: '#64748b',
             border: '1px solid #e2e8f0',
-            letterSpacing: '0.02em',
-            cursor: 'help',
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
             transition: 'all 0.2s'
           }}
         >
-          <span style={{ fontSize: '10px' }}>👤</span>
-          DEBUG USER
+          <span style={{ fontSize: '11px', opacity: 0.8 }}>👤</span>
+          Demo Analyst
         </div>
+
 
         
         <button
