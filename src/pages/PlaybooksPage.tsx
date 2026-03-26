@@ -18,8 +18,8 @@ export function PlaybooksPage() {
 
   const navigate = useNavigate();
 
-  const handleSelect = (pb: any) => {
-    activatePlaybook(pb);
+  const handleSelect = async (pb: any) => {
+    await activatePlaybook(pb);
     navigate('/monitor');
   };
 

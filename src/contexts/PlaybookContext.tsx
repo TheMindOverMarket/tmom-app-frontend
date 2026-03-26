@@ -111,9 +111,9 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       console.log(`Fetched ${data.length} playbooks:`, data);
       setPlaybooks(data);
       
-      // Auto-select the one active in the DB on initial load
+      // Only auto-select the one active in the DB if we don't have a selection yet
       const activeInDb = data.find(pb => pb.is_active);
-      if (activeInDb) {
+      if (activeInDb && !selectedPlaybook) {
         setSelectedPlaybook(activeInDb);
       }
     } catch (error: unknown) {
@@ -133,9 +133,6 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
         user_id: CONFIG.USER_ID,
         playbook_id: playbookId
       });
-      
-      // Trigger the rule engine to start processing this playbook
-      await playbookApi.triggerPlaybook(CONFIG.USER_ID, playbookId);
       
       setActiveSession(session);
       setIsStreaming(true);
@@ -169,13 +166,13 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
         const playbook = await playbookApi.createPlaybook({
           name: `Playbook ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
           user_id: CONFIG.USER_ID,
-          original_nl_input: playbookInput
+          original_nl_input: playbookInput,
+          is_active: true
         });
 
-        await playbookApi.triggerPlaybook(CONFIG.USER_ID, playbook.id);
-        
         await fetchPlaybooks();
-        await activatePlaybook(playbook);
+        setSelectedPlaybook(playbook);
+        
         setPlaybookInput(''); 
         setNotification({ type: 'success', message: 'Playbook successfully created and activated!' });
         
