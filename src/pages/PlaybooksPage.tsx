@@ -3,6 +3,7 @@ import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { PlaybookIngestion } from '../components/playbook/PlaybookIngestion';
 import { RefreshButton } from '../components/common/RefreshButton';
 import { RuleCondition, ConditionEdge, Playbook } from '../domain/playbook/types';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 export function PlaybooksPage() {
   const { 
@@ -20,10 +21,12 @@ export function PlaybooksPage() {
   } = usePlaybookContext();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
 
   const handleOpenAnalysis = (pb: Playbook) => {
     setSelectedPlaybook(pb);
     setIsModalOpen(true);
+    setShowOriginal(false);
   };
 
   return (
@@ -86,24 +89,22 @@ export function PlaybooksPage() {
                     padding: '24px', 
                     backgroundColor: 'white', 
                     borderRadius: '24px', 
-                    border: '1.5px solid var(--slate-100)',
+                    border: '2px solid var(--slate-100)',
                     boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.01)',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '12px',
-                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                     position: 'relative',
                     overflow: 'hidden',
                     cursor: 'pointer'
                   }}
                   onMouseEnter={e => {
                     e.currentTarget.style.borderColor = 'var(--brand)';
-                    e.currentTarget.style.transform = 'translateY(-4px)';
                     e.currentTarget.style.boxShadow = '0 20px 25px -5px var(--brand-alpha), 0 10px 10px -5px rgba(0,0,0,0.04)';
                   }}
                   onMouseLeave={e => {
                     e.currentTarget.style.borderColor = 'var(--slate-100)';
-                    e.currentTarget.style.transform = 'translateY(0)';
                     e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.01)';
                   }}
                 >
@@ -203,7 +204,7 @@ export function PlaybooksPage() {
           </div>
         </section>
 
-        {/* Strategy Audit Modal */}
+        {/* Playbook Audit Modal */}
         {isModalOpen && selectedPlaybook && (
           <div style={{
             position: 'fixed',
@@ -211,169 +212,214 @@ export function PlaybooksPage() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.4)',
-            backdropFilter: 'blur(12px)',
+            backgroundColor: 'rgba(10, 15, 25, 0.5)',
+            backdropFilter: 'blur(24px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 1000,
-            padding: '40px'
+            padding: '24px'
           }} onClick={() => setIsModalOpen(false)}>
             <div style={{
               backgroundColor: 'white',
-              borderRadius: '32px',
+              borderRadius: '40px',
               width: '100%',
-              maxWidth: '720px',
-              maxHeight: '85vh',
+              maxWidth: '1000px',
+              maxHeight: '92vh',
               display: 'flex',
               flexDirection: 'column',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              boxShadow: '0 40px 100px -20px rgba(0, 0, 0, 0.3)',
               overflow: 'hidden',
-              animation: 'modalSlideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)',
-              border: '1px solid var(--slate-200)'
+              animation: 'modalSlideUp 0.5s cubic-bezier(0.19, 1, 0.22, 1)',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
             }} onClick={e => e.stopPropagation()}>
               
-              <div style={{ padding: '32px 40px', borderBottom: '1px solid var(--slate-100)', backgroundColor: 'var(--slate-50)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ padding: '40px 60px', borderBottom: '1px solid var(--slate-100)', backgroundColor: 'var(--slate-50)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--brand)', boxShadow: '0 0 0 4px var(--brand-alpha)' }} />
-                      <div style={{ fontSize: '11px', fontWeight: 900, color: 'var(--brand)', letterSpacing: '0.15em' }}>PLAYBOOK INSPECTOR</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--brand)', boxShadow: '0 0 0 4px var(--brand-alpha)' }} />
+                      <div style={{ fontSize: '12px', fontWeight: 950, color: 'var(--brand)', letterSpacing: '0.2em' }}>PLAYBOOK INSPECTOR</div>
                     </div>
-                    <div style={{ fontSize: '28px', fontWeight: 900, color: 'var(--slate-900)', letterSpacing: '-0.02em' }}>{selectedPlaybook.name}</div>
+                    <div style={{ fontSize: '32px', fontWeight: 950, color: 'var(--slate-900)', letterSpacing: '-0.04em' }}>{selectedPlaybook.name}</div>
                   </div>
                   <button 
                     onClick={() => setIsModalOpen(false)}
-                    style={{ background: 'var(--slate-100)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', fontSize: '20px', color: 'var(--slate-500)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--slate-200)'}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--slate-100)'}
+                    style={{ 
+                      background: 'rgba(0,0,0,0.05)', 
+                      border: 'none', 
+                      width: '48px', 
+                      height: '48px', 
+                      borderRadius: '50%', 
+                      fontSize: '24px', 
+                      color: 'var(--slate-500)', 
+                      cursor: 'pointer', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      transition: 'all 0.3s' 
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.1)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
                   >
                     &times;
                   </button>
                 </div>
               </div>
 
-              <div style={{ flex: 1, overflowY: 'auto', padding: '40px' }}>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '40px 60px' }}>
                 {selectedPlaybook.generation_status === 'PENDING' ? (
-                  <div style={{ padding: '80px 0', textAlign: 'center' }}>
+                  <div style={{ padding: '100px 0', textAlign: 'center' }}>
                     <div style={{ 
-                      width: '56px', 
-                      height: '56px', 
+                      width: '72px', 
+                      height: '72px', 
                       borderRadius: '50%', 
-                      border: '5px solid var(--slate-100)', 
+                      border: '6px solid var(--slate-100)', 
                       borderTopColor: 'var(--brand)', 
-                      margin: '0 auto 24px auto',
-                      animation: 'spin 1s linear infinite'
+                      margin: '0 auto 32px auto',
+                      animation: 'spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite'
                     }} />
-                    <div style={{ fontWeight: 900, fontSize: '20px', color: 'var(--slate-900)' }}>AI Extraction in Progress</div>
-                    <div style={{ fontSize: '14px', color: 'var(--slate-500)', marginTop: '12px', maxWidth: '300px', margin: '12px auto 0 auto', lineHeight: '1.6' }}>We're deriving fine-grained logic from your natural language input.</div>
+                    <div style={{ fontWeight: 950, fontSize: '24px', color: 'var(--slate-900)' }}>Extracting Intelligence...</div>
+                    <div style={{ fontSize: '15px', color: 'var(--slate-500)', marginTop: '16px', maxWidth: '360px', margin: '16px auto 0 auto', lineHeight: '1.7' }}>Analyzing natural language signals to generate deterministic execution rules.</div>
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-                    <div>
-                      <div style={{ fontSize: '11px', fontWeight: 900, color: 'var(--slate-400)', letterSpacing: '0.05em', marginBottom: '16px' }}>ORIGINAL INPUT</div>
-                      <div style={{ 
-                        padding: '24px', 
-                        backgroundColor: 'var(--slate-900)', 
-                        borderRadius: '20px', 
-                        fontSize: '14px',
-                        color: 'var(--slate-300)',
-                        whiteSpace: 'pre-wrap',
-                        fontFamily: 'monospace',
-                        lineHeight: '1.8',
-                        border: '1px solid var(--slate-800)'
-                      }}>
-                        {selectedPlaybook.original_nl_input}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
+                    
+                    {/* Collapsible Original Input */}
+                    <div style={{ 
+                      borderRadius: '24px', 
+                      overflow: 'hidden', 
+                      border: '1px solid var(--slate-200)',
+                      backgroundColor: 'var(--slate-50)'
+                    }}>
+                      <div 
+                        onClick={() => setShowOriginal(!showOriginal)}
+                        style={{ 
+                          padding: '16px 24px', 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center', 
+                          cursor: 'pointer',
+                          backgroundColor: 'white'
+                        }}
+                      >
+                        <div style={{ fontSize: '11px', fontWeight: 900, color: 'var(--slate-400)', letterSpacing: '0.1em' }}>PROMPT SOURCE (ORIGINAL NL) {showOriginal ? '(CLICK TO HIDE)' : '(CLICK TO VIEW)'}</div>
+                        {showOriginal ? <ChevronUp size={16} color="var(--slate-400)" /> : <ChevronDown size={16} color="var(--slate-400)" />}
                       </div>
+                      {showOriginal && (
+                        <div style={{ 
+                          padding: '24px', 
+                          fontSize: '13px',
+                          backgroundColor: '#0f172a',
+                          color: '#94a3b8',
+                          fontFamily: 'monospace',
+                          lineHeight: '1.8',
+                          whiteSpace: 'pre-wrap',
+                          maxHeight: '300px',
+                          overflowY: 'auto',
+                          borderTop: '1px solid var(--slate-200)'
+                        }}>
+                          {selectedPlaybook.original_nl_input}
+                        </div>
+                      )}
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                      <div style={{ fontSize: '11px', fontWeight: 900, color: 'var(--slate-400)', letterSpacing: '0.05em' }}>DERIVED RULESET</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 900, color: 'var(--slate-400)', letterSpacing: '0.1em' }}>DERIVED EXECUTION RULESET</div>
+                        <div style={{ fontSize: '11px', fontWeight: 900, color: 'var(--success)', backgroundColor: 'var(--success-alpha)', padding: '4px 12px', borderRadius: '12px' }}>AI VERIFIED</div>
+                      </div>
+                      
                       {rules.length > 0 ? (
-                        rules.map((rule, idx) => (
-                          <div key={rule.id || idx} style={{
-                            padding: '28px',
-                            borderRadius: '24px',
-                            border: '1.5px solid var(--slate-100)',
-                            backgroundColor: 'white',
-                            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)'
-                          }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                              <span style={{ 
-                                fontSize: '10px', 
-                                padding: '4px 12px', 
-                                borderRadius: '12px', 
-                                backgroundColor: 'var(--slate-50)', 
-                                color: 'var(--slate-500)',
-                                border: '1px solid var(--slate-200)',
-                                fontWeight: 900,
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.05em'
-                              }}>
-                                {rule.category || 'Logic'}
-                              </span>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <div style={{ fontSize: '10px', fontWeight: 800, color: rule.is_active ? 'var(--success)' : 'var(--slate-400)' }}>
-                                  {rule.is_active ? 'ENABLED' : 'DISABLED'}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+                          {rules.map((rule, idx) => (
+                            <div key={rule.id || idx} style={{
+                              padding: '32px',
+                              borderRadius: '32px',
+                              border: '1.5px solid var(--slate-100)',
+                              backgroundColor: 'white',
+                              boxShadow: '0 10px 30px -10px rgba(0,0,0,0.03)',
+                              transition: 'all 0.3s ease'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--brand-alpha)'}
+                            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--slate-100)'}
+                            >
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                <span style={{ 
+                                  fontSize: '10px', 
+                                  padding: '5px 14px', 
+                                  borderRadius: '14px', 
+                                  backgroundColor: 'var(--slate-900)', 
+                                  color: 'white',
+                                  fontWeight: 900,
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.08em'
+                                }}>
+                                  {rule.category || 'Logic'}
+                                </span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                  <div style={{ fontSize: '10px', fontWeight: 900, color: rule.is_active ? 'var(--success)' : 'var(--slate-400)' }}>
+                                    {rule.is_active ? 'ACTIVE' : 'DISABLED'}
+                                  </div>
+                                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: rule.is_active ? 'var(--success)' : 'var(--slate-300)', boxShadow: rule.is_active ? '0 0 0 5px var(--success-alpha)' : 'none' }} />
                                 </div>
-                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: rule.is_active ? 'var(--success)' : 'var(--slate-300)', boxShadow: rule.is_active ? '0 0 0 4px var(--success-alpha)' : 'none' }} />
                               </div>
-                            </div>
-                            <div style={{ fontSize: '18px', fontWeight: 900, color: 'var(--slate-900)', marginBottom: '10px' }}>{rule.name}</div>
-                            <div style={{ fontSize: '13px', color: 'var(--slate-500)', lineHeight: '1.6', marginBottom: (rule.conditions && rule.conditions.length > 0) ? '24px' : '0' }}>{rule.description}</div>
-                            
-                            {rule.conditions && rule.conditions.length > 0 && (
-                              <div style={{ 
-                                marginTop: '20px', 
-                                padding: '24px', 
-                                backgroundColor: 'var(--slate-50)', 
-                                borderRadius: '20px',
-                                border: '1px solid var(--slate-100)'
-                              }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                                  {rule.conditions.map((cond: RuleCondition, cIdx: number) => (
-                                    <div key={cond.id || cIdx} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                      <div style={{ 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
-                                        gap: '14px', 
-                                        backgroundColor: 'white', 
-                                        padding: '12px 20px', 
-                                        borderRadius: '12px',
-                                        border: '1px solid var(--slate-100)',
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
-                                      }}>
-                                        <span style={{ fontSize: '14px', fontWeight: 900, color: 'var(--brand)' }}>{cond.metric}</span>
-                                        <span style={{ fontSize: '12px', color: 'var(--slate-400)', fontWeight: 800 }}>{cond.comparator}</span>
-                                        <span style={{ fontSize: '14px', fontWeight: 900, color: 'var(--slate-800)' }}>{cond.value}</span>
-                                      </div>
-                                      
-                                      {rule.edges && rule.edges.some((e: ConditionEdge) => e.parent_condition_id === cond.id) && (
+                              <div style={{ fontSize: '20px', fontWeight: 950, color: 'var(--slate-900)', marginBottom: '12px' }}>{rule.name}</div>
+                              <div style={{ fontSize: '14px', color: 'var(--slate-500)', lineHeight: '1.7', marginBottom: (rule.conditions && rule.conditions.length > 0) ? '32px' : '0' }}>{rule.description}</div>
+                              
+                              {rule.conditions && rule.conditions.length > 0 && (
+                                <div style={{ 
+                                  padding: '32px', 
+                                  backgroundColor: 'var(--slate-50)', 
+                                  borderRadius: '24px',
+                                  border: '1px solid var(--slate-100)'
+                                }}>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                    {rule.conditions.map((cond: RuleCondition, cIdx: number) => (
+                                      <div key={cond.id || cIdx} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                         <div style={{ 
-                                          marginLeft: '32px', 
-                                          fontSize: '11px', 
-                                          fontWeight: 900, 
-                                          color: 'var(--brand)',
-                                          padding: '4px 10px',
-                                          backgroundColor: 'var(--brand-alpha)',
-                                          borderRadius: '8px',
-                                          width: 'fit-content',
-                                          letterSpacing: '0.05em'
+                                          display: 'flex', 
+                                          alignItems: 'center', 
+                                          gap: '20px', 
+                                          backgroundColor: 'white', 
+                                          padding: '16px 24px', 
+                                          borderRadius: '16px',
+                                          border: '1px solid var(--slate-100)',
+                                          boxShadow: '0 4px 12px rgba(0,0,0,0.02)'
                                         }}>
-                                          {rule.edges.find((e: ConditionEdge) => e.parent_condition_id === cond.id)?.logical_operator}
+                                          <span style={{ fontSize: '15px', fontWeight: 950, color: 'var(--brand)' }}>{cond.metric}</span>
+                                          <span style={{ fontSize: '13px', color: 'var(--slate-400)', fontWeight: 900, fontFamily: 'monospace' }}>{cond.comparator}</span>
+                                          <span style={{ fontSize: '15px', fontWeight: 950, color: 'var(--slate-900)' }}>{cond.value}</span>
                                         </div>
-                                      )}
-                                    </div>
-                                  ))}
+                                        
+                                        {rule.edges && rule.edges.some((e: ConditionEdge) => e.parent_condition_id === cond.id) && (
+                                          <div style={{ 
+                                            marginLeft: '40px', 
+                                            fontSize: '11px', 
+                                            fontWeight: 950, 
+                                            color: 'white',
+                                            padding: '5px 14px',
+                                            backgroundColor: 'var(--brand)',
+                                            borderRadius: '10px',
+                                            width: 'fit-content',
+                                            letterSpacing: '0.1em',
+                                            boxShadow: '0 4px 10px var(--brand-alpha)'
+                                          }}>
+                                            {rule.edges.find((e: ConditionEdge) => e.parent_condition_id === cond.id)?.logical_operator}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                          </div>
-                        ))
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       ) : (
-                        <div style={{ textAlign: 'center', padding: '60px', backgroundColor: 'var(--slate-50)', borderRadius: '24px', border: '1.5px dashed var(--slate-200)' }}>
-                          <span style={{ fontSize: '24px', display: 'block', marginBottom: '12px' }}>🔎</span>
-                          <span style={{ fontSize: '14px', color: 'var(--slate-400)', fontWeight: 600 }}>No deterministic rules derived for this playbook.</span>
+                        <div style={{ textAlign: 'center', padding: '80px', backgroundColor: 'var(--slate-50)', borderRadius: '32px', border: '1.5px dashed var(--slate-200)' }}>
+                          <span style={{ fontSize: '32px', display: 'block', marginBottom: '16px' }}>🧩</span>
+                          <span style={{ fontSize: '15px', color: 'var(--slate-400)', fontWeight: 700 }}>No deterministic rules derived for this playbook.</span>
                         </div>
                       )}
                     </div>
@@ -381,25 +427,7 @@ export function PlaybooksPage() {
                 )}
               </div>
 
-              <div style={{ padding: '32px 40px', borderTop: '1px solid var(--slate-100)', display: 'flex', justifyContent: 'flex-end', gap: '16px', backgroundColor: 'white' }}>
-                <button 
-                  onClick={() => setIsModalOpen(false)}
-                  style={{
-                    padding: '14px 28px',
-                    borderRadius: '14px',
-                    border: '1.5px solid var(--slate-200)',
-                    backgroundColor: 'white',
-                    color: 'var(--slate-600)',
-                    fontSize: '14px',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--slate-50)'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'white'}
-                >
-                  DISMISS
-                </button>
+              <div style={{ padding: '40px 60px', borderTop: '1px solid var(--slate-100)', display: 'flex', justifyContent: 'flex-end', backgroundColor: 'white' }}>
                 {!selectedPlaybook.is_active && (
                   <button 
                     onClick={() => {
@@ -408,19 +436,25 @@ export function PlaybooksPage() {
                     }}
                     disabled={selectedPlaybook.generation_status !== 'COMPLETED'}
                     style={{
-                      padding: '14px 40px',
-                      borderRadius: '14px',
+                      padding: '18px 60px',
+                      borderRadius: '20px',
                       border: 'none',
                       backgroundColor: 'var(--brand)',
                       color: 'white',
-                      fontSize: '14px',
-                      fontWeight: 800,
+                      fontSize: '16px',
+                      fontWeight: 950,
                       cursor: 'pointer',
-                      boxShadow: '0 12px 20px -5px var(--brand-alpha)',
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                      boxShadow: '0 20px 40px -10px var(--brand-alpha)',
+                      transition: 'all 0.4s cubic-bezier(0.19, 1, 0.22, 1)'
                     }}
-                    onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                    onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.transform = 'translateY(-4px)';
+                      e.currentTarget.style.boxShadow = '0 30px 60px -12px var(--brand-alpha)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 20px 40px -10px var(--brand-alpha)';
+                    }}
                   >
                     ACTIVATE PLAYBOOK
                   </button>
@@ -432,7 +466,7 @@ export function PlaybooksPage() {
 
         <style dangerouslySetInnerHTML={{ __html: `
           @keyframes modalSlideUp {
-            from { transform: translateY(40px); opacity: 0; }
+            from { transform: translateY(60px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
           }
           @keyframes spin { to { transform: rotate(360deg); } }
