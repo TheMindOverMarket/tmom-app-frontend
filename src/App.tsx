@@ -40,12 +40,17 @@ function App() {
 
   return (
     <div style={{ 
-      minHeight: '100vh', 
+      height: '100vh', 
       backgroundColor: '#f8fafc',
-      fontFamily: '"Inter", sans-serif'
+      fontFamily: '"Inter", sans-serif',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
     }}>
-      <Header isMockMode={isMockMode} onToggleMockMode={toggleMockMode} />
-      <UserIDBanner />
+      <div style={{ flexShrink: 0 }}>
+        <Header isMockMode={isMockMode} onToggleMockMode={toggleMockMode} />
+        <UserIDBanner />
+      </div>
       
       {notification && (
         <NotificationBanner 
@@ -61,7 +66,7 @@ function App() {
         padding: '0 24px',
         borderBottom: '1px solid #e2e8f0',
         backgroundColor: '#ffffff',
-        marginBottom: '24px'
+        flexShrink: 0
       }}>
         <button 
           onClick={() => setActiveTab('monitor')}
@@ -97,17 +102,34 @@ function App() {
         </button>
       </div>
 
-      <main style={{ padding: '0 24px 24px 24px', maxWidth: '1600px', margin: '0 auto' }}>
+      <main style={{ 
+        flex: 1, 
+        padding: '24px', 
+        maxWidth: '1800px', 
+        width: '100%',
+        margin: '0 auto',
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 0,
+        overflow: 'hidden'
+      }}>
         {activeTab === 'monitor' ? (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '24px' }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: '1fr 400px', 
+            gap: '24px', 
+            flex: 1,
+            minHeight: 0
+          }}>
             {/* Left Column: Flow & Chart */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', minHeight: 0 }}>
               <section style={{ 
                 padding: '24px', 
                 backgroundColor: 'white', 
                 borderRadius: '16px', 
                 boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
-                border: '1px solid #f1f5f9'
+                border: '1px solid #f1f5f9',
+                flexShrink: 0
               }}>
                 <StrategyIngestion 
                   value={ruleInput}
@@ -121,7 +143,7 @@ function App() {
                 />
               </section>
 
-              <div style={{ height: '500px' }}>
+              <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
                 <PriceChart 
                   events={events}
                   onMarkerClick={handleMarkerClick}
@@ -130,23 +152,24 @@ function App() {
             </div>
 
             {/* Right Column: Rule Engine & Mocking */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-
+            <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
               <RuleEventInspector 
                 events={events} 
                 focusedTimestamp={focusedView?.timestamp || null}
                 filterType={focusedView?.filter || null}
                 onClearFocus={() => setFocusedView(null)}
               />
-
             </div>
           </div>
         ) : (
-          <SessionAnalytics />
+          <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+            <SessionAnalytics />
+          </div>
         )}
       </main>
     </div>
   );
+
 }
 
 export default App;
