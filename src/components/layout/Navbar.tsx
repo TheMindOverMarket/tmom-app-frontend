@@ -1,6 +1,5 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { PlayCircle, ShieldCheck, Activity, Database } from 'lucide-react';
+import { ShieldCheck, Activity, Database } from 'lucide-react';
 import { usePlaybookContext } from '../../contexts/PlaybookContext';
 
 const NAV_ITEMS = [
@@ -30,6 +29,10 @@ export function Navbar() {
           <NavLink
             key={path}
             to={path}
+            onClick={(e) => {
+              if (isDisabled) e.preventDefault();
+            }}
+            title={isDisabled ? "Select or Create a Playbook first to enable Live Monitoring" : ""}
             style={({ isActive }) => ({
               display: 'flex',
               alignItems: 'center',
@@ -44,7 +47,7 @@ export function Navbar() {
               transition: 'all 0.2s',
               height: '100%',
               letterSpacing: '0.05em',
-              pointerEvents: isDisabled ? 'none' : 'auto'
+              pointerEvents: 'auto'
             })}
           >
             <Icon size={12} strokeWidth={3} />
