@@ -70,5 +70,20 @@ export const playbookApi = {
       }
       throw new Error(errorMessage);
     }
+  },
+
+  stopPlaybook: async (userId: string, playbookId: string): Promise<void> => {
+    const response = await fetch(`${CONFIG.ENGINE_BASE_URL}/api/rules/stop?user_id=${userId}&playbook_id=${playbookId}`);
+    if (!response.ok) {
+      let errorMessage = 'Failed to stop playbook in rule engine';
+      try {
+        const err = await response.json();
+        errorMessage = err.detail?.[0]?.msg || err.detail || 'Failed to stop playbook in rule engine';
+      } catch (e) {
+        const text = await response.text();
+        errorMessage = text || 'Internal Server Error';
+      }
+      throw new Error(errorMessage);
+    }
   }
 };

@@ -150,7 +150,12 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
   const stopStream = async () => {
     if (!activeSession) return;
     try {
+      // Tell the rule engine to stop evaluating rules
+      await playbookApi.stopPlaybook(CONFIG.USER_ID, activeSession.playbook_id);
+      
+      // Update session status in the DB
       await sessionApi.endSession(activeSession.id, { status: SessionStatus.COMPLETED });
+      
       setActiveSession(null);
       setIsStreaming(false);
       setNotification({ type: 'success', message: 'Session completed and saved.' });
