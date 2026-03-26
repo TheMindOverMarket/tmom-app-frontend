@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { CONFIG } from '../../config/constants';
 
 interface HeaderProps {
@@ -6,8 +7,12 @@ interface HeaderProps {
 }
 
 export function Header({ isMockMode, onToggleMockMode }: HeaderProps) {
+  const [copied, setCopied] = useState(false);
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(CONFIG.USER_ID);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -26,25 +31,32 @@ export function Header({ isMockMode, onToggleMockMode }: HeaderProps) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <div 
           onClick={copyToClipboard}
-          title={`Copy User ID: ${CONFIG.USER_ID}`}
+          title={copied ? "Copied!" : `Copy User ID: ${CONFIG.USER_ID}`}
           style={{
             padding: '4px 12px',
-            backgroundColor: '#f8fafc',
+            backgroundColor: copied ? '#eff6ff' : '#f8fafc',
             borderRadius: '100px',
             fontSize: '11px',
             fontWeight: '600',
-            color: '#64748b',
-            border: '1px solid #e2e8f0',
+            color: copied ? '#3b82f6' : '#64748b',
+            border: `1px solid ${copied ? '#3b82f6' : '#e2e8f0'}`,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
             transition: 'all 0.2s'
           }}
+          onMouseOver={(e) => {
+            if (!copied) e.currentTarget.style.backgroundColor = '#f1f5f9';
+          }}
+          onMouseOut={(e) => {
+            if (!copied) e.currentTarget.style.backgroundColor = '#f8fafc';
+          }}
         >
           <span style={{ fontSize: '11px', opacity: 0.8 }}>👤</span>
-          Demo Analyst
+          {copied ? 'ID Copied!' : 'Demo User'}
         </div>
+
 
 
         
