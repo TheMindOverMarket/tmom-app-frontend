@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { PlaybookIngestion } from '../components/playbook/PlaybookIngestion';
+import { RefreshButton } from '../components/common/RefreshButton';
 import { CONFIG } from '../config/constants';
 
 export function PlaybooksPage() {
@@ -47,22 +48,10 @@ export function PlaybooksPage() {
       <section style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#1e293b' }}>YOUR PLAYBOOKS</h3>
-          <button 
-            onClick={fetchPlaybooks}
-            disabled={isLoadingPlaybooks}
-            style={{
-              padding: '4px 8px',
-              fontSize: '10px',
-              backgroundColor: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '4px',
-              color: '#64748b',
-              cursor: 'pointer',
-              fontWeight: 700
-            }}
-          >
-            {isLoadingPlaybooks ? 'REFRESHING...' : 'REFRESH'}
-          </button>
+          <RefreshButton 
+            onRefresh={fetchPlaybooks}
+            isLoading={isLoadingPlaybooks}
+          />
         </div>
         
         <div style={{ 
