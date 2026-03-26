@@ -129,10 +129,14 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
 
   const startStream = async (playbookId: string) => {
     try {
+      // Setup backend session and UI
       const session = await sessionApi.startSession({
         user_id: CONFIG.USER_ID,
         playbook_id: playbookId
       });
+      
+      // TRIGGER THE RULE ENGINE ORCHESTRATOR
+      await playbookApi.executePlaybook(playbookId);
       
       setActiveSession(session);
       setIsStreaming(true);
@@ -148,7 +152,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     if (!activeSession) return;
     try {
       // Tell the rule engine to stop evaluating rules
-      await playbookApi.stopPlaybook(CONFIG.USER_ID, activeSession.playbook_id);
+      await playbookApi.stopPlaybook(activeSession.playbook_id);
       
       // Update session status in the DB
       await sessionApi.endSession(activeSession.id, { status: SessionStatus.COMPLETED });
@@ -174,6 +178,10 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
           original_nl_input: playbookInput,
           is_active: true
         });
+
+        // IMMEDAITELY COMPILE THE PLAYBOOK VIA RULE ENGINE ORCHESTRATOR
+        setNotification({ type: 'success', message: 'Brainstorming natural language via LLM...' });
+        await playbookApi.compilePlaybook(playbook.id);
 
         await fetchPlaybooks();
         setSelectedPlaybook(playbook);
