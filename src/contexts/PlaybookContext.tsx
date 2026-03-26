@@ -110,6 +110,12 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       const data = await playbookApi.listUserPlaybooks(CONFIG.USER_ID);
       console.log(`Fetched ${data.length} playbooks:`, data);
       setPlaybooks(data);
+      
+      // Auto-select the one active in the DB on initial load
+      const activeInDb = data.find(pb => pb.is_active);
+      if (activeInDb) {
+        setSelectedPlaybook(activeInDb);
+      }
     } catch (error: unknown) {
       console.error('Failed to fetch playbooks:', error);
     } finally {
@@ -165,7 +171,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
         await playbookApi.triggerPlaybook(CONFIG.USER_ID, playbook.id);
         
         await fetchPlaybooks();
-        setSelectedPlaybook(playbook);
+        await activatePlaybook(playbook);
         setStrategyInput(''); 
         setNotification({ type: 'success', message: 'Strategy playbook successfully created and activated!' });
         
