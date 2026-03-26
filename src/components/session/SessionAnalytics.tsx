@@ -56,7 +56,7 @@ export function SessionAnalytics() {
             Session Analytics
           </h2>
           <p style={{ margin: '8px 0 0 0', color: '#64748b', fontSize: '1rem' }}>
-            Audit compliance, evaluate playbook performance, and reconstruct trading sessions.
+            Quantify cost of deviation, evaluate playbook performance, and audit strategy consistency.
           </p>
         </div>
         
