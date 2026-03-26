@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { PlaybookIngestion } from '../components/playbook/PlaybookIngestion';
 import { RefreshButton } from '../components/common/RefreshButton';
@@ -18,8 +17,6 @@ export function PlaybooksPage() {
     isLoadingPlaybooks,
     fetchPlaybooks
   } = usePlaybookContext();
-
-  const navigate = useNavigate();
 
   const handleSelect = (pb: any) => {
     setSelectedPlaybook(pb);
