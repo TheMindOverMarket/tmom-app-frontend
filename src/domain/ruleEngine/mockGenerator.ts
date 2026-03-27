@@ -27,15 +27,28 @@ export function generateMockEvent(basePrice: number = 71500, forceDeviation?: bo
     const msTimestamp = now.getTime();
     const timestamp = Math.floor(msTimestamp / 1000);
 
+    const ruleId = crypto.randomUUID();
+
     return {
         id: crypto.randomUUID(),
-        timestamp: timestamp, // Unix Seconds
+        timestamp: timestamp, 
         msTimestamp: msTimestamp,
         originalTimestamp: now.toISOString(),
         price: price,
-        rule: MOCK_RULES[Math.floor(Math.random() * MOCK_RULES.length)],
-        rawRule: {}, // Empty for mock
-        action: !isDeviation, // Typically adherence = action, deviation = no-op/alert
-        deviation: isDeviation
+        playbook_id: crypto.randomUUID(),
+        session_id: crypto.randomUUID(),
+        user_id: crypto.randomUUID(),
+        rule: ruleId,
+        rule_triggered: !isDeviation,
+        triggered_entries: isDeviation ? [] : [ruleId],
+        rule_evaluations: {
+            [ruleId]: !isDeviation,
+            [crypto.randomUUID()]: false
+        },
+        rawRule: {}, 
+        action: !isDeviation, 
+        deviation: isDeviation,
+        deviation_true: isDeviation ? [ruleId] : [],
+        deviation_false: isDeviation ? [] : [ruleId]
     };
 }
