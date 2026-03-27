@@ -47,6 +47,7 @@ export interface SessionUpdate {
 
 export interface SessionEventCreate {
   type: SessionEventType;
+  timestamp?: string;
   tick?: number;
   event_data: Record<string, unknown>;
   event_metadata?: Record<string, unknown>;
