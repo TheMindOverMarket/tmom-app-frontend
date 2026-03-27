@@ -121,8 +121,9 @@ export function SessionAnalytics() {
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: '4px' }}>
         {error ? (
           <div style={{ padding: '24px', backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '4px', color: '#b91c1c' }}>
-            <div style={{ fontWeight: '700', marginBottom: '4px' }}>Connection Error</div>
-            <div style={{ fontSize: '14px', opacity: 0.9 }}>{error}</div>
+            <div style={{ fontSize: '9px', fontWeight: 900, color: '#ef4444', marginBottom: '6px', letterSpacing: '0.05em' }}>OPERATIONAL ERROR</div>
+            <div style={{ fontSize: '13px', fontWeight: '800' }}>{error}</div>
+            <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '8px' }}>Ensure the session record is valid and exists in technical history before deletion.</div>
           </div>
         ) : (
           <SessionList 

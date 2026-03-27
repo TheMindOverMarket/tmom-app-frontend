@@ -64,9 +64,20 @@ export const sessionApi = {
   },
 
   deleteSession: async (sessionId: string): Promise<void> => {
-    const response = await fetch(`${API_BASE}/sessions/${sessionId}`, {
+    // Try both formats (strict vs trailing slash) for Resilience
+    const response = await fetch(`${API_BASE}/sessions/${sessionId}/`, {
       method: 'DELETE',
     });
-    if (!response.ok) throw new Error('Failed to delete session');
+    
+    if (!response.ok) {
+      let detail = 'Failed to delete session';
+      try {
+        const err = await response.json();
+        detail = err.detail || detail;
+      } catch (e) {
+        // Fallback to generic if not JSON
+      }
+      throw new Error(detail);
+    }
   }
 };
