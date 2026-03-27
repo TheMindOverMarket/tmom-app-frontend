@@ -63,7 +63,7 @@ export const RuleEventInspector: FC<RuleEventInspectorProps> = ({
             <StatusPlaceholder 
               icon={Shield}
               title={`SUPERVISION INACTIVE`}
-              subtitle={`Start a live session to begin real-time monitoring of your playbook execution.`}
+              subtitle={`Start a live session to begin the real-time monitoring of your playbook execution.`}
             />
           ) : (
             <StatusPlaceholder 

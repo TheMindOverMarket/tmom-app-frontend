@@ -48,8 +48,8 @@ export function DeviationPanel({ summary, records, isActive }: DeviationPanelPro
     return (
       <StatusPlaceholder 
         icon={Zap}
-        title={`DEVIATION ENGINE IDLE`}
-        subtitle={`Connect a live session to begin the real-time cost-of-deviation supervision engine.`}
+        title={`DEVIATION ENGINE INACTIVE`}
+        subtitle={`Start a live session to begin the real-time cost-of-deviation analysis.`}
         style={{ 
           border: '1px solid #e2e8f0', 
           borderRadius: '4px',
