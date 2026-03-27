@@ -6,8 +6,16 @@ export interface RuleEngineRawMessage {
   timestamp: string; // ISO-8601 string
   price: number;
   rule: string | Record<string, unknown>;
+  playbook_id?: string;
+  session_id?: string;
+  user_id?: string;
+  rule_triggered?: boolean;
+  triggered_entries?: string[];
+  rule_evaluations?: Record<string, boolean>;
   action: boolean;
   deviation: boolean;
+  deviation_true?: string[];
+  deviation_false?: string[];
 }
 
 export interface RuleEngineEvent extends Omit<RuleEngineRawMessage, 'timestamp'> {
