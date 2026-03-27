@@ -1,14 +1,15 @@
 import { Session, SessionStatus } from '../../domain/session/types';
 import { useNavigate } from 'react-router-dom';
-import { Layers } from 'lucide-react';
+import { Layers, Trash2 } from 'lucide-react';
 
 interface SessionListProps {
   sessions: Session[];
   onSelect: (session: Session) => void;
+  onDelete?: (id: string) => void;
   selectedId?: string;
 }
 
-export function SessionList({ sessions, onSelect, selectedId }: SessionListProps) {
+export function SessionList({ sessions, onSelect, onDelete, selectedId }: SessionListProps) {
   const navigate = useNavigate();
 
   if (sessions.length === 0) {
@@ -77,20 +78,51 @@ export function SessionList({ sessions, onSelect, selectedId }: SessionListProps
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-            <div style={{
-              fontSize: '9px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              fontWeight: '900',
-              padding: '2px 6px',
-              borderRadius: '2px',
-              backgroundColor: session.status === SessionStatus.COMPLETED ? '#dcfce7' : session.status === SessionStatus.STARTED ? '#eff6ff' : '#fee2e2',
-              color: session.status === SessionStatus.COMPLETED ? '#15803d' : session.status === SessionStatus.STARTED ? '#1d4ed8' : '#b91c1c',
-            }}>
-              {session.status}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{
+                fontSize: '9px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                fontWeight: '900',
+                padding: '2px 6px',
+                borderRadius: '2px',
+                backgroundColor: session.status === SessionStatus.COMPLETED ? '#dcfce7' : session.status === SessionStatus.STARTED ? '#eff6ff' : '#fee2e2',
+                color: session.status === SessionStatus.COMPLETED ? '#15803d' : session.status === SessionStatus.STARTED ? '#1d4ed8' : '#b91c1c',
+                alignSelf: 'flex-start'
+              }}>
+                {session.status}
+              </div>
             </div>
-            <div style={{ fontSize: '9px', color: '#9ca3af', fontWeight: '600' }}>
-              {new Date(session.start_time).toLocaleDateString()}
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ fontSize: '9px', color: '#9ca3af', fontWeight: '600' }}>
+                {new Date(session.start_time).toLocaleDateString()}
+              </div>
+              {onDelete && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (window.confirm(`Permanently delete session log "${session.id.slice(0, 8)}"?`)) {
+                      onDelete(session.id);
+                    }
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: '2px',
+                    cursor: 'pointer',
+                    color: '#cbd5e1',
+                    display: 'flex',
+                    alignItems: 'center',
+                    transition: 'all 0.2s ease'
+                  }}
+                  title="Purge session from logs"
+                  onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+                  onMouseLeave={e => e.currentTarget.style.color = '#cbd5e1'}
+                >
+                  <Trash2 size={12} />
+                </button>
+              )}
             </div>
           </div>
 

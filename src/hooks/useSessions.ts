@@ -47,6 +47,14 @@ export function useSessions() {
     replayEvents,
     loadingReplay,
     fetchSessions,
-    loadReplay
+    loadReplay,
+    deleteSession: async (id: string) => {
+      try {
+        await sessionApi.deleteSession(id);
+        setSessions(prev => prev.filter(s => s.id !== id));
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Failed to delete session');
+      }
+    }
   };
 }

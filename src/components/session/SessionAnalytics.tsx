@@ -13,7 +13,8 @@ export function SessionAnalytics() {
     loadReplay, 
     replayEvents, 
     loadingReplay,
-    fetchSessions
+    fetchSessions,
+    deleteSession
   } = useSessions();
   
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
@@ -81,7 +82,7 @@ export function SessionAnalytics() {
           <div key={stat.label} style={{
             padding: '24px',
             backgroundColor: '#f8fafc',
-            borderRadius: '16px',
+            borderRadius: '4px',
             border: '1px solid #f1f5f9',
             minHeight: '100px',
             display: 'flex',
@@ -109,18 +110,17 @@ export function SessionAnalytics() {
             width: '100%',
             padding: '12px 20px',
             fontSize: '14px',
-            borderRadius: '12px',
+            borderRadius: '4px',
             border: '1px solid #e2e8f0',
             backgroundColor: '#fcfdfe',
-            outline: 'none',
-            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+            outline: 'none'
           }}
         />
       </div>
 
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: '4px' }}>
         {error ? (
-          <div style={{ padding: '24px', backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '16px', color: '#b91c1c' }}>
+          <div style={{ padding: '24px', backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '4px', color: '#b91c1c' }}>
             <div style={{ fontWeight: '700', marginBottom: '4px' }}>Connection Error</div>
             <div style={{ fontSize: '14px', opacity: 0.9 }}>{error}</div>
           </div>
@@ -128,6 +128,7 @@ export function SessionAnalytics() {
           <SessionList 
             sessions={filteredSessions} 
             onSelect={handleSelectSession} 
+            onDelete={deleteSession}
             selectedId={selectedSession?.id} 
           />
         )}
