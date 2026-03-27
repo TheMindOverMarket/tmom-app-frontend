@@ -5,10 +5,13 @@ import { useRuleEngineEvents } from '../hooks/useRuleEngineEvents';
 import { PriceChart } from '../components/PriceChart';
 import { RuleEventInspector } from '../components/RuleEventInspector';
 import { Activity, Circle, Check, X } from 'lucide-react';
+import { useDeviationEngine } from '../hooks/useDeviationEngine';
+import { DeviationPanel } from '../components/deviation/DeviationPanel';
 
 export function MonitorPage() {
   const { selectedPlaybook, rules, activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream } = usePlaybookContext();
   const { events, lastEvent, isMockMode, toggleMockMode } = useRuleEngineEvents(isStreaming, activeSession?.id);
+  const { summary: deviationSummary, records: deviationRecords } = useDeviationEngine(activeSession?.id);
   const navigate = useNavigate();
 
   const [focusedView, setFocusedView] = useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);
@@ -211,14 +214,19 @@ export function MonitorPage() {
         </div>
       </div>
 
-      {/* Right Column: Rule Engine Feed */}
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+      {/* Right Column: Rule Engine Feed + Deviation Panel */}
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, gap: '16px' }}>
         <RuleEventInspector 
           events={events} 
           focusedTimestamp={focusedView?.timestamp || null}
           isActive={isStreaming}
           filterType={focusedView?.filter || null}
           onClearFocus={() => setFocusedView(null)}
+        />
+        <DeviationPanel
+          summary={deviationSummary}
+          records={deviationRecords}
+          isActive={isStreaming}
         />
       </div>
     </div>
