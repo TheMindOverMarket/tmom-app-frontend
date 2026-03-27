@@ -4,9 +4,10 @@ import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { useRuleEngineEvents } from '../hooks/useRuleEngineEvents';
 import { PriceChart } from '../components/PriceChart';
 import { RuleEventInspector } from '../components/RuleEventInspector';
-import { Activity, Circle, Check, X } from 'lucide-react';
+import { Activity, Circle, Check, X, ShoppingCart, HandMetal, Bell } from 'lucide-react';
 import { useDeviationEngine } from '../hooks/useDeviationEngine';
 import { DeviationPanel } from '../components/deviation/DeviationPanel';
+import { CONFIG } from '../config/constants';
 
 export function MonitorPage() {
   const { selectedPlaybook, rules, activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream } = usePlaybookContext();
@@ -30,6 +31,24 @@ export function MonitorPage() {
 
   if (!selectedPlaybook) return null;
 
+  const handleManualOrder = async (side: 'BUY' | 'SELL') => {
+    try {
+      const response = await fetch(`${CONFIG.BACKEND_BASE_URL}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ side, symbol: 'BTC/USD', qty: 1 })
+      });
+      if (response.ok) {
+        setNotification({ type: 'success', message: `Order Filled: ${side} 1.00 BTC/USD @ Market` });
+        setTimeout(() => setNotification(null), 3000);
+      }
+    } catch (e) {
+      console.error("Order failed", e);
+    }
+  };
+
+  const { notification, setNotification } = usePlaybookContext();
+
   return (
     <div style={{ 
       display: 'grid', 
@@ -38,6 +57,30 @@ export function MonitorPage() {
       flex: 1,
       minHeight: 0
     }}>
+      {notification && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 9999,
+          backgroundColor: notification.type === 'success' ? '#059669' : '#dc2626',
+          color: 'white',
+          padding: '12px 24px',
+          borderRadius: '8px',
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontSize: '13px',
+          fontWeight: 700,
+          animation: 'slideDown 0.3s ease-out'
+        }}>
+          <Bell size={16} />
+          {notification.message}
+        </div>
+      )}
+
       {/* Left Column: Chart & Controls */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minHeight: 0 }}>
           <div style={{ 
@@ -54,8 +97,46 @@ export function MonitorPage() {
               <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--slate-400)', letterSpacing: '0.05em' }}>PLAYBOOK SUPERVISION:</div>
               <div style={{ fontSize: '11px', color: '#0f172a', fontWeight: 800 }}>{selectedPlaybook.name}</div>
             </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                onClick={() => handleManualOrder('BUY')}
+                style={{
+                  height: '32px',
+                  padding: '0 12px',
+                  backgroundColor: '#f0fdf4',
+                  color: '#16a34a',
+                  border: '1px solid #bbf7d0',
+                  borderRadius: '4px',
+                  fontSize: '9px',
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <ShoppingCart size={11} /> BUY
+              </button>
+              <button
+                onClick={() => handleManualOrder('SELL')}
+                style={{
+                  height: '32px',
+                  padding: '0 12px',
+                  backgroundColor: '#fef2f2',
+                  color: '#dc2626',
+                  border: '1px solid #fecaca',
+                  borderRadius: '4px',
+                  fontSize: '9px',
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <HandMetal size={11} /> SELL
+              </button>
             <button
               onClick={toggleMockMode}
               style={{
