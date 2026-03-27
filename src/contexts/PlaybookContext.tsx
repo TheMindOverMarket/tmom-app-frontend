@@ -215,9 +215,6 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
         playbook_id: playbookId
       });
       
-      // TRIGGER THE RULE ENGINE ORCHESTRATOR
-      await playbookApi.executePlaybook(playbookId);
-      
       setActiveSession(session);
       setIsStreaming(true);
       setNotification({ type: 'success', message: 'New session started. Previous session (if any) has been finalized.' });
@@ -234,9 +231,6 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     if (!activeSession) return;
     setIsStoppingStream(true);
     try {
-      // Tell the rule engine to stop evaluating rules
-      await playbookApi.stopPlaybook(activeSession.playbook_id);
-      
       // Update session status in the DB
       await sessionApi.endSession(activeSession.id, { status: SessionStatus.COMPLETED });
       
@@ -263,10 +257,6 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
           original_nl_input: playbookInput,
           is_active: true
         });
-
-        // IMMEDAITELY COMPILE THE PLAYBOOK VIA RULE ENGINE ORCHESTRATOR
-        setNotification({ type: 'success', message: 'Brainstorming natural language via LLM...' });
-        await playbookApi.compilePlaybook(playbook.id);
 
         await fetchPlaybooks();
         setSelectedPlaybook(playbook);
