@@ -140,7 +140,7 @@ export function MonitorPage() {
             gap: '8px'
           }}>
             <Circle size={10} color="#94a3b8" />
-            <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', letterSpacing: '0.15em' }}>SESSION RULES & GUARDIANS</div>
+            <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', letterSpacing: '0.15em' }}>SESSION RULES</div>
           </div>
           
           <div style={{ 
