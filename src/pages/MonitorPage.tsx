@@ -7,7 +7,7 @@ import { RuleEventInspector } from '../components/RuleEventInspector';
 import { Activity, Circle, Check, X, ShoppingCart, HandMetal, Bell } from 'lucide-react';
 import { useDeviationEngine } from '../hooks/useDeviationEngine';
 import { DeviationPanel } from '../components/deviation/DeviationPanel';
-import { CONFIG } from '../config/constants';
+import { tradingApi } from '../domain/trading/api';
 
 export function MonitorPage() {
   const { selectedPlaybook, rules, activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream } = usePlaybookContext();
@@ -33,17 +33,28 @@ export function MonitorPage() {
 
   const handleManualOrder = async (side: 'BUY' | 'SELL') => {
     try {
-      const response = await fetch(`${CONFIG.BACKEND_BASE_URL}/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ side, symbol: 'BTC/USD', qty: 1 })
+      // Execute via canonical Trading Domain API
+      const result = await tradingApi.placeOrder({
+          side,
+          symbol: 'BTC/USD', // Default symbol or get from context
+          qty: 1,
+          type: 'market',
+          session_id: activeSession?.id // Link to session lifecycle for replay auditing
       });
-      if (response.ok) {
-        setNotification({ type: 'success', message: `Order Filled: ${side} 1.00 BTC/USD @ Market` });
-        setTimeout(() => setNotification(null), 3000);
-      }
+      
+      setNotification({ 
+          type: 'success', 
+          message: `Order Filled: ${result.side} ${result.qty} ${result.symbol} @ ${result.filled_avg_price || 'Market'}` 
+      });
+      
+      setTimeout(() => setNotification(null), 5000);
     } catch (e) {
-      console.error("Order failed", e);
+      console.error("Manual order failed:", e);
+      setNotification({ 
+          type: 'error', 
+          message: `Order Failed: ${e instanceof Error ? e.message : 'Unknown technical error'}` 
+      });
+      setTimeout(() => setNotification(null), 5000);
     }
   };
 
