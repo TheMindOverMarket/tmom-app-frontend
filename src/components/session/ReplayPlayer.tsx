@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Session, SessionEvent, SessionEventType } from '../../domain/session/types';
+import { useDeviationEngine } from '../../hooks/useDeviationEngine';
+import { AlertTriangle, DollarSign } from 'lucide-react';
 
 interface ReplayPlayerProps {
   session: Session;
@@ -12,6 +14,7 @@ export function ReplayPlayer({ session, events, loading, onClose }: ReplayPlayer
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const { summary: deviationSummary } = useDeviationEngine(session.id);
   const playbackRef = useRef<number | null>(null);
 
   const selectedEvent = useMemo(() => 
@@ -105,8 +108,7 @@ export function ReplayPlayer({ session, events, loading, onClose }: ReplayPlayer
           </button>
         </div>
 
-        {/* Metadata Audit Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '32px' }}>
           {[
             { label: 'FULL UUID', value: session.id },
             { label: 'USER CONTEXT', value: session.user_id.slice(0, 12) + '...' },
@@ -119,6 +121,55 @@ export function ReplayPlayer({ session, events, loading, onClose }: ReplayPlayer
             </div>
           ))}
         </div>
+
+        {/* Cost of Deviation Impact */}
+        {deviationSummary && (
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(3, 1fr)', 
+            gap: '12px',
+            padding: '16px',
+            backgroundColor: '#f8fafc',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ backgroundColor: '#fee2e2', padding: '10px', borderRadius: '10px' }}>
+                <DollarSign size={20} color="#ef4444" />
+              </div>
+              <div>
+                <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase' }}>DEVIATION COST</div>
+                <div style={{ fontSize: '18px', fontWeight: 900, color: '#ef4444' }}>
+                  -${deviationSummary.total_deviation_cost.toFixed(2)}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ backgroundColor: '#ffedd5', padding: '10px', borderRadius: '10px' }}>
+                <DollarSign size={20} color="#f97316" />
+              </div>
+              <div>
+                <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase' }}>UNAUTH GAIN</div>
+                <div style={{ fontSize: '18px', fontWeight: 900, color: '#0f172a' }}>
+                  ${deviationSummary.total_unauthorized_gain.toFixed(2)}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ backgroundColor: '#f1f5f9', padding: '10px', borderRadius: '10px' }}>
+                <AlertTriangle size={20} color="#64748b" />
+              </div>
+              <div>
+                <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase' }}>DEVIATION FLAGS</div>
+                <div style={{ fontSize: '18px', fontWeight: 900, color: '#0f172a' }}>
+                  {deviationSummary.deviation_count}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {loading ? (

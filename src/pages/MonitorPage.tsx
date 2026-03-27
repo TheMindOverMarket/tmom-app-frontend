@@ -33,8 +33,8 @@ export function MonitorPage() {
   return (
     <div style={{ 
       display: 'grid', 
-      gridTemplateColumns: '1fr 400px', 
-      gap: '24px', 
+      gridTemplateColumns: '1fr 340px', 
+      gap: '16px', 
       flex: 1,
       minHeight: 0
     }}>
@@ -131,7 +131,7 @@ export function MonitorPage() {
           backgroundColor: 'white',
           borderRadius: '4px',
           border: '1px solid #e2e8f0',
-          maxHeight: '240px',
+          maxHeight: '280px',
           flexShrink: 0
         }}>
           <div style={{ 
@@ -148,9 +148,9 @@ export function MonitorPage() {
           
           <div style={{ 
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-            gap: '8px',
-            padding: '12px',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+            gap: '4px',
+            padding: '8px',
             overflowY: 'auto'
           }}>
             {rules.length === 0 ? (
@@ -160,7 +160,7 @@ export function MonitorPage() {
             ) : (
               rules.map((rule, idx) => (
                 <div key={rule.id || idx} style={{
-                  padding: '10px',
+                  padding: '8px',
                   borderRadius: '4px',
                   border: `1px solid ${
                     lastEvent?.deviation_true?.includes(rule.id) ? '#fee2e2' : 
@@ -169,13 +169,20 @@ export function MonitorPage() {
                   backgroundColor: '#ffffff',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '6px',
+                  gap: '4px',
                   transition: 'all 0.3s ease',
                   boxShadow: lastEvent?.deviation_true?.includes(rule.id) ? '0 0 10px rgba(239, 68, 68, 0.1)' : 'none'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-                      <div style={{ fontSize: '11px', fontWeight: '900', color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.02em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div style={{ 
+                        fontSize: '10px', 
+                        fontWeight: '900', 
+                        color: '#0f172a', 
+                        textTransform: 'uppercase', 
+                        letterSpacing: '0.01em',
+                        lineHeight: '1.2'
+                      }}>
                         {rule.name}
                       </div>
                     </div>
@@ -191,13 +198,13 @@ export function MonitorPage() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                     {rule.conditions?.map((cond: any, cIdx: number) => (
                       <div key={cond.id || cIdx} style={{ 
-                        fontSize: '9px', 
-                        padding: '4px 8px', 
+                        fontSize: '8.5px', 
+                        padding: '2px 6px', 
                         backgroundColor: '#f8fafc', 
                         borderRadius: '2px', 
                         display: 'flex', 
                         alignItems: 'center',
-                        gap: '6px',
+                        gap: '4px',
                         border: '1px solid #f1f5f9'
                       }}>
                         <Circle size={6} color="#e2e8f0" />
