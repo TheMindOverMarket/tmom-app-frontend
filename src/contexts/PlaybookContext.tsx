@@ -25,6 +25,7 @@ interface PlaybookContextType {
   startStream: (playbookId: string) => Promise<Session | undefined>;
   stopStream: () => Promise<void>;
   rules: any[]; 
+  deletePlaybook: (id: string) => Promise<void>;
 }
 
 const PlaybookContext = createContext<PlaybookContextType | undefined>(undefined);
@@ -291,13 +292,26 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const deletePlaybook = async (id: string) => {
+    try {
+      await playbookApi.deletePlaybook(id);
+      if (selectedPlaybook?.id === id) setSelectedPlaybook(null);
+      await fetchPlaybooks();
+      setNotification({ type: 'success', message: 'Playbook deleted successfully.' });
+    } catch (error: unknown) {
+      console.error('Failed to delet playbook:', error);
+      setNotification({ type: 'error', message: `Failed to delete: ${error instanceof Error ? error.message : 'Unknown error'}` });
+    }
+  };
+
   const value = {
     playbookInput, setPlaybookInput,
     isSubmitting, notification, setNotification,
     createPlaybookFromNL, playbooks, selectedPlaybook, setSelectedPlaybook,
     isLoadingPlaybooks, fetchPlaybooks, activatePlaybook,
     activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream,
-    rules
+    rules,
+    deletePlaybook
   };
 
   return <PlaybookContext.Provider value={value}>{children}</PlaybookContext.Provider>;

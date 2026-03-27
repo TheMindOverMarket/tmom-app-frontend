@@ -3,7 +3,7 @@ import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { PlaybookIngestion } from '../components/playbook/PlaybookIngestion';
 import { RefreshButton } from '../components/common/RefreshButton';
 import { RuleCondition, Playbook } from '../domain/playbook/types';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 
 export function PlaybooksPage() {
   const { 
@@ -15,6 +15,7 @@ export function PlaybooksPage() {
     selectedPlaybook,
     setSelectedPlaybook,
     activatePlaybook,
+    deletePlaybook,
     rules,
     isLoadingPlaybooks,
     fetchPlaybooks
@@ -125,7 +126,32 @@ export function PlaybooksPage() {
                   
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '14px', fontWeight: '800', color: '#0f172a' }}>{pb.name}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ fontSize: '14px', fontWeight: '800', color: '#0f172a' }}>{pb.name}</div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm(`Permanently delete playbook "${pb.name}"?`)) {
+                              deletePlaybook(pb.id);
+                            }
+                          }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            padding: '4px',
+                            cursor: 'pointer',
+                            color: '#cbd5e1',
+                            display: 'flex',
+                            alignItems: 'center',
+                            transition: 'all 0.2s ease'
+                          }}
+                          title="Purge Playbook from Library"
+                          onMouseEnter={e => e.currentTarget.style.color = 'var(--danger)'}
+                          onMouseLeave={e => e.currentTarget.style.color = '#cbd5e1'}
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
                       <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '2px', fontWeight: 600 }}>{new Date(pb.created_at).toLocaleDateString().toUpperCase()}</div>
                     </div>
                     

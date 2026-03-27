@@ -91,5 +91,12 @@ export const playbookApi = {
     const response = await fetch(`${API_BASE}/playbooks/${playbookId}/rules`);
     if (!response.ok) throw new Error('Failed to list playbook rules');
     return response.json();
+  },
+
+  deletePlaybook: async (id: string): Promise<void> => {
+    const response = await fetch(`${API_BASE}/playbooks/${id}`, {
+      method: 'DELETE'
+    });
+    if (!response.ok) throw new Error('Failed to delete playbook');
   }
 };
