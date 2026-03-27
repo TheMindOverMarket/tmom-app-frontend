@@ -65,7 +65,7 @@ export function PlaybookIngestion({
           <button
             onClick={isStreaming ? onStopSession : onStartSession}
             disabled={disabled && !isStreaming}
-            title={disabled && !isStreaming ? "Select a valid strategy to enable live feed orchestration." : (isStreaming ? "Terminate active live session" : "Initialize real-time supervision feed")}
+            title={disabled && !isStreaming ? "Select or initiate a Playbook to enable live feed orchestration. Requires COMPLETED analysis status." : (isStreaming ? "Terminate active live session" : "Initialize real-time supervision feed")}
             style={{
                 height: '32px',
                 padding: '0 12px',
