@@ -68,13 +68,14 @@ export function ReplayPlayer({ session, events, loading, onClose }: ReplayPlayer
               alignItems: 'center', 
               gap: '6px', 
               padding: '4px 10px', 
-              borderRadius: '20px', 
-              backgroundColor: session.status === 'COMPLETED' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-              color: session.status === 'COMPLETED' ? 'var(--success)' : 'var(--danger)',
+              borderRadius: '4px', 
+              backgroundColor: session.status === 'COMPLETED' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(239, 68, 68, 0.05)',
+              color: session.status === 'COMPLETED' ? '#10b981' : '#ef4444',
               fontSize: '10px',
-              fontWeight: 800,
+              fontWeight: 900,
               textTransform: 'uppercase',
-              letterSpacing: '0.05em',
+              letterSpacing: '0.1em',
+              border: `1px solid ${session.status === 'COMPLETED' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'}`,
               marginBottom: '12px'
             }}>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'currentColor' }} />
@@ -109,12 +110,12 @@ export function ReplayPlayer({ session, events, loading, onClose }: ReplayPlayer
           {[
             { label: 'FULL UUID', value: session.id },
             { label: 'USER CONTEXT', value: session.user_id.slice(0, 12) + '...' },
-            { label: 'START TIME', value: new Date(session.start_time).toLocaleString() },
-            { label: 'END TIME', value: session.end_time ? new Date(session.end_time).toLocaleString() : 'Active / Forced Stop' }
+            { label: 'START TIME', value: new Date(session.start_time).toLocaleString().toUpperCase() },
+            { label: 'END TIME', value: session.end_time ? new Date(session.end_time).toLocaleString().toUpperCase() : 'LIVE / IN-PROGRESS' }
           ].map(meta => (
             <div key={meta.label}>
-              <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--slate-400)', textTransform: 'uppercase', marginBottom: '4px' }}>{meta.label}</div>
-              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--slate-600)', fontFamily: 'monospace' }}>{meta.value}</div>
+              <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.05em' }}>{meta.label}</div>
+              <div style={{ fontSize: '11px', fontWeight: 600, color: '#0f172a', fontFamily: 'monospace' }}>{meta.value}</div>
             </div>
           ))}
         </div>
@@ -209,14 +210,15 @@ export function ReplayPlayer({ session, events, loading, onClose }: ReplayPlayer
                 <div style={{ maxWidth: '600px' }}>
                   <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#111827', marginBottom: '24px' }}>{selectedEvent.type}</h3>
                   <pre style={{
-                    backgroundColor: '#1e293b',
+                    backgroundColor: '#0f172a',
                     color: '#e2e8f0',
                     padding: '24px',
-                    borderRadius: '12px',
-                    fontSize: '12px',
+                    borderRadius: '4px',
+                    fontSize: '11px',
                     lineHeight: '1.6',
                     overflowX: 'auto',
-                    fontFamily: 'Fira Code, monospace'
+                    fontFamily: 'monospace',
+                    border: '1px solid #1e293b'
                   }}>
                     {JSON.stringify(selectedEvent.event_data, null, 2)}
                   </pre>
