@@ -1,11 +1,5 @@
 import { RuleEngineEvent } from './types';
 
-const MOCK_RULES = [
-    'Momentum Breakout Playbook', 
-    'Mean Reversion Guard', 
-    'Volume Spike Detector', 
-    'RSI Divergence Check'
-];
 
 /**
  * Generates a single mock RuleEngineEvent.
