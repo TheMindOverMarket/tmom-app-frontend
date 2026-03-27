@@ -1,18 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { createChart, CandlestickSeries, LineSeries, type IChartApi, type ISeriesApi, type Time } from 'lightweight-charts';
-import { useMarketData } from './useMarketData';
-import { useDerivedSignals } from './useDerivedSignals';
 import { RuleEngineEvent } from '../domain/ruleEngine/types';
 import { MarkerData } from '../components/chart/types';
+import { Candle } from '../marketdata/types';
 
-export function usePriceChart(symbol: string, interval: number, events: RuleEngineEvent[]) {
+export function usePriceChart(
+  events: RuleEngineEvent[],
+  candles: Candle[],
+  currentCandle: Candle | null,
+  ema9: any[],
+  currentEMA9: any | null,
+  isMockData: boolean = false
+) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
   const emaSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
-
-  const { candles, currentCandle, isMockData } = useMarketData(symbol, interval);
-  const { ema9, currentEMA9 } = useDerivedSignals(candles, currentCandle);
 
   const [deduplicateEvents, setDeduplicateEvents] = useState(true);
   const [markers, setMarkers] = useState<MarkerData[]>([]);

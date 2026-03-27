@@ -9,6 +9,6 @@ export interface Candle {
 }
 
 export interface MarketDataProvider {
-  getHistory(symbol: string, interval: number): Promise<Candle[]>;
+  getHistory(symbol: string, interval: number, options?: { start_time?: string, end_time?: string }): Promise<Candle[]>;
   subscribeLive(symbol: string, interval: number, onCandleUpdate: (candle: Candle) => void): () => void;
 }

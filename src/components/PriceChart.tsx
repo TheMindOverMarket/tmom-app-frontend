@@ -1,5 +1,7 @@
 import { RuleEngineEvent } from '../domain/ruleEngine/types';
 import { usePriceChart } from '../hooks/usePriceChart';
+import { useMarketData } from '../hooks/useMarketData';
+import { useDerivedSignals } from '../hooks/useDerivedSignals';
 import { MarkerLayer } from './chart/MarkerLayer';
 import { ChartControls } from './chart/ChartControls';
 import { ChartLegend } from './chart/ChartLegend';
@@ -10,13 +12,15 @@ interface PriceChartProps {
 }
 
 export function PriceChart({ events, onMarkerClick }: PriceChartProps) {
+  const { candles, currentCandle, isMockData } = useMarketData('BTC/USD', 60);
+  const { ema9, currentEMA9 } = useDerivedSignals(candles, currentCandle);
+
   const {
     chartContainerRef,
-    isMockData,
     deduplicateEvents,
     setDeduplicateEvents,
     markers
-  } = usePriceChart('BTC/USD', 60, events);
+  } = usePriceChart(events, candles, currentCandle, ema9, currentEMA9, isMockData);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 0, flex: 1 }}>

@@ -10,13 +10,19 @@ let lastKnownPrice = 71500;
  * Canonical provider that fetches historical and live market data from the TMOM Backend.
  */
 export const BackendMarketDataProvider: MarketDataProvider = {
-  getHistory: async (symbol: string, interval: number): Promise<Candle[]> => {
+  getHistory: async (symbol: string, interval: number, options?: { start_time?: string, end_time?: string }): Promise<Candle[]> => {
     let timeframe = '1Min';
     if (interval === 60) timeframe = '1Min';
     else if (interval === 3600) timeframe = '1Hour';
     else if (interval === 86400) timeframe = '1Day';
 
-    const response = await fetch(`${CONFIG.BACKEND_BASE_URL}/market-data/history?symbol=${encodeURIComponent(symbol)}&timeframe=${timeframe}&limit=100`);
+    let url = `${CONFIG.BACKEND_BASE_URL}/market-data/history?symbol=${encodeURIComponent(symbol)}&timeframe=${timeframe}`;
+    
+    if (options?.start_time) url += `&start_time=${encodeURIComponent(options.start_time)}`;
+    if (options?.end_time) url += `&end_time=${encodeURIComponent(options.end_time)}`;
+    if (!options?.start_time) url += `&limit=100`; // Default to last 100 if no range provided
+
+    const response = await fetch(url);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch history from backend: ${response.status}`);

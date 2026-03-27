@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Session, SessionEvent, SessionEventType } from '../../domain/session/types';
 import { useDeviationEngine } from '../../hooks/useDeviationEngine';
-import { AlertTriangle, DollarSign } from 'lucide-react';
+import { AlertTriangle, DollarSign, Activity } from 'lucide-react';
+import { ReplayChart } from '../ReplayChart';
 
 interface ReplayPlayerProps {
   session: Session;
@@ -48,11 +49,20 @@ export function ReplayPlayer({ session, events, loading, onClose }: ReplayPlayer
 
   const getEventColor = (type: SessionEventType) => {
     switch (type) {
-      case SessionEventType.ADHERENCE: return '#059669';
-      case SessionEventType.DEVIATION: return '#dc2626';
-      case SessionEventType.TRADING: return '#2563eb';
-      case SessionEventType.NOTIFICATION: return '#d97706';
-      default: return '#6b7280';
+      case SessionEventType.ADHERENCE: return '#10b981';
+      case SessionEventType.DEVIATION: return '#ef4444';
+      case SessionEventType.TRADING: return '#3b82f6';
+      case SessionEventType.NOTIFICATION: return '#f59e0b';
+      default: return '#94a3b8';
+    }
+  };
+
+  const handleMarkerClick = (timestamp: number) => {
+    const idx = events.findIndex(e => new Date(e.timestamp).getTime() / 1000 === timestamp);
+    if (idx !== -1) {
+       setCurrentIndex(idx);
+       setSelectedEventId(events[idx].id);
+       setIsPlaying(false);
     }
   };
 
@@ -229,50 +239,100 @@ export function ReplayPlayer({ session, events, loading, onClose }: ReplayPlayer
           </div>
 
           <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+            {/* Event Timeline Sidebar */}
             <div style={{ 
-              width: '350px', 
-              borderRight: '1px solid #e5e7eb', 
+              width: '320px', 
+              borderRight: '1px solid #f1f5f9', 
               overflowY: 'auto',
-              padding: '16px'
+              backgroundColor: '#fcfdfe',
+              display: 'flex',
+              flexDirection: 'column'
             }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9' }}>
+                <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', letterSpacing: '0.1em' }}>TIMELINE FEED ({events.length})</div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                 {events.map((evt, idx) => (
                   <div 
                     key={evt.id}
                     onClick={() => { setSelectedEventId(evt.id); setCurrentIndex(idx); setIsPlaying(false); }}
                     style={{
-                      padding: '10px 12px',
-                      backgroundColor: (idx === currentIndex) ? '#f8fafc' : 'transparent',
-                      borderRadius: '8px',
-                      borderLeft: `4px solid ${getEventColor(evt.type)}`,
+                      padding: '12px 20px',
+                      backgroundColor: (idx === currentIndex) ? '#ffffff' : 'transparent',
+                      borderLeft: `3px solid ${(idx === currentIndex) ? getEventColor(evt.type) : 'transparent'}`,
                       cursor: 'pointer',
-                      transition: 'background-color 0.2s',
+                      transition: 'all 0.2s',
+                      boxShadow: (idx === currentIndex) ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+                      zIndex: (idx === currentIndex) ? 1 : 0
                     }}
                   >
-                    <div style={{ fontSize: '12px', fontWeight: '700', color: '#111827' }}>{evt.type}</div>
-                    <div style={{ fontSize: '10px', color: '#9ca3af' }}>{new Date(evt.timestamp).toLocaleTimeString()}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <div style={{ 
+                        fontSize: '9px', 
+                        fontWeight: 900, 
+                        color: getEventColor(evt.type),
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
+                      }}>{evt.type}</div>
+                      <div style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 600 }}>{new Date(evt.timestamp).toLocaleTimeString([], { hour12: false })}</div>
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: (idx === currentIndex) ? '#0f172a' : '#64748b' }}>
+                        {evt.event_data?.summary as string || (evt.tick ? `Price Tick: $${evt.tick}` : 'System Event')}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
+            {/* Main Replay Area: Map/Chart + Details Overlay */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: '#f8fafc', position: 'relative' }}>
+              <div style={{ flex: 1, minHeight: 0 }}>
+                 <ReplayChart 
+                   session={session} 
+                   events={events} 
+                   onMarkerClick={handleMarkerClick} 
+                 />
+              </div>
+
+              {/* Collapsible Details Drawer */}
               {selectedEvent && (
-                <div style={{ maxWidth: '600px' }}>
-                  <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#111827', marginBottom: '24px' }}>{selectedEvent.type}</h3>
-                  <pre style={{
-                    backgroundColor: '#0f172a',
-                    color: '#e2e8f0',
-                    padding: '24px',
-                    borderRadius: '4px',
-                    fontSize: '11px',
-                    lineHeight: '1.6',
-                    overflowX: 'auto',
-                    fontFamily: 'monospace',
-                    border: '1px solid #1e293b'
+                <div style={{ 
+                  height: '240px', 
+                  backgroundColor: '#ffffff', 
+                  borderTop: '1px solid #e2e8f0',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  boxShadow: '0 -4px 12px rgba(0,0,0,0.05)'
+                }}>
+                  <div style={{ 
+                    padding: '12px 24px', 
+                    borderBottom: '1px solid #f1f5f9',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    backgroundColor: '#ffffff'
                   }}>
-                    {JSON.stringify(selectedEvent.event_data, null, 2)}
-                  </pre>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Activity size={14} color={getEventColor(selectedEvent.type)} />
+                        <span style={{ fontSize: '11px', fontWeight: 900, color: '#0f172a' }}>EVENT INSPECTOR</span>
+                    </div>
+                    <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700 }}>{selectedEvent.id}</div>
+                  </div>
+                  <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px' }}>
+                    <pre style={{
+                      backgroundColor: '#f8fafc',
+                      color: '#334155',
+                      padding: '16px',
+                      borderRadius: '8px',
+                      fontSize: '11px',
+                      lineHeight: '1.6',
+                      overflowX: 'auto',
+                      fontFamily: 'monospace',
+                      border: '1px solid #f1f5f9'
+                    }}>
+                      {JSON.stringify(selectedEvent.event_data, null, 2)}
+                    </pre>
+                  </div>
                 </div>
               )}
             </div>
