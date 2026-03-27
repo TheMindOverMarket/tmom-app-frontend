@@ -3,46 +3,56 @@ import { Playbook, PlaybookCreate } from './types';
 
 const API_BASE = CONFIG.BACKEND_BASE_URL;
 
+const parsePlaybookError = async (response: Response, fallbackMessage: string): Promise<string> => {
+  try {
+    const err = await response.json();
+    return err.detail?.[0]?.msg || err.detail || fallbackMessage;
+  } catch (e) {
+    const text = await response.text();
+    return text || 'Internal Server Error';
+  }
+};
+
+const postPlaybook = async (path: string, data: PlaybookCreate, fallbackMessage: string): Promise<Response> => {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorMessage = await parsePlaybookError(response, fallbackMessage);
+    throw new Error(errorMessage);
+  }
+
+  return response;
+};
+
 export const playbookApi = {
   createPlaybook: async (data: PlaybookCreate): Promise<Playbook> => {
-    const response = await fetch(`${API_BASE}/playbooks/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-      let errorMessage = 'Failed to create playbook';
-      try {
-        const err = await response.json();
-        errorMessage = err.detail?.[0]?.msg || err.detail || 'Failed to create playbook';
-      } catch (e) {
-        // Fallback if response is not JSON
-        const text = await response.text();
-        errorMessage = text || 'Internal Server Error';
-      }
-      throw new Error(errorMessage);
-    }
+    const response = await postPlaybook('/playbooks/', data, 'Failed to create playbook');
     return response.json();
   },
 
   ingestPlaybook: async (data: PlaybookCreate): Promise<Playbook> => {
-    const response = await fetch(`${API_BASE}/playbooks/ingest`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-      let errorMessage = 'Failed to ingest playbook';
-      try {
-        const err = await response.json();
-        errorMessage = err.detail?.[0]?.msg || err.detail || 'Failed to ingest playbook';
-      } catch (e) {
-        const text = await response.text();
-        errorMessage = text || 'Internal Server Error';
+    try {
+      const response = await postPlaybook('/playbooks/ingest', data, 'Failed to ingest playbook');
+      return response.json();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      const shouldFallback =
+        message === 'Method Not Allowed' ||
+        message === 'Not Found' ||
+        message.includes('405') ||
+        message.includes('404');
+
+      if (!shouldFallback) {
+        throw error;
       }
-      throw new Error(errorMessage);
+
+      const response = await postPlaybook('/playbooks/', data, 'Failed to create playbook');
+      return response.json();
     }
-    return response.json();
   },
 
   listUserPlaybooks: async (userId: string): Promise<Playbook[]> => {
