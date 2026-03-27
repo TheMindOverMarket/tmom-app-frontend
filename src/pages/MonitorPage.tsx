@@ -120,28 +120,19 @@ export function MonitorPage() {
             onMarkerClick={handleMarkerClick}
           />
         </div>
-      </div>
 
-      {/* Right Column: Rule Engine & Logic Inspector */}
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        minHeight: 0,
-        gap: '16px'
-      }}>
-        {/* Logic Inspector Panel */}
+        {/* Rules Dashboard: High-Density At-a-Glance view */}
         <div style={{ 
-          flex: 1, 
-          minHeight: 0, 
           display: 'flex', 
           flexDirection: 'column',
           backgroundColor: 'white',
           borderRadius: '4px',
           border: '1px solid #e2e8f0',
-          overflow: 'hidden'
+          maxHeight: '240px',
+          flexShrink: 0
         }}>
           <div style={{ 
-            padding: '10px 16px', 
+            padding: '8px 16px', 
             backgroundColor: '#f8fafc', 
             borderBottom: '1px solid #f1f5f9',
             display: 'flex',
@@ -149,51 +140,54 @@ export function MonitorPage() {
             gap: '8px'
           }}>
             <Circle size={10} color="#94a3b8" />
-            <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', letterSpacing: '0.1em' }}>PLAYBOOK LOGIC</div>
+            <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', letterSpacing: '0.15em' }}>SESSION RULES & GUARDIANS</div>
           </div>
           
           <div style={{ 
-            flex: 1, 
-            overflowY: 'auto', 
-            padding: '16px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px'
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+            gap: '8px',
+            padding: '12px',
+            overflowY: 'auto'
           }}>
             {rules.length === 0 ? (
-              <div style={{ fontSize: '11px', color: '#94a3b8', textAlign: 'center', padding: '20px' }}>
-                Fetching playbook parameters...
+              <div style={{ fontSize: '11px', color: '#94a3b8', textAlign: 'center', gridColumn: '1 / -1', padding: '12px' }}>
+                Fetching active playbook parameters...
               </div>
             ) : (
               rules.map((rule, idx) => (
                 <div key={rule.id || idx} style={{
-                  padding: '12px',
+                  padding: '10px',
                   borderRadius: '4px',
                   border: '1px solid #f1f5f9',
-                  backgroundColor: 'white'
+                  backgroundColor: '#ffffff',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '6px'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Circle size={8} color="#cbd5e1" />
-                    <div style={{ fontSize: '12px', fontWeight: '900', color: '#0f172a' }}>{rule.name}</div>
+                    <div style={{ fontSize: '11px', fontWeight: '900', color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.02em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {rule.name}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '10px', color: '#64748b', lineHeight: '1.4', marginBottom: '10px', paddingLeft: '16px' }}>{rule.description}</div>
                   
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingLeft: '16px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                     {rule.conditions?.map((cond: any, cIdx: number) => (
                       <div key={cond.id || cIdx} style={{ 
-                        fontSize: '10px', 
-                        padding: '6px 10px', 
+                        fontSize: '9px', 
+                        padding: '4px 8px', 
                         backgroundColor: '#f8fafc', 
-                        border: '1px solid #f1f5f9', 
                         borderRadius: '2px', 
                         display: 'flex', 
                         alignItems: 'center',
-                        gap: '8px' 
+                        gap: '6px',
+                        border: '1px solid #f1f5f9'
                       }}>
                         <Circle size={6} color="#e2e8f0" />
                         <span style={{ fontWeight: 800, color: 'var(--brand)' }}>{cond.metric}</span>
                         <span style={{ color: '#94a3b8', fontWeight: 700 }}>{cond.comparator}</span>
-                        <span style={{ fontWeight: 800, color: '#0f172a' }}>{cond.value}</span>
+                        <span style={{ fontWeight: 900, color: '#0f172a' }}>{cond.value}</span>
                       </div>
                     ))}
                   </div>
@@ -202,17 +196,17 @@ export function MonitorPage() {
             )}
           </div>
         </div>
+      </div>
 
-        {/* Existing Event Inspector Panel */}
-        <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
-          <RuleEventInspector 
-            events={events} 
-            focusedTimestamp={focusedView?.timestamp || null}
-            isActive={isStreaming}
-            filterType={focusedView?.filter || null}
-            onClearFocus={() => setFocusedView(null)}
-          />
-        </div>
+      {/* Right Column: Rule Engine Feed */}
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <RuleEventInspector 
+          events={events} 
+          focusedTimestamp={focusedView?.timestamp || null}
+          isActive={isStreaming}
+          filterType={focusedView?.filter || null}
+          onClearFocus={() => setFocusedView(null)}
+        />
       </div>
     </div>
   );
