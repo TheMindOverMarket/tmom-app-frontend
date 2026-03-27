@@ -15,23 +15,22 @@ export function SessionList({ sessions, onSelect, onDelete, selectedId }: Sessio
   if (sessions.length === 0) {
     return (
       <div style={{
-        padding: '64px 32px',
+        padding: '32px 24px',
         textAlign: 'center',
         backgroundColor: '#f8fafc',
         borderRadius: '4px',
-        border: '1px dashed #e2e8f0',
+        border: '1px solid #e2e8f0',
         color: '#64748b',
         fontSize: '13px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '20px',
-        marginTop: '20px'
+        gap: '16px'
       }}>
-        <div style={{ padding: '20px', backgroundColor: 'white', borderRadius: '50%', border: '1px solid #f1f5f9', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+        <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '50%', border: '1px solid #f1f5f9', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
           <Layers size={24} color="#94a3b8" />
         </div>
-        <div style={{ maxWidth: '320px', lineHeight: '1.6' }}>
+        <div style={{ maxWidth: '320px', lineHeight: '1.5' }}>
           No historical session records found. Ingest and activate a <strong>Playbook</strong> to begin automated supervision.
         </div>
         
