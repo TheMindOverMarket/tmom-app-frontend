@@ -66,14 +66,20 @@ export function PlaybookIngestion({
         {/* Integrated Action Bar */}
         <div style={{ 
           display: 'flex',
-          justifyContent: 'flex-end',
+          justifyContent: 'space-between', // Changed to between for balance
           alignItems: 'center',
           padding: '16px 24px',
-          backgroundColor: 'var(--slate-50)',
+          backgroundColor: '#fcfdfe', // Slightly brighter/cleaner
           borderTop: '1px solid var(--slate-100)',
           gap: '16px'
         }}>
-          {showSessionControls && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+             <div style={{ fontSize: '11px', fontWeight: 950, color: 'var(--slate-900)', letterSpacing: '0.05em' }}>AI EXTRACTION ENGINE</div>
+             <div style={{ fontSize: '10px', color: 'var(--slate-400)', fontWeight: 600 }}>Convert natural language into deterministic logic</div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            {showSessionControls && (
             <button
               onClick={isStreaming ? onStopSession : onStartSession}
               disabled={disabled && !isStreaming}
@@ -122,22 +128,23 @@ export function PlaybookIngestion({
             disabled={isSubmitting || !value.trim()}
             style={{
                 height: '48px',
-                padding: '0 40px',
+                padding: '0 32px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '12px',
-                backgroundColor: isSubmitting ? 'var(--brand)' : (value.trim() ? 'var(--brand)' : 'var(--slate-100)'),
+                background: isSubmitting ? 'var(--brand)' : (value.trim() ? 'linear-gradient(135deg, var(--brand) 0%, #4f46e5 100%)' : 'var(--slate-100)'),
                 color: isSubmitting ? 'white' : (value.trim() ? 'white' : 'var(--slate-400)'),
-                border: 'none',
+                border: value.trim() ? '1px solid rgba(255,255,255,0.1)' : 'none',
                 borderRadius: '16px',
                 fontSize: '13px',
                 fontWeight: 950,
-                letterSpacing: '0.05em',
+                letterSpacing: '0.08em',
                 cursor: (isSubmitting || !value.trim()) ? 'default' : 'pointer',
                 transition: 'all 0.4s cubic-bezier(0.19, 1, 0.22, 1)',
-                boxShadow: (isSubmitting || !value.trim()) ? 'none' : '0 10px 20px -5px var(--brand-alpha)',
-                overflow: 'hidden'
+                boxShadow: (isSubmitting || !value.trim()) ? 'none' : '0 10px 25px -5px var(--brand-alpha), 0 8px 10px -6px var(--brand-alpha)',
+                overflow: 'hidden',
+                position: 'relative'
             }}
             onMouseEnter={e => {
               if (!isSubmitting && value.trim()) {
@@ -166,11 +173,12 @@ export function PlaybookIngestion({
               </>
             ) : (
               <>
-                <span style={{ fontSize: '18px' }}>✨</span>
+                <span style={{ fontSize: '18px', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>✨</span>
                 <span>INGEST PLAYBOOK</span>
               </>
             )}
           </button>
+          </div>
         </div>
       </div>
 
