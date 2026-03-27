@@ -4,11 +4,11 @@ import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { useRuleEngineEvents } from '../hooks/useRuleEngineEvents';
 import { PriceChart } from '../components/PriceChart';
 import { RuleEventInspector } from '../components/RuleEventInspector';
-import { Activity, Circle } from 'lucide-react';
+import { Activity, Circle, Check, X } from 'lucide-react';
 
 export function MonitorPage() {
   const { selectedPlaybook, rules, activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream } = usePlaybookContext();
-  const { events, isMockMode, toggleMockMode } = useRuleEngineEvents(isStreaming, activeSession?.id);
+  const { events, lastEvent, isMockMode, toggleMockMode } = useRuleEngineEvents(isStreaming, activeSession?.id);
   const navigate = useNavigate();
 
   const [focusedView, setFocusedView] = useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);
@@ -159,17 +159,30 @@ export function MonitorPage() {
                 <div key={rule.id || idx} style={{
                   padding: '10px',
                   borderRadius: '4px',
-                  border: '1px solid #f1f5f9',
+                  border: `1px solid ${
+                    lastEvent?.deviation_true?.includes(rule.id) ? '#fee2e2' : 
+                    lastEvent?.deviation_false?.includes(rule.id) ? '#dcfce7' : '#f1f5f9'
+                  }`,
                   backgroundColor: '#ffffff',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '6px'
+                  gap: '6px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: lastEvent?.deviation_true?.includes(rule.id) ? '0 0 10px rgba(239, 68, 68, 0.1)' : 'none'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Circle size={8} color="#cbd5e1" />
-                    <div style={{ fontSize: '11px', fontWeight: '900', color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.02em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {rule.name}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                      <div style={{ fontSize: '11px', fontWeight: '900', color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.02em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {rule.name}
+                      </div>
                     </div>
+                    {lastEvent?.deviation_true?.includes(rule.id) ? (
+                      <X size={12} color="#ef4444" strokeWidth={3} />
+                    ) : lastEvent?.deviation_false?.includes(rule.id) ? (
+                      <Check size={12} color="#10b981" strokeWidth={3} />
+                    ) : (
+                      <Circle size={8} color="#cbd5e1" />
+                    )}
                   </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>

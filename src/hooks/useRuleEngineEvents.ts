@@ -9,6 +9,7 @@ import { CONFIG } from '../config/constants';
  */
 export function useRuleEngineEvents(isActive: boolean = false, sessionId?: string) {
   const [events, setEvents] = useState<RuleEngineEvent[]>([]);
+  const [lastEvent, setLastEvent] = useState<RuleEngineEvent | null>(null);
   const [isMockMode, setIsMockMode] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   
@@ -43,16 +44,19 @@ export function useRuleEngineEvents(isActive: boolean = false, sessionId?: strin
       ws.onmessage = (msg) => {
         try {
           const rawData: RuleEngineRawMessage = JSON.parse(msg.data);
-          const date = new Date(rawData.timestamp);
-          
-          setEvents(prev => [...prev, {
-            ...rawData,
-            id: crypto.randomUUID(),
-            timestamp: Math.floor(date.getTime() / 1000),
-            msTimestamp: date.getTime(),
-            originalTimestamp: rawData.timestamp,
-            rawRule: rawData.rule,
-          }]);
+          const date = new Date(); // Define date here
+          setEvents(prev => {
+            const newEvent: RuleEngineEvent = {
+              ...rawData,
+              id: crypto.randomUUID(),
+              timestamp: Math.floor(date.getTime() / 1000),
+              msTimestamp: date.getTime(),
+              originalTimestamp: rawData.timestamp,
+              rawRule: rawData.rule,
+            };
+            setLastEvent(newEvent);
+            return [...prev, newEvent];
+          });
         } catch (err) {
           console.error('[useRuleEngineEvents] Parse error:', err);
         }
@@ -121,5 +125,12 @@ export function useRuleEngineEvents(isActive: boolean = false, sessionId?: strin
     };
   }, [isActive, isMockMode, sessionId, connect]);
 
-  return { events, isMockMode, toggleMockMode, isConnected, clearEvents };
+  return {
+    events,
+    lastEvent,
+    isMockMode,
+    isConnected,
+    toggleMockMode,
+    clearEvents
+  };
 }
