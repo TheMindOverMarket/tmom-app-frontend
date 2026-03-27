@@ -37,39 +37,40 @@ export function MonitorPage() {
     }}>
       {/* Left Column: Chart & Controls */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minHeight: 0 }}>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          backgroundColor: 'white',
-          padding: '12px 20px',
-          borderRadius: '12px',
-          border: '1px solid #f1f5f9'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Activity size={14} color="var(--brand)" />
-            <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--slate-400)' }}>PLAYBOOK SUPERVISION:</div>
-            <div style={{ fontSize: '11px', color: '#1e293b', fontWeight: 700 }}>{selectedPlaybook.name}</div>
-          </div>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            backgroundColor: 'white',
+            padding: '8px 16px',
+            borderRadius: '4px',
+            border: '1px solid #e2e8f0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Activity size={12} color="var(--brand)" />
+              <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--slate-400)', letterSpacing: '0.05em' }}>PLAYBOOK SUPERVISION:</div>
+              <div style={{ fontSize: '11px', color: '#0f172a', fontWeight: 800 }}>{selectedPlaybook.name}</div>
+            </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button
               onClick={toggleMockMode}
               style={{
-                padding: '6px 12px',
-                backgroundColor: isMockMode ? 'var(--brand)' : 'white',
-                color: isMockMode ? 'white' : 'var(--slate-400)',
-                border: `1px solid ${isMockMode ? 'var(--brand)' : 'var(--slate-200)'}`,
-                borderRadius: '6px',
+                padding: '0 12px',
+                height: '32px',
+                backgroundColor: isMockMode ? '#0f172a' : 'white',
+                color: isMockMode ? 'white' : 'var(--slate-500)',
+                border: `1px solid ${isMockMode ? '#0f172a' : 'var(--slate-200)'}`,
+                borderRadius: '4px',
                 fontSize: '10px',
                 fontWeight: 800,
                 cursor: 'pointer',
-                transition: 'var(--transition)',
+                transition: 'all 0.2s ease',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px'
               }}
-              title="Toggle Live Session Simulation"
+              title="Toggle Live Session Simulation [MOCK DATA MODE]"
             >
               <div style={{ 
                 width: '6px', 
@@ -84,27 +85,28 @@ export function MonitorPage() {
               onClick={isStreaming ? stopStream : () => startStream(selectedPlaybook.id)}
               disabled={isLoading || (!isStreaming && selectedPlaybook.generation_status !== 'COMPLETED')}
               style={{
-                  padding: '6px 16px',
-                  backgroundColor: isLoading ? 'var(--slate-100)' : (isStreaming ? 'var(--danger)' : (selectedPlaybook.generation_status === 'COMPLETED' ? 'var(--success)' : 'var(--slate-200)')),
-                  color: (isLoading || (selectedPlaybook.generation_status !== 'COMPLETED' && !isStreaming)) ? 'var(--slate-400)' : 'white',
-                  border: 'none',
-                  borderRadius: '6px',
+                  height: '32px',
+                  padding: '0 16px',
+                  backgroundColor: isLoading ? 'var(--slate-50)' : (isStreaming ? 'var(--danger-alpha)' : (selectedPlaybook.generation_status === 'COMPLETED' ? '#0f172a' : 'var(--slate-50)')),
+                  color: (isLoading || (selectedPlaybook.generation_status !== 'COMPLETED' && !isStreaming)) ? 'var(--slate-400)' : (isStreaming ? 'var(--danger)' : 'white'),
+                  border: isStreaming ? '1px solid var(--danger)' : 'none',
+                  borderRadius: '4px',
                   fontSize: '11px',
-                  fontWeight: 800,
-                  cursor: (isLoading || (!isStreaming && selectedPlaybook.generation_status !== 'COMPLETED')) ? 'default' : 'pointer',
+                  fontWeight: 900,
+                  cursor: (isLoading || (!isStreaming && selectedPlaybook.generation_status !== 'COMPLETED')) ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  opacity: (isLoading || (selectedPlaybook.generation_status !== 'COMPLETED' && !isStreaming)) ? 0.7 : 1,
-                  transition: 'var(--transition)'
+                  gap: '8px',
+                  opacity: (isLoading || (selectedPlaybook.generation_status !== 'COMPLETED' && !isStreaming)) ? 0.6 : 1,
+                  transition: 'all 0.2s ease'
               }}
-              title={selectedPlaybook.generation_status !== 'COMPLETED' ? "Strategy analysis in progress..." : "Start real-time supervision"}
+              title={selectedPlaybook.generation_status !== 'COMPLETED' ? "Playbook analysis in progress. Monitoring restricted." : "Initialize real-time supervision orchestration"}
             >
               <div style={{ 
                 width: '6px', 
                 height: '6px', 
                 borderRadius: '50%', 
-                backgroundColor: 'white', 
+                backgroundColor: isStreaming ? 'var(--danger)' : 'white', 
                 animation: (isStreaming || isLoading) ? 'pulse 1.5s infinite' : 'none' 
               }} />
               {isStartingStream ? 'WARMING UP...' : (isStoppingStream ? 'CLOSING...' : (isStreaming ? 'STOP STREAM' : (selectedPlaybook.generation_status === 'COMPLETED' ? 'START LIVE SESSION' : 'ANALYZING...')))}
@@ -112,7 +114,7 @@ export function MonitorPage() {
           </div>
         </div>
 
-        <div style={{ flex: 1, minHeight: 0, position: 'relative', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #f1f5f9', overflow: 'hidden' }}>
+        <div style={{ flex: 1, minHeight: 0, position: 'relative', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
           <PriceChart 
             events={events}
             onMarkerClick={handleMarkerClick}

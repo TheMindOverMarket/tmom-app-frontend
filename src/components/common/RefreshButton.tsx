@@ -19,17 +19,18 @@ export function RefreshButton({
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
-        padding: '8px 16px',
-        fontSize: '12px',
-        fontWeight: '800',
+        padding: '0 12px',
+        height: '32px',
+        fontSize: '10px',
+        fontWeight: '900',
         backgroundColor: isLoading ? 'var(--slate-50)' : '#ffffff',
         border: `1px solid var(--slate-200)`,
-        borderRadius: 'var(--radius-md)',
+        borderRadius: '4px',
         color: isLoading ? 'var(--slate-400)' : 'var(--slate-600)',
         cursor: isLoading ? 'default' : 'pointer',
-        transition: 'var(--transition)',
-        boxShadow: 'var(--shadow-sm)',
-        letterSpacing: '0.025em'
+        transition: 'all 0.2s ease',
+        boxShadow: 'none',
+        letterSpacing: '0.05em'
       }}
       onMouseOver={e => !isLoading && (e.currentTarget.style.backgroundColor = 'var(--slate-50)')}
       onMouseOut={e => !isLoading && (e.currentTarget.style.backgroundColor = '#ffffff')}
