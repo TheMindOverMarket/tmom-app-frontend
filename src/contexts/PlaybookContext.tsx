@@ -209,22 +209,14 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     setIsStartingStream(true);
     setNotification(null);
     try {
-      // 1. Hard Guard: Integrity Check
-      const data = await playbookApi.getPlaybook(playbookId);
-      if (data.generation_status !== 'COMPLETED') {
-        throw new Error('This playbook is still being analyzed by the AI. Please wait for the analysis to complete (Approx 30s) before starting a live session.');
-      }
-
-      // 2. Safety Cleanup
-      if (activeSession) {
-        console.warn(`[PlaybookContext] Terminating existing session ${activeSession.id} before starting new one.`);
-        await stopStream();
-      }
-
+      // Setup backend session and UI
       const session = await sessionApi.startSession({
         user_id: CONFIG.USER_ID,
         playbook_id: playbookId
       });
+      
+      // TRIGGER THE RULE ENGINE ORCHESTRATOR
+      await playbookApi.executePlaybook(playbookId);
       
       setActiveSession(session);
       setIsStreaming(true);
@@ -242,6 +234,9 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     if (!activeSession) return;
     setIsStoppingStream(true);
     try {
+      // Tell the rule engine to stop evaluating rules
+      await playbookApi.stopPlaybook(activeSession.playbook_id);
+      
       // Update session status in the DB
       await sessionApi.endSession(activeSession.id, { status: SessionStatus.COMPLETED });
       
@@ -268,6 +263,10 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
           original_nl_input: playbookInput,
           is_active: true
         });
+
+        // IMMEDAITELY COMPILE THE PLAYBOOK VIA RULE ENGINE ORCHESTRATOR
+        setNotification({ type: 'success', message: 'Brainstorming natural language via LLM...' });
+        await playbookApi.compilePlaybook(playbook.id);
 
         await fetchPlaybooks();
         setSelectedPlaybook(playbook);

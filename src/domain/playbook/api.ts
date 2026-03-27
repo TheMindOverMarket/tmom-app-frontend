@@ -77,8 +77,56 @@ export const playbookApi = {
     return response.json();
   },
 
-  listPlaybookRules: async (id: string): Promise<any[]> => {
-    const response = await fetch(`${API_BASE}/playbooks/${id}/rules`);
+  compilePlaybook: async (playbookId: string): Promise<void> => {
+    const response = await fetch(`${CONFIG.ENGINE_BASE_URL}/api/rules/compile?playbook_id=${playbookId}`, {
+      method: 'POST'
+    });
+    if (!response.ok) {
+      let errorMessage = 'Failed to compile playbook in rule engine';
+      try {
+        const err = await response.json();
+        errorMessage = err.detail?.[0]?.msg || err.detail || errorMessage;
+      } catch (e) {
+        errorMessage = await response.text() || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+  },
+
+  executePlaybook: async (playbookId: string): Promise<void> => {
+    const response = await fetch(`${CONFIG.ENGINE_BASE_URL}/api/rules/execute?playbook_id=${playbookId}`, {
+      method: 'POST'
+    });
+    if (!response.ok) {
+      let errorMessage = 'Failed to execute playbook in rule engine';
+      try {
+        const err = await response.json();
+        errorMessage = err.detail?.[0]?.msg || err.detail || errorMessage;
+      } catch (e) {
+        errorMessage = await response.text() || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+  },
+
+  stopPlaybook: async (playbookId: string): Promise<void> => {
+    const response = await fetch(`${CONFIG.ENGINE_BASE_URL}/api/rules/stop?playbook_id=${playbookId}`);
+    if (!response.ok) {
+      let errorMessage = 'Failed to stop playbook in rule engine';
+      try {
+        const err = await response.json();
+        errorMessage = err.detail?.[0]?.msg || err.detail || errorMessage;
+      } catch (e) {
+        errorMessage = await response.text() || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+  },
+
+
+
+  listPlaybookRules: async (playbookId: string): Promise<any[]> => {
+    const response = await fetch(`${API_BASE}/playbooks/${playbookId}/rules`);
     if (!response.ok) throw new Error('Failed to list playbook rules');
     return response.json();
   }
