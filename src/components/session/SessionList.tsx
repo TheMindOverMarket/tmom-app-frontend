@@ -31,7 +31,7 @@ export function SessionList({ sessions, onSelect, selectedId }: SessionListProps
           <Layers size={24} color="#94a3b8" />
         </div>
         <div style={{ maxWidth: '320px', lineHeight: '1.6' }}>
-          No historical sessions detected. Ingest and activate a <strong>Playbook</strong> to begin automated supervision.
+          No historical session records found. Ingest and activate a <strong>Playbook</strong> to begin automated supervision.
         </div>
         
         <button 

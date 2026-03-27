@@ -32,7 +32,7 @@ export function Navbar() {
             onClick={(e) => {
               if (isDisabled) e.preventDefault();
             }}
-            title={isDisabled ? "Select or Create a Playbook first to enable Live Supervision" : ""}
+            title={isDisabled ? "Select or initiate a Playbook to enable real-time supervision orchestration" : "Monitor active playbook execution"}
             style={({ isActive }) => ({
               display: 'flex',
               alignItems: 'center',
