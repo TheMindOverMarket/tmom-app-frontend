@@ -44,11 +44,11 @@ export function SessionAnalytics() {
 
   return (
     <div style={{
-      padding: '32px',
+      padding: '24px',
       backgroundColor: '#ffffff',
-      borderRadius: '24px',
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)',
-      border: '1px solid #f1f5f9',
+      borderRadius: '4px',
+      boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+      border: '1px solid #e2e8f0',
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
@@ -57,11 +57,11 @@ export function SessionAnalytics() {
     }}>
       <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexShrink: 0 }}>
         <div>
-          <h2 style={{ fontSize: '1.875rem', fontWeight: '800', margin: 0, color: '#0f172a', letterSpacing: '-0.025em' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '900', margin: 0, color: '#0f172a', letterSpacing: '-0.02em' }}>
             Session Analytics
           </h2>
-          <p style={{ margin: '8px 0 0 0', color: '#64748b', fontSize: '1rem' }}>
-            Quantify cost of deviation, evaluate playbook performance, and audit strategy consistency.
+          <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '13px' }}>
+            Quantify cost of deviation, evaluate playbook performance, and audit execution consistency.
           </p>
         </div>
         
@@ -88,11 +88,11 @@ export function SessionAnalytics() {
             flexDirection: 'column',
             justifyContent: 'center'
           }}>
-            <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px', fontWeight: '500' }}>{stat.label}</div>
+            <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '4px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
             {loading && sessions.length === 0 ? (
-              <div style={{ fontSize: '32px', fontWeight: '800', color: '#e2e8f0', animation: 'pulse 1.5s infinite' }}>...</div>
+              <div style={{ fontSize: '24px', fontWeight: '900', color: '#f1f5f9', animation: 'pulse 1.5s infinite' }}>...</div>
             ) : (
-              <div style={{ fontSize: '32px', fontWeight: '800', color: stat.color }}>{stat.value}</div>
+              <div style={{ fontSize: '24px', fontWeight: '900', color: '#0f172a' }}>{stat.value}</div>
             )}
           </div>
         ))}

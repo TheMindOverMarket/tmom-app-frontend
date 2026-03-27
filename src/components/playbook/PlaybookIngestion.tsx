@@ -22,34 +22,33 @@ export function PlaybookIngestion({
   showSessionControls = false
 }: PlaybookIngestionProps) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
       <div style={{ 
         position: 'relative', 
         display: 'flex', 
         flexDirection: 'column',
         backgroundColor: 'white',
-        borderRadius: '6px', 
+        borderRadius: '4px', 
         border: '1px solid var(--slate-200)',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-        transition: 'all 0.2s ease',
+        transition: 'all 0.1s ease',
         overflow: 'hidden'
       }}>
         <textarea 
-          placeholder="Describe your playbook logic..."
+          placeholder="Describe your strategy logic..."
           value={value}
           onChange={(e) => onChange(e.target.value)}
           style={{ 
               width: '100%',
-              padding: '16px', 
+              padding: '12px 16px', 
               border: 'none', 
-              fontSize: '14px',
+              fontSize: '13px',
               outline: 'none',
               color: 'var(--slate-900)',
               backgroundColor: 'transparent',
               resize: 'none',
-              minHeight: '120px',
-              fontFamily: 'inherit',
-              lineHeight: '1.6',
+              minHeight: '80px',
+              fontFamily: 'var(--font-mono, monospace)',
+              lineHeight: '1.5',
               boxSizing: 'border-box'
           }} 
         />
@@ -59,24 +58,26 @@ export function PlaybookIngestion({
         display: 'flex',
         justifyContent: 'flex-end',
         alignItems: 'center',
-        gap: '8px'
+        gap: '8px',
+        marginTop: '8px'
       }}>
         {showSessionControls && (
           <button
             onClick={isStreaming ? onStopSession : onStartSession}
             disabled={disabled && !isStreaming}
+            title={disabled && !isStreaming ? "Select a valid strategy to enable live feed orchestration." : (isStreaming ? "Terminate active live session" : "Initialize real-time supervision feed")}
             style={{
-                height: '38px',
-                padding: '0 16px',
+                height: '32px',
+                padding: '0 12px',
                 backgroundColor: isStreaming ? 'var(--danger-alpha)' : 'white',
-                color: isStreaming ? 'var(--danger)' : 'var(--slate-700)',
+                color: isStreaming ? 'var(--danger)' : 'var(--slate-600)',
                 border: `1px solid ${isStreaming ? 'var(--danger)' : 'var(--slate-200)'}`,
                 borderRadius: '4px',
-                fontSize: '11px',
+                fontSize: '10px',
                 fontWeight: 800,
                 letterSpacing: '0.02em',
                 cursor: (disabled && !isStreaming) ? 'not-allowed' : 'pointer',
-                opacity: (disabled && !isStreaming) ? 0.5 : 1,
+                opacity: (disabled && !isStreaming) ? 0.6 : 1,
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
@@ -90,37 +91,38 @@ export function PlaybookIngestion({
               backgroundColor: isStreaming ? 'var(--danger)' : 'var(--success)', 
               animation: isStreaming ? 'pulse 1.5s infinite' : 'none',
             }}></div>
-            {isStreaming ? 'STOP LIVE' : 'START LIVE'}
+            {isStreaming ? 'STOP FEED' : 'START LIVE FEED'}
           </button>
         )}
 
         <button
           onClick={onSubmit}
           disabled={isSubmitting || !value.trim()}
+          title={isSubmitting ? "Background extraction in progress..." : (!value.trim() ? "Input descriptive logic to enable strategy ingestion." : "Submit logic for deterministic derivation")}
           style={{
-              height: '38px',
-              padding: '0 20px',
+              height: '32px',
+              padding: '0 16px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              background: isSubmitting ? 'var(--brand)' : (value.trim() ? 'var(--brand)' : 'var(--slate-100)'),
+              background: isSubmitting ? 'var(--brand)' : (value.trim() ? '#0f172a' : 'var(--slate-100)'),
               color: 'white',
               border: 'none',
               borderRadius: '4px',
-              fontSize: '12px',
+              fontSize: '10px',
               fontWeight: 800,
               letterSpacing: '0.02em',
-              cursor: (isSubmitting || !value.trim()) ? 'default' : 'pointer',
+              cursor: (isSubmitting || !value.trim()) ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s ease',
-              boxShadow: (isSubmitting || !value.trim()) ? 'none' : '0 1px 3px rgba(0,0,0,0.1)'
+              boxShadow: 'none'
           }}
         >
           {isSubmitting ? (
             <>
               <div style={{ 
-                width: '14px', 
-                height: '14px', 
+                width: '12px', 
+                height: '12px', 
                 borderRadius: '50%', 
                 border: '2px solid rgba(255,255,255,0.3)', 
                 borderTopColor: 'white', 
@@ -130,7 +132,7 @@ export function PlaybookIngestion({
             </>
           ) : (
             <>
-              <span style={{ fontSize: '14px' }}>✨</span>
+              <span style={{ fontSize: '13px' }}>✨</span>
               <span>INGEST PLAYBOOK</span>
             </>
           )}

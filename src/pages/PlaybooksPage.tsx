@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { PlaybookIngestion } from '../components/playbook/PlaybookIngestion';
 import { RefreshButton } from '../components/common/RefreshButton';
-import { RuleCondition, ConditionEdge, Playbook } from '../domain/playbook/types';
+import { RuleCondition, Playbook } from '../domain/playbook/types';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 export function PlaybooksPage() {
@@ -146,6 +146,7 @@ export function PlaybooksPage() {
                           if (pb.generation_status === 'COMPLETED') activatePlaybook(pb);
                         }}
                         disabled={pb.generation_status !== 'COMPLETED'}
+                        title={pb.generation_status === 'PENDING' ? "Orchestrating background extraction task. Activation pending..." : (pb.generation_status === 'FAILED' ? "Extraction failed. Re-ingest with clearer logic." : "Deploy strategy to live supervision feed")}
                         style={{
                           fontSize: '10px',
                           fontWeight: 800,
@@ -154,14 +155,14 @@ export function PlaybooksPage() {
                           border: '1px solid #e2e8f0',
                           padding: '4px 10px',
                           borderRadius: '4px',
-                          cursor: pb.generation_status === 'COMPLETED' ? 'pointer' : 'default',
-                          opacity: pb.generation_status === 'COMPLETED' ? 1 : 0.5,
+                          cursor: pb.generation_status === 'COMPLETED' ? 'pointer' : 'not-allowed',
+                          opacity: pb.generation_status === 'COMPLETED' ? 1 : 0.6,
                           transition: 'all 0.2s ease'
                         }}
                         onMouseEnter={e => {
                           if (pb.generation_status === 'COMPLETED') {
-                            e.currentTarget.style.backgroundColor = 'var(--brand)';
-                            e.currentTarget.style.borderColor = 'var(--brand)';
+                            e.currentTarget.style.backgroundColor = '#0f172a';
+                            e.currentTarget.style.borderColor = '#0f172a';
                             e.currentTarget.style.color = 'white';
                           }
                         }}
@@ -233,7 +234,7 @@ export function PlaybooksPage() {
                       <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--brand)' }} />
                       <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--brand)', letterSpacing: '0.1em' }}>STRATEGY INSPECTOR</div>
                     </div>
-                    <div style={{ fontSize: '24px', fontWeight: '900', color: '#0f172a' }}>{selectedPlaybook.name}</div>
+                    <div style={{ fontSize: '20px', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.02em' }}>{selectedPlaybook.name}</div>
                   </div>
                   <button 
                     onClick={() => setIsModalOpen(false)}
@@ -255,9 +256,9 @@ export function PlaybooksPage() {
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
                     <div style={{ borderRadius: '4px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-                      <div onClick={() => setShowOriginal(!showOriginal)} style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', backgroundColor: 'white' }}>
-                        <span style={{ fontSize: '11px', fontWeight: 900, color: '#64748b' }}>SOURCE NATURAL LANGUAGE</span>
-                        {showOriginal ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      <div onClick={() => setShowOriginal(!showOriginal)} style={{ padding: '8px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', backgroundColor: 'white' }}>
+                        <span style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', letterSpacing: '0.1em' }}>SOURCE NATURAL LANGUAGE [CLICK TO TOGGLE]</span>
+                        {showOriginal ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                       </div>
                       {showOriginal && (
                         <div style={{ padding: '16px', fontSize: '12px', backgroundColor: '#f8fafc', color: '#334155', fontFamily: 'monospace', whiteSpace: 'pre-wrap', borderTop: '1px solid #f1f5f9' }}>
@@ -266,8 +267,8 @@ export function PlaybooksPage() {
                       )}
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      <div style={{ fontSize: '11px', fontWeight: 900, color: '#64748b', letterSpacing: '0.05em' }}>DETERMINISTIC RULESET</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', letterSpacing: '0.1em' }}>DETERMINISTIC RULESET</div>
                       {rules.map((rule, idx) => (
                         <div key={rule.id || idx} style={{
                           padding: '20px',
@@ -296,15 +297,18 @@ export function PlaybooksPage() {
                   <button 
                     onClick={() => { activatePlaybook(selectedPlaybook); setIsModalOpen(false); }}
                     disabled={selectedPlaybook.generation_status !== 'COMPLETED'}
+                    title={selectedPlaybook.generation_status !== 'COMPLETED' ? "Extraction incomplete. Deployment restricted." : "Deploy strategy to live supervision feed"}
                     style={{
-                      padding: '12px 32px',
+                      padding: '10px 32px',
                       borderRadius: '4px',
                       border: 'none',
-                      backgroundColor: 'var(--brand)',
+                      backgroundColor: '#0f172a',
                       color: 'white',
-                      fontSize: '14px',
+                      fontSize: '11px',
                       fontWeight: 900,
-                      cursor: 'pointer'
+                      cursor: selectedPlaybook.generation_status === 'COMPLETED' ? 'pointer' : 'not-allowed',
+                      opacity: selectedPlaybook.generation_status === 'COMPLETED' ? 1 : 0.6,
+                      transition: 'all 0.2s ease'
                     }}
                   >ACTIVATE PLAYBOOK</button>
                 )}
