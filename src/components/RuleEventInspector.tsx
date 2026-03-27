@@ -3,6 +3,8 @@ import { RuleEngineEvent } from '../domain/ruleEngine/types';
 import { EventRow } from './inspector/EventRow';
 import { useRuleEventFilter } from '../hooks/useRuleEventFilter';
 import { InspectorHeader } from './inspector/InspectorHeader';
+import { StatusPlaceholder } from './common/StatusPlaceholder';
+import { Shield, Activity, Search } from 'lucide-react';
 
 interface RuleEventInspectorProps {
   events: RuleEngineEvent[];
@@ -51,32 +53,25 @@ export const RuleEventInspector: FC<RuleEventInspectorProps> = ({
 
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
         {visibleEvents.length === 0 ? (
-           <div style={{ 
-             padding: '32px', 
-             textAlign: 'center', 
-             color: '#6B7280', 
-             fontSize: '13px',
-             display: 'flex',
-             flexDirection: 'column',
-             gap: '8px'
-           }}>
-              {focusedTimestamp ? (
-                <>
-                  <span style={{ fontWeight: 500 }}>No events found for {formatHeaderDate(focusedTimestamp)}</span>
-                  <span style={{ fontSize: '12px', color: '#9CA3AF' }}>Try selecting a different marker.</span>
-                </>
-              ) : !isActive ? (
-                <>
-                  <span style={{ fontWeight: 600, color: '#4B5563' }}>SUPERVISION INACTIVE</span>
-                  <span style={{ fontSize: '12px', color: '#9CA3AF' }}>Start a live session to begin monitoring your playbook.</span>
-                </>
-              ) : (
-                <>
-                  <span style={{ fontWeight: 500 }}>Waiting for rule events...</span>
-                  <span style={{ fontSize: '12px', color: '#9CA3AF' }}>Events will appear here in real-time.</span>
-                </>
-              )}
-           </div>
+          focusedTimestamp ? (
+            <StatusPlaceholder 
+              icon={Search}
+              title={`NO EVENTS FOUND`}
+              subtitle={`No events recorded for ${formatHeaderDate(focusedTimestamp)}. Try selecting a different timeframe on the chart.`}
+            />
+          ) : !isActive ? (
+            <StatusPlaceholder 
+              icon={Shield}
+              title={`SUPERVISION INACTIVE`}
+              subtitle={`Start a live session to begin real-time monitoring of your playbook execution.`}
+            />
+          ) : (
+            <StatusPlaceholder 
+              icon={Activity}
+              title={`WAITING FOR FEED...`}
+              subtitle={`Events will appear here as they are processed by the Rule Engine in real-time.`}
+            />
+          )
         ) : (
            visibleEvents.map(evt => <EventRow key={evt.id} event={evt} />)
         )}

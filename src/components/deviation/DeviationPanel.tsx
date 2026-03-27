@@ -1,6 +1,7 @@
-import { AlertTriangle, DollarSign, Shield, Clock, BarChart3, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertTriangle, DollarSign, Shield, Clock, BarChart3, ChevronDown, ChevronUp, Zap } from 'lucide-react';
 import { useState } from 'react';
 import type { DeviationRecord, DeviationSummary } from '../../hooks/useDeviationEngine';
+import { StatusPlaceholder } from '../common/StatusPlaceholder';
 
 // ─── Severity Colors ─────────────────────────────────────────────────
 const SEVERITY_COLORS: Record<string, string> = {
@@ -45,21 +46,17 @@ export function DeviationPanel({ summary, records, isActive }: DeviationPanelPro
 
   if (!isActive && records.length === 0) {
     return (
-      <div style={{
-        backgroundColor: 'white',
-        border: '1px solid #e2e8f0',
-        borderRadius: '4px',
-        padding: '24px',
-        textAlign: 'center',
-      }}>
-        <Shield size={24} color="#cbd5e1" style={{ margin: '0 auto 8px' }} />
-        <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 700 }}>
-          DEVIATION ENGINE IDLE
-        </div>
-        <div style={{ fontSize: '10px', color: '#cbd5e1', marginTop: '4px' }}>
-          Start a live session to begin supervision
-        </div>
-      </div>
+      <StatusPlaceholder 
+        icon={Zap}
+        title={`DEVIATION ENGINE IDLE`}
+        subtitle={`Connect a live session to begin the real-time cost-of-deviation supervision engine.`}
+        style={{ 
+          border: '1px solid #e2e8f0', 
+          borderRadius: '4px',
+          padding: '40px 16px',
+          minHeight: 'auto'
+        }}
+      />
     );
   }
 
