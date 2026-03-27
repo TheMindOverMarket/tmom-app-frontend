@@ -14,7 +14,9 @@ export function SessionAnalytics() {
     replayEvents, 
     loadingReplay,
     fetchSessions,
-    deleteSession
+    deleteSession,
+    deleteError,
+    clearDeleteError
   } = useSessions();
   
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
@@ -119,13 +121,29 @@ export function SessionAnalytics() {
       </div>
 
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: '4px' }}>
-        {error ? (
-          <div style={{ padding: '24px', backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '4px', color: '#b91c1c' }}>
-            <div style={{ fontSize: '9px', fontWeight: 900, color: '#ef4444', marginBottom: '6px', letterSpacing: '0.05em' }}>OPERATIONAL ERROR</div>
+        {error && (
+          <div style={{ padding: '24px', backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '4px', color: '#b91c1c', marginBottom: '24px' }}>
+            <div style={{ fontSize: '9px', fontWeight: 900, color: '#ef4444', marginBottom: '6px', letterSpacing: '0.05em' }}>NETWORKING ERROR</div>
             <div style={{ fontSize: '13px', fontWeight: '800' }}>{error}</div>
+            <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '8px' }}>The server could not be reached. Verify session health and backend service status.</div>
+          </div>
+        )}
+
+        {deleteError && (
+          <div style={{ padding: '24px', backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '4px', color: '#b91c1c', marginBottom: '24px', position: 'relative' }}>
+            <button 
+              onClick={clearDeleteError}
+              style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', color: '#b91c1c', cursor: 'pointer', fontSize: '14px' }}
+            >
+              ×
+            </button>
+            <div style={{ fontSize: '9px', fontWeight: 900, color: '#ef4444', marginBottom: '6px', letterSpacing: '0.05em' }}>PURGE ERROR</div>
+            <div style={{ fontSize: '13px', fontWeight: '800' }}>{deleteError}</div>
             <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '8px' }}>Ensure the session record is valid and exists in technical history before deletion.</div>
           </div>
-        ) : (
+        )}
+
+        {!error && (
           <SessionList 
             sessions={filteredSessions} 
             onSelect={handleSelectSession} 

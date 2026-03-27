@@ -64,8 +64,7 @@ export const sessionApi = {
   },
 
   deleteSession: async (sessionId: string): Promise<void> => {
-    // Try both formats (strict vs trailing slash) for Resilience
-    const response = await fetch(`${API_BASE}/sessions/${sessionId}/`, {
+    const response = await fetch(`${API_BASE}/sessions/${sessionId}`, {
       method: 'DELETE',
     });
     

@@ -7,6 +7,7 @@ export function useSessions() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [replayEvents, setReplayEvents] = useState<SessionEvent[]>([]);
   const [loadingReplay, setLoadingReplay] = useState(false);
 
@@ -49,12 +50,15 @@ export function useSessions() {
     fetchSessions,
     loadReplay,
     deleteSession: async (id: string) => {
+      setDeleteError(null);
       try {
         await sessionApi.deleteSession(id);
         setSessions(prev => prev.filter(s => s.id !== id));
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'Failed to delete session');
+        setDeleteError(err instanceof Error ? err.message : 'Failed to delete session');
       }
-    }
+    },
+    deleteError,
+    clearDeleteError: () => setDeleteError(null)
   };
 }
