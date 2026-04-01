@@ -35,6 +35,7 @@ export interface Playbook {
   name: string;
   original_nl_input: string;
   generation_status: GenerationStatus;
+  failure_reason?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;

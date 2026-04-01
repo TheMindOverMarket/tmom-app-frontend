@@ -275,9 +275,25 @@ export function PlaybooksPage() {
                     <div style={{ fontWeight: 800, fontSize: '18px', color: '#0f172a' }}>Analyzing Strategy Logic...</div>
                   </div>
                 ) : selectedPlaybook.generation_status === 'FAILED' ? (
-                  <div style={{ padding: '60px 0', textAlign: 'center' }}>
-                    <div style={{ fontWeight: 800, fontSize: '18px', color: 'var(--danger)' }}>Extraction Failed</div>
-                    <button onClick={() => setIsModalOpen(false)} style={{ marginTop: '20px', padding: '8px 24px', border: '1px solid #e2e8f0', background: 'white', borderRadius: '4px', cursor: 'pointer' }}>Dismiss</button>
+                  <div style={{ padding: '60px 32px', textAlign: 'center' }}>
+                    <div style={{ fontWeight: 800, fontSize: '18px', color: 'var(--danger)', marginBottom: '8px' }}>Extraction Failed</div>
+                    {selectedPlaybook.failure_reason && (
+                      <div style={{ 
+                        fontSize: '13px', 
+                        color: '#64748b', 
+                        backgroundColor: '#fef2f2', 
+                        padding: '12px 16px', 
+                        borderRadius: '4px',
+                        border: '1px solid #fee2e2',
+                        maxWidth: '500px',
+                        margin: '0 auto',
+                        wordBreak: 'break-word',
+                        fontFamily: 'monospace'
+                      }}>
+                        {selectedPlaybook.failure_reason}
+                      </div>
+                    )}
+                    <button onClick={() => setIsModalOpen(false)} style={{ marginTop: '24px', padding: '8px 24px', border: '1px solid #e2e8f0', background: 'white', borderRadius: '4px', cursor: 'pointer', fontWeight: 700, color: '#475569' }}>Dismiss</button>
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
