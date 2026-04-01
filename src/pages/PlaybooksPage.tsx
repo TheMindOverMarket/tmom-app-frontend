@@ -3,7 +3,7 @@ import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { PlaybookIngestion } from '../components/playbook/PlaybookIngestion';
 import { RefreshButton } from '../components/common/RefreshButton';
 import { RuleCondition, Playbook } from '../domain/playbook/types';
-import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Trash2, Copy, Check } from 'lucide-react';
 
 export function PlaybooksPage() {
   const { 
@@ -23,6 +23,13 @@ export function PlaybooksPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
+  };
 
   const handleOpenAnalysis = (pb: Playbook) => {
     setSelectedPlaybook(pb);
@@ -298,9 +305,35 @@ export function PlaybooksPage() {
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
                     <div style={{ borderRadius: '4px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-                      <div onClick={() => setShowOriginal(!showOriginal)} style={{ padding: '8px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', backgroundColor: 'white' }}>
-                        <span style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', letterSpacing: '0.1em' }}>SOURCE NATURAL LANGUAGE [CLICK TO TOGGLE]</span>
-                        {showOriginal ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                      <div style={{ padding: '8px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'white' }}>
+                        <div 
+                          onClick={() => setShowOriginal(!showOriginal)} 
+                          style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', flex: 1 }}
+                        >
+                          <span style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', letterSpacing: '0.1em' }}>SOURCE NATURAL LANGUAGE [CLICK TO TOGGLE]</span>
+                          {showOriginal ? <ChevronUp size={10} color="#94a3b8" /> : <ChevronDown size={10} color="#94a3b8" />}
+                        </div>
+                        
+                        <button
+                          onClick={() => handleCopy(selectedPlaybook.original_nl_input)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            padding: '4px',
+                            cursor: 'pointer',
+                            color: copySuccess ? '#16a34a' : '#94a3b8',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontSize: '9px',
+                            fontWeight: 800,
+                            transition: 'all 0.2s ease'
+                          }}
+                          title="Copy prompt to clipboard"
+                        >
+                          {copySuccess ? <Check size={12} /> : <Copy size={12} />}
+                          {copySuccess ? 'COPIED' : 'COPY'}
+                        </button>
                       </div>
                       {showOriginal && (
                         <div style={{ padding: '16px', fontSize: '12px', backgroundColor: '#f8fafc', color: '#334155', fontFamily: 'monospace', whiteSpace: 'pre-wrap', borderTop: '1px solid #f1f5f9' }}>
