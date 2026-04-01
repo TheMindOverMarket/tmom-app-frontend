@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { PlaybookIngestion } from '../components/playbook/PlaybookIngestion';
-import { RefreshButton } from '../components/common/RefreshButton';
 import { RuleCondition, Playbook } from '../domain/playbook/types';
-import { ChevronDown, ChevronUp, Trash2, Copy, Check } from 'lucide-react';
+import { ChevronDown, ChevronUp, Trash2, Copy, Check, Info } from 'lucide-react';
+import { ConfirmationModal } from '../components/common/ConfirmationModal';
+import { RefreshButton } from '../components/common/RefreshButton';
 
 export function PlaybooksPage() {
   const { 
@@ -18,12 +19,29 @@ export function PlaybooksPage() {
     deletePlaybook,
     rules,
     isLoadingPlaybooks,
-    fetchPlaybooks
+    fetchPlaybooks,
+    deleteAllPlaybooks
   } = usePlaybookContext();
+
+  const handleConfirmDelete = async () => {
+    if (confirmConfig.id === 'all') {
+      await deleteAllPlaybooks();
+    } else {
+      await deletePlaybook(confirmConfig.id);
+    }
+    setIsConfirmOpen(false);
+  };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  
+  // Deletion Confirmation State
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [confirmConfig, setConfirmConfig] = useState<{
+    id: string | 'all';
+    name: string;
+  }>({ id: '', name: '' });
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -68,10 +86,37 @@ export function PlaybooksPage() {
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexShrink: 0 }}>
             <h3 style={{ margin: 0, fontSize: '11px', fontWeight: 900, color: '#64748b', letterSpacing: '0.05em' }}>STRATEGY LIBRARY</h3>
-            <RefreshButton 
-              onRefresh={fetchPlaybooks}
-              isLoading={isLoadingPlaybooks}
-            />
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              {playbooks.length > 0 && (
+                <button
+                  onClick={() => {
+                    setConfirmConfig({ id: 'all', name: 'all playbooks' });
+                    setIsConfirmOpen(true);
+                  }}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '4px',
+                    border: '1px solid #fee2e2',
+                    backgroundColor: '#fff5f5',
+                    color: '#dc2626',
+                    fontSize: '10px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <Trash2 size={12} />
+                  DELETE ALL
+                </button>
+              )}
+              <RefreshButton 
+                onRefresh={fetchPlaybooks}
+                isLoading={isLoadingPlaybooks}
+              />
+            </div>
           </div>
           
           <div style={{ 
@@ -135,79 +180,65 @@ export function PlaybooksPage() {
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ fontSize: '14px', fontWeight: '800', color: '#0f172a' }}>{pb.name}</div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (window.confirm(`Permanently delete playbook "${pb.name}"?`)) {
-                              deletePlaybook(pb.id);
-                            }
-                          }}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            padding: '4px',
-                            cursor: 'pointer',
-                            color: '#cbd5e1',
-                            display: 'flex',
-                            alignItems: 'center',
-                            transition: 'all 0.2s ease'
-                          }}
-                          title="Purge Playbook from Library"
-                          onMouseEnter={e => e.currentTarget.style.color = 'var(--danger)'}
-                          onMouseLeave={e => e.currentTarget.style.color = '#cbd5e1'}
-                        >
-                          <Trash2 size={12} />
-                        </button>
+                        {pb.is_active && (
+                          <div style={{ 
+                            fontSize: '9px', 
+                            padding: '2px 6px', 
+                            backgroundColor: '#f0fdf4', 
+                            color: '#16a34a', 
+                            borderRadius: '2px',
+                            border: '1px solid #bbf7d0',
+                            fontWeight: 900
+                          }}>ACTIVE</div>
+                        )}
                       </div>
                       <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '2px', fontWeight: 600 }}>{new Date(pb.created_at).toLocaleDateString().toUpperCase()}</div>
                     </div>
                     
-                    {pb.is_active ? (
-                      <div style={{ 
-                        fontSize: '9px', 
-                        padding: '2px 6px', 
-                        backgroundColor: '#f0fdf4', 
-                        color: '#16a34a', 
-                        borderRadius: '2px',
-                        border: '1px solid #bbf7d0',
-                        fontWeight: 900
-                      }}>ACTIVE</div>
-                    ) : (
-                      <button 
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <div 
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (pb.generation_status === 'COMPLETED') activatePlaybook(pb);
+                          handleOpenAnalysis(pb);
                         }}
-                        disabled={pb.generation_status !== 'COMPLETED'}
-                        title={pb.generation_status === 'PENDING' ? "Orchestrating background extraction task. Activation pending..." : (pb.generation_status === 'FAILED' ? "Extraction failed. Re-ingest with clearer logic." : "Deploy strategy to live supervision feed")}
                         style={{
-                          fontSize: '10px',
-                          fontWeight: 800,
-                          backgroundColor: 'white',
+                          padding: '6px',
+                          borderRadius: '6px',
                           color: '#64748b',
-                          border: '1px solid #e2e8f0',
-                          padding: '4px 10px',
-                          borderRadius: '4px',
-                          cursor: pb.generation_status === 'COMPLETED' ? 'pointer' : 'not-allowed',
-                          opacity: pb.generation_status === 'COMPLETED' ? 1 : 0.6,
-                          transition: 'all 0.2s ease'
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          backgroundColor: '#f8fafc'
                         }}
-                        onMouseEnter={e => {
-                          if (pb.generation_status === 'COMPLETED') {
-                            e.currentTarget.style.backgroundColor = '#0f172a';
-                            e.currentTarget.style.borderColor = '#0f172a';
-                            e.currentTarget.style.color = 'white';
-                          }
-                        }}
-                        onMouseLeave={e => {
-                          e.currentTarget.style.backgroundColor = 'white';
-                          e.currentTarget.style.borderColor = '#e2e8f0';
-                          e.currentTarget.style.color = '#64748b';
-                        }}
+                        title="View details"
                       >
-                        ACTIVATE
-                      </button>
-                    )}
+                        <Info size={16} />
+                      </div>
+                      
+                      {!pb.is_active && (
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (pb.generation_status === 'COMPLETED') activatePlaybook(pb);
+                          }}
+                          disabled={pb.generation_status !== 'COMPLETED'}
+                          title={pb.generation_status === 'PENDING' ? "Extraction pending..." : (pb.generation_status === 'FAILED' ? "Extraction failed." : "Activate strategy")}
+                          style={{
+                            fontSize: '10px',
+                            fontWeight: 800,
+                            backgroundColor: 'white',
+                            color: '#64748b',
+                            border: '1px solid #e2e8f0',
+                            padding: '4px 10px',
+                            borderRadius: '4px',
+                            cursor: pb.generation_status === 'COMPLETED' ? 'pointer' : 'not-allowed',
+                            opacity: pb.generation_status === 'COMPLETED' ? 1 : 0.6,
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          ACTIVATE
+                        </button>
+                      )}
+                    </div>
                   </div>
                   
                   <div style={{ 
@@ -222,9 +253,36 @@ export function PlaybooksPage() {
                     whiteSpace: 'pre-wrap',
                     fontFamily: 'monospace',
                     maskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
-                    border: '1px solid #f1f5f9'
+                    border: '1px solid #f1f5f9',
+                    flex: 1
                   }}>
                     {pb.original_nl_input}
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfirmConfig({ id: pb.id, name: pb.name });
+                        setIsConfirmOpen(true);
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: '4px',
+                        cursor: 'pointer',
+                        color: '#ef4444',
+                        display: 'flex',
+                        alignItems: 'center',
+                        transition: 'all 0.2s ease',
+                        opacity: 0.6
+                      }}
+                      title="Delete Playbook"
+                      onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                      onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </div>
               ))
@@ -392,6 +450,18 @@ export function PlaybooksPage() {
           </div>
         )}
       </div>
+
+      <ConfirmationModal
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title={confirmConfig.id === 'all' ? 'Delete All Playbooks' : 'Delete Playbook'}
+        message={confirmConfig.id === 'all' 
+          ? 'Are you absolutely sure you want to delete ALL playbooks? This action is permanent and will remove all associated rules and trading history.' 
+          : `Are you sure you want to delete "${confirmConfig.name}"? This will permanently remove the playbook and its compiled logic.`
+        }
+        confirmText={confirmConfig.id === 'all' ? 'Delete All' : 'Delete Playbook'}
+      />
     </div>
   );
 }
