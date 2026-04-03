@@ -32,11 +32,11 @@ export interface Rule {
 export interface Playbook {
   id: string;
   user_id: string;
+  symbol?: string;
   name: string;
   market: string;
   original_nl_input: string;
   context?: Record<string, unknown> | null;
-  symbol?: string;
   generation_status: GenerationStatus;
   failure_reason?: string;
   is_active: boolean;
@@ -47,6 +47,7 @@ export interface Playbook {
 export interface PlaybookCreate {
   name: string;
   user_id: string;
+  symbol?: string;
   market: string;
   original_nl_input: string;
   is_active?: boolean;
@@ -54,6 +55,7 @@ export interface PlaybookCreate {
 
 export interface PlaybookUpdate {
   name?: string;
+  symbol?: string;
   market?: string;
   is_active?: boolean;
 }

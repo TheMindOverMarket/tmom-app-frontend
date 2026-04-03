@@ -323,6 +323,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
         const playbook = await playbookApi.ingestPlaybook({
           name: `${selectedMarket.split('/')[0]} Playbook ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
           user_id: currentUser.id,
+          symbol: selectedMarket,
           market: selectedMarket,
           original_nl_input: playbookInput,
           is_active: true

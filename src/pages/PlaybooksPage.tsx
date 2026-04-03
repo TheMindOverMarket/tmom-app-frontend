@@ -5,6 +5,7 @@ import { RuleCondition, Playbook } from '../domain/playbook/types';
 import { ChevronDown, ChevronUp, Trash2, Copy, Check, Info } from 'lucide-react';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { RefreshButton } from '../components/common/RefreshButton';
+import { resolvePlaybookSymbol } from '../domain/playbook/utils';
 
 export function PlaybooksPage() {
   const { 
@@ -142,8 +143,11 @@ export function PlaybooksPage() {
               </div>
             ) : (
               playbooks.map(pb => (
+                (() => {
+                  const playbookSymbol = resolvePlaybookSymbol(pb);
+                  return (
                 <div 
-                  key={pb.id} 
+                  key={pb.id}
                   onClick={() => handleOpenAnalysis(pb)}
                   style={{ 
                     padding: '16px', 
@@ -197,7 +201,7 @@ export function PlaybooksPage() {
                           borderRadius: '999px',
                           border: '1px solid #bfdbfe',
                           fontWeight: 900
-                        }}>{pb.market}</div>
+                        }}>{playbookSymbol}</div>
                         {pb.is_active && (
                           <div style={{ 
                             fontSize: '9px', 
@@ -310,6 +314,8 @@ export function PlaybooksPage() {
                     </div>
                   </div>
                 </div>
+                  );
+                })()
               ))
             )}
           </div>
@@ -352,7 +358,7 @@ export function PlaybooksPage() {
                     </div>
                     <div style={{ fontSize: '20px', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.02em' }}>{selectedPlaybook.name}</div>
                     <div style={{ marginTop: '8px', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 800, color: '#1d4ed8', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '999px', padding: '6px 10px' }}>
-                      {selectedPlaybook.market}
+                      {resolvePlaybookSymbol(selectedPlaybook)}
                     </div>
                   </div>
                   <button 

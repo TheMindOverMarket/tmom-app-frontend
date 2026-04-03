@@ -7,6 +7,7 @@ import { RuleEventInspector } from '../components/RuleEventInspector';
 import { Activity, Circle, Check, X, Bell } from 'lucide-react';
 import { useDeviationEngine } from '../hooks/useDeviationEngine';
 import { DeviationPanel } from '../components/deviation/DeviationPanel';
+import { resolvePlaybookSymbol } from '../domain/playbook/utils';
 
 export function MonitorPage() {
   const { selectedPlaybook, rules, activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream } = usePlaybookContext();
@@ -16,6 +17,7 @@ export function MonitorPage() {
 
   const [focusedView, setFocusedView] = useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);
   const isLoading = isStartingStream || isStoppingStream;
+  const { notification } = usePlaybookContext();
 
   // Guard: Redirect if no playbook selected
   useEffect(() => {
@@ -29,8 +31,7 @@ export function MonitorPage() {
   };
 
   if (!selectedPlaybook) return null;
-
-  const { notification } = usePlaybookContext();
+  const playbookSymbol = resolvePlaybookSymbol(selectedPlaybook);
 
   return (
     <div style={{ 
@@ -146,7 +147,7 @@ export function MonitorPage() {
         <div style={{ flex: 1, minHeight: 0, position: 'relative', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
           <PriceChart 
             events={events}
-            symbol={selectedPlaybook.market}
+            symbol={playbookSymbol}
             onMarkerClick={handleMarkerClick}
           />
         </div>
