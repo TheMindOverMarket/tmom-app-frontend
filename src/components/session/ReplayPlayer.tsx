@@ -22,6 +22,10 @@ export function ReplayPlayer({ session, events, loading, onClose }: ReplayPlayer
     events.find(e => e.id === selectedEventId) || events[currentIndex], 
     [events, selectedEventId, currentIndex]
   );
+  const visibleEvents = useMemo(
+    () => events.slice(0, Math.min(currentIndex + 1, events.length)),
+    [events, currentIndex]
+  );
 
   useEffect(() => {
     if (isPlaying) {
@@ -57,8 +61,18 @@ export function ReplayPlayer({ session, events, loading, onClose }: ReplayPlayer
     }
   };
 
-  const handleMarkerClick = (timestamp: number) => {
-    const idx = events.findIndex(e => new Date(e.timestamp).getTime() / 1000 === timestamp);
+  const handleMarkerClick = (timestamp: number, type?: 'adherence' | 'deviation') => {
+    const snappedTimestamp = Math.floor(timestamp / 60) * 60;
+    const idx = events.findIndex((event) => {
+      const eventSnappedTimestamp = Math.floor(new Date(event.timestamp).getTime() / 1000 / 60) * 60;
+      if (eventSnappedTimestamp !== snappedTimestamp) return false;
+      if (!type) return true;
+      return (
+        (type === 'deviation' && event.type === SessionEventType.DEVIATION) ||
+        (type === 'adherence' && event.type === SessionEventType.ADHERENCE)
+      );
+    });
+
     if (idx !== -1) {
        setCurrentIndex(idx);
        setSelectedEventId(events[idx].id);
@@ -289,7 +303,7 @@ export function ReplayPlayer({ session, events, loading, onClose }: ReplayPlayer
               <div style={{ flex: 1, minHeight: 0 }}>
                  <ReplayChart 
                    session={session} 
-                   events={events} 
+                   events={visibleEvents} 
                    onMarkerClick={handleMarkerClick} 
                  />
               </div>

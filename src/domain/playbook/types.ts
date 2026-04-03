@@ -34,6 +34,8 @@ export interface Playbook {
   user_id: string;
   name: string;
   original_nl_input: string;
+  context?: Record<string, unknown> | null;
+  symbol?: string;
   generation_status: GenerationStatus;
   failure_reason?: string;
   is_active: boolean;

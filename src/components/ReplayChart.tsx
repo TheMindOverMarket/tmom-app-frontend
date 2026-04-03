@@ -23,60 +23,137 @@ interface ReplayChartProps {
 export function ReplayChart({ session, events, onMarkerClick }: ReplayChartProps) {
   const [candles, setCandles] = useState<Candle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [symbol, setSymbol] = useState('BTC/USD');
+
+  const resolveReplaySymbol = (playbook: Awaited<ReturnType<typeof playbookApi.getPlaybook>> | null, replayEvents: SessionEvent[]) => {
+    const playbookSymbol = typeof playbook?.symbol === 'string'
+      ? playbook.symbol
+      : typeof playbook?.context?.symbol === 'string'
+        ? playbook.context.symbol
+        : null;
+
+    if (playbookSymbol) return playbookSymbol;
+
+    const symbolFromEvents = replayEvents
+      .map((event) => event.event_data?.symbol)
+      .find((value): value is string => typeof value === 'string' && value.length > 0);
+
+    if (symbolFromEvents) return symbolFromEvents;
+
+    // Temporary fallback until the explicit playbook symbol lands everywhere.
+    if (playbook?.original_nl_input?.toLowerCase().includes('eth')) return 'ETH/USD';
+    if (playbook?.original_nl_input?.toLowerCase().includes('btc')) return 'BTC/USD';
+    return 'BTC/USD';
+  };
+
+  const extractNumericValue = (event: SessionEvent): number | null => {
+    const candidates = [
+      event.event_data?.price,
+      event.event_data?.filled_avg_price,
+      event.event_data?.last_price,
+      event.event_data?.close,
+      event.event_data?.value,
+      event.tick,
+    ];
+
+    for (const candidate of candidates) {
+      if (typeof candidate === 'number' && Number.isFinite(candidate)) return candidate;
+      if (typeof candidate === 'string') {
+        const parsed = Number(candidate);
+        if (Number.isFinite(parsed)) return parsed;
+      }
+    }
+
+    return null;
+  };
+
+  const getNearestCandle = (timestampMs: number, replayCandles: Candle[]) => {
+    if (replayCandles.length === 0) return null;
+
+    const targetSeconds = Math.floor(timestampMs / 1000);
+    let nearest = replayCandles[0];
+    let smallestDistance = Math.abs(Number(nearest.time) - targetSeconds);
+
+    for (const candle of replayCandles) {
+      const distance = Math.abs(Number(candle.time) - targetSeconds);
+      if (distance < smallestDistance) {
+        nearest = candle;
+        smallestDistance = distance;
+      }
+    }
+
+    return nearest;
+  };
+
+  const deriveRuleEngineEvents = (replayEvents: SessionEvent[], replayCandles: Candle[]): RuleEngineEvent[] =>
+    replayEvents
+      .filter((event) => event.type === SessionEventType.ADHERENCE || event.type === SessionEventType.DEVIATION)
+      .map((event) => {
+        const msTimestamp = new Date(event.timestamp).getTime();
+        const nearestCandle = getNearestCandle(msTimestamp, replayCandles);
+        const extractedPrice = extractNumericValue(event);
+        const price = extractedPrice ?? nearestCandle?.close ?? 0;
+        const ruleName =
+          (typeof event.event_data?.rule === 'string' && event.event_data.rule) ||
+          (typeof event.event_data?.rule_name === 'string' && event.event_data.rule_name) ||
+          (typeof event.event_data?.summary === 'string' && event.event_data.summary) ||
+          (typeof event.event_data?.rule_id === 'string' && event.event_data.rule_id) ||
+          event.type;
+        const ruleId =
+          (typeof event.event_data?.rule_id === 'string' && event.event_data.rule_id) ||
+          (typeof event.event_data?.rule === 'string' && event.event_data.rule) ||
+          event.id;
+        const deviation = event.type === SessionEventType.DEVIATION;
+
+        return {
+          id: event.id,
+          timestamp: Math.floor(msTimestamp / 1000),
+          msTimestamp,
+          originalTimestamp: event.timestamp,
+          price,
+          playbook_id: session.playbook_id,
+          session_id: session.id,
+          user_id: session.user_id,
+          rule: ruleName,
+          rule_triggered: !deviation,
+          triggered_entries: ruleId ? [ruleId] : [],
+          rule_evaluations: {},
+          rawRule: event.event_data,
+          action: true,
+          deviation,
+          deviation_true: deviation ? [ruleId] : [],
+          deviation_false: deviation ? [] : [ruleId],
+        };
+      });
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // 1. Resolve symbol from the playbook context
+        let resolvedPlaybook = null;
         try {
-            const pb = await playbookApi.getPlaybook(session.playbook_id);
-            if (pb.original_nl_input?.toLowerCase().includes('eth')) setSymbol('ETH/USD');
-            else if (pb.original_nl_input?.toLowerCase().includes('btc')) setSymbol('BTC/USD');
+          resolvedPlaybook = await playbookApi.getPlaybook(session.playbook_id);
         } catch (e) {
-            console.warn("[ReplayChart] Failed to fetch playbook for symbol lookup, defaulting to BTC/USD");
+          console.warn('[ReplayChart] Failed to fetch playbook for replay hydration, using event fallback.');
         }
 
-        // 2. Fetch market data for exactly the duration of the session
-        // Note: Backend endpoint enhancement requested to support these parameters.
-        const history = await BackendMarketDataProvider.getHistory(symbol, 60, {
+        const resolvedSymbol = resolveReplaySymbol(resolvedPlaybook, events);
+
+        const history = await BackendMarketDataProvider.getHistory(resolvedSymbol, 60, {
           start_time: session.start_time,
-          end_time: session.end_time || new Date().toISOString()
+          end_time: session.end_time || new Date().toISOString(),
         });
         setCandles(history);
       } catch (err) {
-        console.error("[ReplayChart] Failed to load replay market data", err);
+        console.error('[ReplayChart] Failed to load replay market data', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
-  }, [session.id, symbol, session.playbook_id, session.start_time, session.end_time]);
 
-  // Translate SessionEvents back to RuleEngineEvents so we can reuse the PriceChart visualization logic
-  const ruleEvents: RuleEngineEvent[] = events
-    .filter(e => e.type === SessionEventType.ADHERENCE || e.type === SessionEventType.DEVIATION)
-    .map(e => {
-        const ts = new Date(e.timestamp).getTime();
-        return {
-          id: e.id,
-          timestamp: Math.floor(ts / 1000),
-          msTimestamp: ts,
-          originalTimestamp: e.timestamp,
-          price: e.tick || 0,
-          playbook_id: session.playbook_id,
-          session_id: session.id,
-          user_id: session.user_id,
-          rule: (e.event_data?.rule_id as string) || 'unknown',
-          rule_triggered: e.type === SessionEventType.ADHERENCE,
-          triggered_entries: [],
-          rule_evaluations: {},
-          rawRule: {},
-          action: true,
-          deviation: e.type === SessionEventType.DEVIATION,
-        };
-    });
+    void fetchData();
+  }, [events, session.end_time, session.playbook_id, session.start_time]);
+
+  const ruleEvents = deriveRuleEngineEvents(events, candles);
 
   const { ema9 } = useDerivedSignals(candles, null);
 
