@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Session, SessionEvent } from '../domain/session/types';
 import { sessionApi } from '../domain/session/api';
-import { CONFIG } from '../config/constants';
+import { useUserSession } from '../contexts/UserSessionContext';
 
 export function useSessions() {
+  const { currentUser } = useUserSession();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -12,17 +13,24 @@ export function useSessions() {
   const [loadingReplay, setLoadingReplay] = useState(false);
 
   const fetchSessions = useCallback(async () => {
+    if (!currentUser) {
+      setLoading(false);
+      setError(null);
+      setSessions([]);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      const data = await sessionApi.listSessions(CONFIG.USER_ID);
+      const data = await sessionApi.listSessions(currentUser.id);
       setSessions(data);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to fetch sessions');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentUser]);
 
   const loadReplay = useCallback(async (sessionId: string) => {
     setLoadingReplay(true);

@@ -1,6 +1,10 @@
-import { CONFIG } from '../../config/constants';
+import { useUserSession } from '../../contexts/UserSessionContext';
 
 export function UserIDBanner() {
+  const { currentUser } = useUserSession();
+
+  if (!currentUser) return null;
+
   return (
     <div style={{
       padding: '4px 24px',
@@ -13,8 +17,7 @@ export function UserIDBanner() {
       fontWeight: 500,
     }}>
       <span style={{ marginRight: '6px', opacity: 0.7 }}>👤</span>
-      <strong style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Debug:</strong> &nbsp;{CONFIG.USER_ID}
+      <strong style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Debug:</strong> &nbsp;{currentUser.id}
     </div>
   );
 }
-

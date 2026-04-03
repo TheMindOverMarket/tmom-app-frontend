@@ -3,7 +3,7 @@ import { playbookApi } from '../domain/playbook/api';
 import { Playbook } from '../domain/playbook/types';
 import { sessionApi } from '../domain/session/api';
 import { Session, SessionStatus } from '../domain/session/types';
-import { CONFIG } from '../config/constants';
+import { useUserSession } from './UserSessionContext';
 
 interface PlaybookContextType {
   playbookInput: string;
@@ -97,6 +97,7 @@ Cooldown:
 	•	30 minutes after 2 consecutive losses`;
 
 export function PlaybookProvider({ children }: { children: ReactNode }) {
+  const { currentUser } = useUserSession();
   const [playbookInput, setPlaybookInput] = useState(SAMPLE_PLAYBOOK);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -177,9 +178,17 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
 
   // Fetch Playbooks
   const fetchPlaybooks = useCallback(async () => {
+    if (!currentUser) {
+      setPlaybooks([]);
+      setSelectedPlaybook(null);
+      setRules([]);
+      setIsLoadingPlaybooks(false);
+      return;
+    }
+
     setIsLoadingPlaybooks(true);
     try {
-      const data = await playbookApi.listUserPlaybooks(CONFIG.USER_ID);
+      const data = await playbookApi.listUserPlaybooks(currentUser.id);
       
       // Sort: Active first, then by date descending
       const sorted = [...data].sort((a, b) => {
@@ -193,27 +202,34 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       
       // Only auto-select the one active in the DB if we don't have a selection yet
       const activeInDb = sorted.find(pb => pb.is_active);
-      if (activeInDb && !selectedPlaybook) {
-        setSelectedPlaybook(activeInDb);
-      }
+      setSelectedPlaybook(prev => prev ?? activeInDb ?? null);
     } catch (error: unknown) {
       console.error('Failed to fetch playbooks:', error);
     } finally {
       setIsLoadingPlaybooks(false);
     }
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => {
-    fetchPlaybooks();
+    void fetchPlaybooks();
   }, [fetchPlaybooks]);
 
+  useEffect(() => {
+    setSelectedPlaybook(null);
+    setActiveSession(null);
+    setIsStreaming(false);
+    setRules([]);
+  }, [currentUser?.id]);
+
   const startStream = async (playbookId: string) => {
+    if (!currentUser) return;
+
     setIsStartingStream(true);
     setNotification(null);
     try {
       // Setup backend session and UI
       const session = await sessionApi.startSession({
-        user_id: CONFIG.USER_ID,
+        user_id: currentUser.id,
         playbook_id: playbookId
       });
       
@@ -247,7 +263,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
   };
 
   const createPlaybookFromNL = async () => {
-    if (!playbookInput.trim()) return;
+    if (!playbookInput.trim() || !currentUser) return;
     
     setIsSubmitting(true);
     setNotification(null);
@@ -255,7 +271,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     try {
         const playbook = await playbookApi.ingestPlaybook({
           name: `Playbook ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
-          user_id: CONFIG.USER_ID,
+          user_id: currentUser.id,
           original_nl_input: playbookInput,
           is_active: true
         });
@@ -306,8 +322,10 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteAllPlaybooks = async () => {
+    if (!currentUser) return;
+
     try {
-      await playbookApi.deleteAllPlaybooks(CONFIG.USER_ID);
+      await playbookApi.deleteAllPlaybooks(currentUser.id);
       setSelectedPlaybook(null);
       await fetchPlaybooks();
       setNotification({ type: 'success', message: 'All playbooks have been deleted.' });
