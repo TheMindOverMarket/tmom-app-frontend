@@ -100,7 +100,7 @@ export const playbookApi = {
     if (!response.ok) throw new Error('Failed to delete playbook');
   },
   deleteAllPlaybooks: async (userId: string): Promise<void> => {
-    const response = await fetch(`${API_BASE}/playbooks/users/${userId}/playbooks`, {
+    const response = await fetch(`${API_BASE}/users/${userId}/playbooks`, {
       method: 'DELETE'
     });
     if (!response.ok) throw new Error('Failed to delete all playbooks');
