@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { PlaybookProvider } from './contexts/PlaybookContext';
 import { UserSessionProvider, useUserSession } from './contexts/UserSessionContext';
 import { AppLayout } from './components/layout/AppLayout';
+import { AdminDashboard } from './pages/AdminDashboard';
 import { PlaybooksPage } from './pages/PlaybooksPage';
 import { MonitorPage } from './pages/MonitorPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
@@ -18,6 +19,8 @@ function UserScopedApp() {
     );
   }
 
+  const isAdmin = currentUser?.role === 'ADMIN';
+
   return (
     <PlaybookProvider>
       <Routes>
@@ -28,6 +31,7 @@ function UserScopedApp() {
             <Route path="/playbooks" element={<PlaybooksPage />} />
             <Route path="/supervision" element={<MonitorPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
+            {isAdmin && <Route path="/admin" element={<AdminDashboard />} />}
             <Route path="*" element={<Navigate to="/playbooks" replace />} />
           </Route>
         ) : (

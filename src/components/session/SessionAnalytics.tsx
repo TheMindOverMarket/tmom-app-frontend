@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useSessions } from '../../hooks/useSessions';
 import { Session, SessionStatus } from '../../domain/session/types';
 import { SessionList } from './SessionList';
@@ -6,6 +7,10 @@ import { ReplayPlayer } from './ReplayPlayer';
 import { RefreshButton } from '../common/RefreshButton';
 
 export function SessionAnalytics() {
+  const [searchParams] = useSearchParams();
+  const userIdParam = searchParams.get('user_id');
+  const sessionIdParam = searchParams.get('session_id');
+
   const { 
     sessions, 
     loading, 
@@ -17,10 +22,21 @@ export function SessionAnalytics() {
     deleteSession,
     deleteError,
     clearDeleteError
-  } = useSessions();
+  } = useSessions(userIdParam || undefined);
   
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(sessionIdParam || '');
+
+  // Auto-select session if sessionIdParam is present and sessions are loaded
+  useEffect(() => {
+    if (sessionIdParam && sessions.length > 0 && !selectedSession) {
+      const session = sessions.find(s => s.id === sessionIdParam);
+      if (session) {
+        setSelectedSession(session);
+        loadReplay(session.id);
+      }
+    }
+  }, [sessionIdParam, sessions, selectedSession, loadReplay]);
 
   const stats = useMemo(() => ({
     total: sessions.length,

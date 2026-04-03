@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
-import { ShieldCheck, Activity, Database } from 'lucide-react';
+import { ShieldCheck, Activity, Database, LayoutGrid } from 'lucide-react';
 import { usePlaybookContext } from '../../contexts/PlaybookContext';
+import { useUserSession } from '../../contexts/UserSessionContext';
 
 const NAV_ITEMS = [
   { path: '/playbooks', label: 'PLAYBOOKS', icon: Database },
@@ -10,6 +11,12 @@ const NAV_ITEMS = [
 
 export function Navbar() {
   const { selectedPlaybook } = usePlaybookContext();
+  const { currentUser } = useUserSession();
+
+  const isAdmin = currentUser?.role === 'ADMIN';
+  const navItems = isAdmin 
+    ? [...NAV_ITEMS, { path: '/admin', label: 'ADMIN CONTROL', icon: LayoutGrid }]
+    : NAV_ITEMS;
 
   return (
     <nav style={{
@@ -22,7 +29,7 @@ export function Navbar() {
       height: '36px',
       alignItems: 'center'
     }}>
-      {NAV_ITEMS.map(({ path, label, icon: Icon, requiresPlaybook }) => {
+      {navItems.map(({ path, label, icon: Icon, requiresPlaybook }) => {
         const isDisabled = requiresPlaybook && !selectedPlaybook;
         
         return (
