@@ -150,6 +150,7 @@ export function PlaybooksPage() {
                     overflow: 'hidden',
                     cursor: 'pointer'
                   }}
+                  aria-label={`Open ${pb.name}`}
                   onMouseEnter={e => {
                     e.currentTarget.style.borderColor = 'var(--brand)';
                     e.currentTarget.style.backgroundColor = '#fcfdfe';
@@ -259,7 +260,10 @@ export function PlaybooksPage() {
                     {pb.original_nl_input}
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
+                    <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 700 }}>
+                      Open to inspect the extracted rules.
+                    </div>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -267,21 +271,31 @@ export function PlaybooksPage() {
                         setIsConfirmOpen(true);
                       }}
                       style={{
-                        background: 'none',
-                        border: 'none',
-                        padding: '4px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 10px',
+                        borderRadius: '999px',
+                        border: '1px solid #fee2e2',
+                        backgroundColor: '#fff5f5',
                         cursor: 'pointer',
                         color: '#ef4444',
-                        display: 'flex',
-                        alignItems: 'center',
                         transition: 'all 0.2s ease',
-                        opacity: 0.6
+                        fontSize: '10px',
+                        fontWeight: 900
                       }}
                       title="Delete Playbook"
-                      onMouseEnter={e => e.currentTarget.style.opacity = '1'}
-                      onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.backgroundColor = '#fef2f2';
+                        e.currentTarget.style.borderColor = '#fecaca';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.backgroundColor = '#fff5f5';
+                        e.currentTarget.style.borderColor = '#fee2e2';
+                      }}
                     >
                       <Trash2 size={14} />
+                      DELETE
                     </button>
                   </div>
                 </div>
