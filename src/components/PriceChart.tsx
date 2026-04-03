@@ -8,11 +8,12 @@ import { ChartLegend } from './chart/ChartLegend';
 
 interface PriceChartProps {
   events: RuleEngineEvent[];
+  symbol: string;
   onMarkerClick: (timestamp: number, type?: 'adherence' | 'deviation') => void;
 }
 
-export function PriceChart({ events, onMarkerClick }: PriceChartProps) {
-  const { candles, currentCandle, isMockData } = useMarketData('BTC/USD', 60);
+export function PriceChart({ events, symbol, onMarkerClick }: PriceChartProps) {
+  const { candles, currentCandle, isMockData } = useMarketData(symbol, 60);
   const { ema9, currentEMA9 } = useDerivedSignals(candles, currentCandle);
 
   const {
@@ -39,8 +40,7 @@ export function PriceChart({ events, onMarkerClick }: PriceChartProps) {
         onToggle={() => setDeduplicateEvents(!deduplicateEvents)} 
       />
 
-      <ChartLegend isMockData={isMockData} />
+      <ChartLegend isMockData={isMockData} symbol={symbol} />
     </div>
   );
 }
-

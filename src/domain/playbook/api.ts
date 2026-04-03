@@ -1,5 +1,5 @@
 import { CONFIG } from '../../config/constants';
-import { Playbook, PlaybookCreate } from './types';
+import { MarketOption, Playbook, PlaybookCreate } from './types';
 
 const API_BASE = CONFIG.BACKEND_BASE_URL;
 
@@ -90,6 +90,12 @@ export const playbookApi = {
   listPlaybookRules: async (playbookId: string): Promise<any[]> => {
     const response = await fetch(`${API_BASE}/playbooks/${playbookId}/rules`);
     if (!response.ok) throw new Error('Failed to list playbook rules');
+    return response.json();
+  },
+
+  listMarkets: async (): Promise<MarketOption[]> => {
+    const response = await fetch(`${API_BASE}/market-data/markets`);
+    if (!response.ok) throw new Error('Failed to list markets');
     return response.json();
   },
 

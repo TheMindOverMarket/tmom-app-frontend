@@ -30,7 +30,6 @@ export function MonitorPage() {
 
   if (!selectedPlaybook) return null;
 
-
   const { notification } = usePlaybookContext();
 
   return (
@@ -147,6 +146,7 @@ export function MonitorPage() {
         <div style={{ flex: 1, minHeight: 0, position: 'relative', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
           <PriceChart 
             events={events}
+            symbol={selectedPlaybook.market}
             onMarkerClick={handleMarkerClick}
           />
         </div>

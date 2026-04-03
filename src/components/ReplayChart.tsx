@@ -25,11 +25,13 @@ export function ReplayChart({ session, events, onMarkerClick }: ReplayChartProps
   const [loading, setLoading] = useState(true);
 
   const resolveReplaySymbol = (playbook: Awaited<ReturnType<typeof playbookApi.getPlaybook>> | null, replayEvents: SessionEvent[]) => {
-    const playbookSymbol = typeof playbook?.symbol === 'string'
-      ? playbook.symbol
-      : typeof playbook?.context?.symbol === 'string'
-        ? playbook.context.symbol
-        : null;
+    const playbookSymbol = typeof playbook?.market === 'string'
+      ? playbook.market
+      : typeof playbook?.symbol === 'string'
+        ? playbook.symbol
+        : typeof playbook?.context?.symbol === 'string'
+          ? playbook.context.symbol
+          : null;
 
     if (playbookSymbol) return playbookSymbol;
 
@@ -38,8 +40,6 @@ export function ReplayChart({ session, events, onMarkerClick }: ReplayChartProps
       .find((value): value is string => typeof value === 'string' && value.length > 0);
 
     if (symbolFromEvents) return symbolFromEvents;
-
-    // Temporary fallback until the explicit playbook symbol lands everywhere.
     if (playbook?.original_nl_input?.toLowerCase().includes('eth')) return 'ETH/USD';
     if (playbook?.original_nl_input?.toLowerCase().includes('btc')) return 'BTC/USD';
     return 'BTC/USD';

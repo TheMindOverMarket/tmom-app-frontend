@@ -1,8 +1,14 @@
+import { MarketOption } from '../../domain/playbook/types';
+
 interface PlaybookIngestionProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit: () => void;
   isSubmitting: boolean;
+  selectedMarket: string;
+  onMarketChange: (value: string) => void;
+  availableMarkets: MarketOption[];
+  isLoadingMarkets?: boolean;
   onStartSession?: () => void;
   onStopSession?: () => void;
   isStreaming?: boolean;
@@ -15,6 +21,10 @@ export function PlaybookIngestion({
   onChange, 
   onSubmit, 
   isSubmitting,
+  selectedMarket,
+  onMarketChange,
+  availableMarkets,
+  isLoadingMarkets = false,
   onStartSession,
   onStopSession,
   isStreaming = false,
@@ -23,6 +33,52 @@ export function PlaybookIngestion({
 }: PlaybookIngestionProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: '12px', alignItems: 'end', marginBottom: '8px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label style={{ fontSize: '10px', fontWeight: 900, color: '#64748b', letterSpacing: '0.06em' }}>
+            MARKET
+          </label>
+          <select
+            value={selectedMarket}
+            onChange={(e) => onMarketChange(e.target.value)}
+            disabled={isSubmitting || isLoadingMarkets}
+            style={{
+              height: '38px',
+              borderRadius: '4px',
+              border: '1px solid var(--slate-200)',
+              backgroundColor: 'white',
+              color: 'var(--slate-900)',
+              padding: '0 12px',
+              fontSize: '13px',
+              fontWeight: 700,
+              outline: 'none',
+            }}
+          >
+            {availableMarkets.map((market) => (
+              <option key={market.symbol} value={market.symbol}>
+                {market.symbol}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div
+          style={{
+            minHeight: '38px',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 12px',
+            borderRadius: '4px',
+            backgroundColor: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            fontSize: '12px',
+            color: '#475569',
+            fontWeight: 600,
+          }}
+        >
+          {availableMarkets.find((market) => market.symbol === selectedMarket)?.display_name || selectedMarket}
+        </div>
+      </div>
+
       <div style={{ 
         position: 'relative', 
         display: 'flex', 

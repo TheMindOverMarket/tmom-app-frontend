@@ -10,6 +10,10 @@ export function PlaybooksPage() {
   const { 
     playbookInput, 
     setPlaybookInput, 
+    selectedMarket,
+    setSelectedMarket,
+    availableMarkets,
+    isLoadingMarkets,
     createPlaybookFromNL, 
     isSubmitting,
     playbooks,
@@ -70,6 +74,10 @@ export function PlaybooksPage() {
         <PlaybookIngestion 
           value={playbookInput}
           onChange={setPlaybookInput}
+          selectedMarket={selectedMarket}
+          onMarketChange={setSelectedMarket}
+          availableMarkets={availableMarkets}
+          isLoadingMarkets={isLoadingMarkets}
           onSubmit={createPlaybookFromNL}
           isSubmitting={isSubmitting}
         />
@@ -181,6 +189,15 @@ export function PlaybooksPage() {
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ fontSize: '14px', fontWeight: '800', color: '#0f172a' }}>{pb.name}</div>
+                        <div style={{ 
+                          fontSize: '9px', 
+                          padding: '2px 6px', 
+                          backgroundColor: '#eff6ff', 
+                          color: '#1d4ed8', 
+                          borderRadius: '999px',
+                          border: '1px solid #bfdbfe',
+                          fontWeight: 900
+                        }}>{pb.market}</div>
                         {pb.is_active && (
                           <div style={{ 
                             fontSize: '9px', 
@@ -334,6 +351,9 @@ export function PlaybooksPage() {
                       <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--brand)', letterSpacing: '0.1em' }}>STRATEGY INSPECTOR</div>
                     </div>
                     <div style={{ fontSize: '20px', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.02em' }}>{selectedPlaybook.name}</div>
+                    <div style={{ marginTop: '8px', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 800, color: '#1d4ed8', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '999px', padding: '6px 10px' }}>
+                      {selectedPlaybook.market}
+                    </div>
                   </div>
                   <button 
                     onClick={() => setIsModalOpen(false)}

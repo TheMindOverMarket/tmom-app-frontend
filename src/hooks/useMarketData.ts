@@ -30,7 +30,7 @@ export function useMarketData(symbol: string = 'BTC/USD', interval: number = 60)
         setIsMockData(false);
       } catch (err) {
         console.warn('[useMarketData] Backend failed, generating mock data.', err);
-        history = generateRealisticMockHistory(interval);
+        history = generateRealisticMockHistory(symbol, interval);
         setIsMockData(true);
       }
       
@@ -71,11 +71,29 @@ export function useMarketData(symbol: string = 'BTC/USD', interval: number = 60)
   return { candles, currentCandle, isMockData };
 }
 
-function generateRealisticMockHistory(interval: number): Candle[] {
+function getMockBaselinePrice(symbol: string): number {
+  const baseAsset = symbol.split('/')[0]?.toUpperCase();
+  switch (baseAsset) {
+    case 'ETH':
+      return 3600;
+    case 'SOL':
+      return 180;
+    case 'DOGE':
+      return 0.18;
+    case 'LTC':
+      return 95;
+    case 'AVAX':
+      return 42;
+    case 'BTC':
+    default:
+      return 71500;
+  }
+}
+
+function generateRealisticMockHistory(symbol: string, interval: number): Candle[] {
   const data: Candle[] = [];
   const now = Math.floor(Date.now() / 1000 / 60) * 60;
-  // Start at a realistic BTC price instead of 96k
-  let price = 71500;
+  let price = getMockBaselinePrice(symbol);
 
   for (let i = 100; i >= 0; i--) {
     const time = (now - i * interval) as Time;
@@ -90,4 +108,3 @@ function generateRealisticMockHistory(interval: number): Candle[] {
   }
   return data;
 }
-

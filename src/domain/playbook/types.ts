@@ -33,6 +33,7 @@ export interface Playbook {
   id: string;
   user_id: string;
   name: string;
+  market: string;
   original_nl_input: string;
   context?: Record<string, unknown> | null;
   symbol?: string;
@@ -46,11 +47,21 @@ export interface Playbook {
 export interface PlaybookCreate {
   name: string;
   user_id: string;
+  market: string;
   original_nl_input: string;
   is_active?: boolean;
 }
 
 export interface PlaybookUpdate {
   name?: string;
+  market?: string;
   is_active?: boolean;
+}
+
+export interface MarketOption {
+  symbol: string;
+  base_asset: string;
+  quote_asset: string;
+  display_name: string;
+  provider: string;
 }
