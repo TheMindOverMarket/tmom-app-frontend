@@ -35,12 +35,6 @@ interface PlaybookContextType {
 
 const PlaybookContext = createContext<PlaybookContextType | undefined>(undefined);
 
-const DEFAULT_MARKETS: MarketOption[] = [
-  { symbol: 'BTC/USD', base_asset: 'BTC', quote_asset: 'USD', display_name: 'Bitcoin / US Dollar', provider: 'fallback' },
-  { symbol: 'ETH/USD', base_asset: 'ETH', quote_asset: 'USD', display_name: 'Ethereum / US Dollar', provider: 'fallback' },
-  { symbol: 'SOL/USD', base_asset: 'SOL', quote_asset: 'USD', display_name: 'Solana / US Dollar', provider: 'fallback' },
-];
-
 const buildSamplePlaybook = (market: string) => `I’m using ${market.split('/')[0]}.
 1. Setup Logic (Deterministic Inputs)
 
@@ -108,10 +102,10 @@ Cooldown:
 
 export function PlaybookProvider({ children }: { children: ReactNode }) {
   const { currentUser } = useUserSession();
-  const [selectedMarket, setSelectedMarket] = useState('BTC/USD');
-  const [availableMarkets, setAvailableMarkets] = useState<MarketOption[]>(DEFAULT_MARKETS);
+  const [selectedMarket, setSelectedMarket] = useState('');
+  const [availableMarkets, setAvailableMarkets] = useState<MarketOption[]>([]);
   const [isLoadingMarkets, setIsLoadingMarkets] = useState(false);
-  const [playbookInput, setPlaybookInput] = useState(buildSamplePlaybook('BTC/USD'));
+  const [playbookInput, setPlaybookInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   
@@ -129,12 +123,16 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
         const markets = await playbookApi.listMarkets();
         if (!cancelled && markets.length > 0) {
           setAvailableMarkets(markets);
-          if (!markets.some((market) => market.symbol === selectedMarket)) {
+          if (!selectedMarket || !markets.some((market) => market.symbol === selectedMarket)) {
             setSelectedMarket(markets[0].symbol);
           }
         }
       } catch (error) {
         console.error('Failed to fetch markets:', error);
+        if (!cancelled) {
+          setAvailableMarkets([]);
+          setSelectedMarket('');
+        }
       } finally {
         if (!cancelled) {
           setIsLoadingMarkets(false);
@@ -150,6 +148,9 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (!selectedMarket) {
+      return;
+    }
     const nextTemplate = buildSamplePlaybook(selectedMarket);
     setPlaybookInput((current) => {
       const matchesExistingTemplate =
@@ -256,6 +257,10 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       setSelectedPlaybook(prev => prev ?? activeInDb ?? null);
     } catch (error: unknown) {
       console.error('Failed to fetch playbooks:', error);
+      setNotification({
+        type: 'error',
+        message: `Failed to load playbooks: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      });
     } finally {
       setIsLoadingPlaybooks(false);
     }
@@ -314,7 +319,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
   };
 
   const createPlaybookFromNL = async () => {
-    if (!playbookInput.trim() || !currentUser) return;
+    if (!playbookInput.trim() || !currentUser || !selectedMarket) return;
     
     setIsSubmitting(true);
     setNotification(null);

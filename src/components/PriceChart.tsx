@@ -5,6 +5,8 @@ import { useDerivedSignals } from '../hooks/useDerivedSignals';
 import { MarkerLayer } from './chart/MarkerLayer';
 import { ChartControls } from './chart/ChartControls';
 import { ChartLegend } from './chart/ChartLegend';
+import { StatusPlaceholder } from './common/StatusPlaceholder';
+import { CandlestickChart } from 'lucide-react';
 
 interface PriceChartProps {
   events: RuleEngineEvent[];
@@ -22,6 +24,17 @@ export function PriceChart({ events, symbol, onMarkerClick }: PriceChartProps) {
     setDeduplicateEvents,
     markers
   } = usePriceChart(events, candles, currentCandle, ema9, currentEMA9, isMockData);
+
+  if (!symbol) {
+    return (
+      <StatusPlaceholder
+        icon={CandlestickChart}
+        title="No Market Selected"
+        subtitle="This playbook does not have a saved market symbol yet, so the chart cannot be hydrated."
+        style={{ height: '100%' }}
+      />
+    );
+  }
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 0, flex: 1 }}>

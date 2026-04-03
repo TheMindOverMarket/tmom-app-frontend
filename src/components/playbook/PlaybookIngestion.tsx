@@ -41,7 +41,7 @@ export function PlaybookIngestion({
           <select
             value={selectedMarket}
             onChange={(e) => onMarketChange(e.target.value)}
-            disabled={isSubmitting || isLoadingMarkets}
+            disabled={isSubmitting || isLoadingMarkets || availableMarkets.length === 0}
             style={{
               height: '38px',
               borderRadius: '4px',
@@ -54,6 +54,9 @@ export function PlaybookIngestion({
               outline: 'none',
             }}
           >
+            {availableMarkets.length === 0 && (
+              <option value="">No markets available</option>
+            )}
             {availableMarkets.map((market) => (
               <option key={market.symbol} value={market.symbol}>
                 {market.symbol}
@@ -153,8 +156,17 @@ export function PlaybookIngestion({
 
         <button
           onClick={onSubmit}
-          disabled={isSubmitting || !value.trim()}
-          title={isSubmitting ? "Background extraction in progress..." : (!value.trim() ? "Input descriptive logic to enable strategy ingestion." : "Submit logic for deterministic derivation")}
+          disabled={isSubmitting || !value.trim() || !selectedMarket}
+          
+          title={
+            isSubmitting
+              ? "Background extraction in progress..."
+              : !selectedMarket
+                ? "Select a market before ingesting a playbook."
+                : !value.trim()
+                  ? "Input descriptive logic to enable strategy ingestion."
+                  : "Submit logic for deterministic derivation"
+          }
           style={{
               height: '32px',
               padding: '0 16px',
@@ -169,7 +181,7 @@ export function PlaybookIngestion({
               fontSize: '10px',
               fontWeight: 800,
               letterSpacing: '0.02em',
-              cursor: (isSubmitting || !value.trim()) ? 'not-allowed' : 'pointer',
+              cursor: (isSubmitting || !value.trim() || !selectedMarket) ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s ease',
               boxShadow: 'none'
           }}

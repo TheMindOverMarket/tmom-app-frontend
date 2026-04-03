@@ -57,7 +57,10 @@ export const playbookApi = {
 
   listUserPlaybooks: async (userId: string): Promise<Playbook[]> => {
     const response = await fetch(`${API_BASE}/users/${userId}/playbooks`);
-    if (!response.ok) throw new Error('Failed to list playbooks');
+    if (!response.ok) {
+      const errorMessage = await parsePlaybookError(response, 'Failed to list playbooks');
+      throw new Error(errorMessage);
+    }
     return response.json();
   },
 

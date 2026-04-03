@@ -3,7 +3,7 @@ import { type Candle } from '../marketdata/types';
 import { BackendMarketDataProvider } from '../marketdata/providers/backend';
 import { type Time } from 'lightweight-charts';
 
-export function useMarketData(symbol: string = 'BTC/USD', interval: number = 60) {
+export function useMarketData(symbol: string, interval: number = 60) {
   const [candles, setCandles] = useState<Candle[]>([]);
   const [currentCandle, setCurrentCandle] = useState<Candle | null>(null);
   const [isMockData, setIsMockData] = useState(false);
@@ -19,6 +19,10 @@ export function useMarketData(symbol: string = 'BTC/USD', interval: number = 60)
     setCurrentCandle(null);
     setIsMockData(false);
     isSubscribedRef.current = false;
+
+    if (!symbol) {
+      return;
+    }
 
     let unsubscribe: (() => void) | undefined;
 

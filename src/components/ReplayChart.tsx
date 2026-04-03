@@ -28,7 +28,7 @@ interface ReplayChartProps {
 export function ReplayChart({ session, events, onMarkerClick }: ReplayChartProps) {
   const [candles, setCandles] = useState<Candle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [resolvedSymbol, setResolvedSymbol] = useState('BTC/USD');
+  const [resolvedSymbol, setResolvedSymbol] = useState('');
   const [chartError, setChartError] = useState<string | null>(null);
 
   const resolveReplaySymbol = (playbook: Awaited<ReturnType<typeof playbookApi.getPlaybook>> | null, replayEvents: SessionEvent[]) => {
@@ -41,8 +41,7 @@ export function ReplayChart({ session, events, onMarkerClick }: ReplayChartProps
       .find((value): value is string => typeof value === 'string' && value.length > 0);
 
     if (symbolFromEvents) return symbolFromEvents;
-    if (playbook?.original_nl_input?.toLowerCase().includes('eth')) return 'ETH/USD';
-    return 'BTC/USD';
+    return '';
   };
 
   const extractNumericValue = (event: SessionEvent): number | null => {
@@ -139,6 +138,11 @@ export function ReplayChart({ session, events, onMarkerClick }: ReplayChartProps
 
         const nextResolvedSymbol = resolveReplaySymbol(resolvedPlaybook, events);
         setResolvedSymbol(nextResolvedSymbol);
+        if (!nextResolvedSymbol) {
+          setCandles([]);
+          setChartError('No saved market symbol was found for this session.');
+          return;
+        }
 
         const history = await BackendMarketDataProvider.getHistory(nextResolvedSymbol, 60, {
           start_time: session.start_time,

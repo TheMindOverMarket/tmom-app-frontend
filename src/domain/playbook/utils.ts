@@ -5,7 +5,7 @@ export function resolvePlaybookSymbol(playbook: Pick<Playbook, 'symbol' | 'marke
     (typeof playbook?.symbol === 'string' && playbook.symbol) ||
     (typeof playbook?.market === 'string' && playbook.market) ||
     (typeof playbook?.context?.symbol === 'string' && playbook.context.symbol) ||
-    'BTC/USD';
+    '';
 
   return rawSymbol.trim().toUpperCase().replace('-', '/');
 }
