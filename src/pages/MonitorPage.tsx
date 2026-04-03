@@ -4,10 +4,9 @@ import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { useRuleEngineEvents } from '../hooks/useRuleEngineEvents';
 import { PriceChart } from '../components/PriceChart';
 import { RuleEventInspector } from '../components/RuleEventInspector';
-import { Activity, Circle, Check, X, ShoppingCart, HandMetal, Bell } from 'lucide-react';
+import { Activity, Circle, Check, X, Bell } from 'lucide-react';
 import { useDeviationEngine } from '../hooks/useDeviationEngine';
 import { DeviationPanel } from '../components/deviation/DeviationPanel';
-import { tradingApi } from '../domain/trading/api';
 
 export function MonitorPage() {
   const { selectedPlaybook, rules, activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream } = usePlaybookContext();
@@ -31,34 +30,8 @@ export function MonitorPage() {
 
   if (!selectedPlaybook) return null;
 
-  const handleManualOrder = async (side: 'BUY' | 'SELL') => {
-    try {
-      // Execute via canonical Trading Domain API
-      const result = await tradingApi.placeOrder({
-          side,
-          symbol: 'BTC/USD', // Default symbol or get from context
-          qty: 1,
-          type: 'market',
-          session_id: activeSession?.id // Link to session lifecycle for replay auditing
-      });
-      
-      setNotification({ 
-          type: 'success', 
-          message: `Order Filled: ${result.side} ${result.qty} ${result.symbol} @ ${result.filled_avg_price || 'Market'}` 
-      });
-      
-      setTimeout(() => setNotification(null), 5000);
-    } catch (e) {
-      console.error("Manual order failed:", e);
-      setNotification({ 
-          type: 'error', 
-          message: `Order Failed: ${e instanceof Error ? e.message : 'Unknown technical error'}` 
-      });
-      setTimeout(() => setNotification(null), 5000);
-    }
-  };
 
-  const { notification, setNotification } = usePlaybookContext();
+  const { notification } = usePlaybookContext();
 
   return (
     <div style={{ 
@@ -110,44 +83,6 @@ export function MonitorPage() {
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button
-                onClick={() => handleManualOrder('BUY')}
-                style={{
-                  height: '32px',
-                  padding: '0 12px',
-                  backgroundColor: '#f0fdf4',
-                  color: '#16a34a',
-                  border: '1px solid #bbf7d0',
-                  borderRadius: '4px',
-                  fontSize: '9px',
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <ShoppingCart size={11} /> BUY
-              </button>
-              <button
-                onClick={() => handleManualOrder('SELL')}
-                style={{
-                  height: '32px',
-                  padding: '0 12px',
-                  backgroundColor: '#fef2f2',
-                  color: '#dc2626',
-                  border: '1px solid #fecaca',
-                  borderRadius: '4px',
-                  fontSize: '9px',
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <HandMetal size={11} /> SELL
-              </button>
             <button
               onClick={toggleMockMode}
               style={{
