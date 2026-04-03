@@ -196,7 +196,11 @@ export function PlaybooksPage() {
                       <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '2px', fontWeight: 600 }}>{new Date(pb.created_at).toLocaleDateString().toUpperCase()}</div>
                     </div>
                     
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <div style={{ fontSize: '9px', color: '#9ca3af', fontWeight: '600' }}>
+                        {new Date(pb.created_at).toLocaleDateString()}
+                      </div>
+
                       <div 
                         onClick={(e) => {
                           e.stopPropagation();
@@ -214,6 +218,29 @@ export function PlaybooksPage() {
                       >
                         <Info size={16} />
                       </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setConfirmConfig({ id: pb.id, name: pb.name });
+                          setIsConfirmOpen(true);
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          padding: '2px',
+                          cursor: 'pointer',
+                          color: '#cbd5e1',
+                          display: 'flex',
+                          alignItems: 'center',
+                          transition: 'all 0.2s ease'
+                        }}
+                        title="Delete playbook"
+                        onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+                        onMouseLeave={e => e.currentTarget.style.color = '#cbd5e1'}
+                      >
+                        <Trash2 size={12} />
+                      </button>
                       
                       {!pb.is_active && (
                         <button 
@@ -260,43 +287,10 @@ export function PlaybooksPage() {
                     {pb.original_nl_input}
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
                     <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 700 }}>
                       Open to inspect the extracted rules.
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setConfirmConfig({ id: pb.id, name: pb.name });
-                        setIsConfirmOpen(true);
-                      }}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '6px 10px',
-                        borderRadius: '999px',
-                        border: '1px solid #fee2e2',
-                        backgroundColor: '#fff5f5',
-                        cursor: 'pointer',
-                        color: '#ef4444',
-                        transition: 'all 0.2s ease',
-                        fontSize: '10px',
-                        fontWeight: 900
-                      }}
-                      title="Delete Playbook"
-                      onMouseEnter={e => {
-                        e.currentTarget.style.backgroundColor = '#fef2f2';
-                        e.currentTarget.style.borderColor = '#fecaca';
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.backgroundColor = '#fff5f5';
-                        e.currentTarget.style.borderColor = '#fee2e2';
-                      }}
-                    >
-                      <Trash2 size={14} />
-                      DELETE
-                    </button>
                   </div>
                 </div>
               ))
