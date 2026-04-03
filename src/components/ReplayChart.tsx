@@ -5,9 +5,13 @@ import { usePriceChart } from '../hooks/usePriceChart';
 import { useDerivedSignals } from '../hooks/useDerivedSignals';
 import { BackendMarketDataProvider } from '../marketdata/providers/backend';
 import { MarkerLayer } from './chart/MarkerLayer';
+import { ChartControls } from './chart/ChartControls';
+import { ChartLegend } from './chart/ChartLegend';
+import { StatusPlaceholder } from './common/StatusPlaceholder';
 import { Candle } from '../marketdata/types';
 import { playbookApi } from '../domain/playbook/api';
 import { resolvePlaybookSymbol } from '../domain/playbook/utils';
+import { Activity, CandlestickChart } from 'lucide-react';
 
 interface ReplayChartProps {
   session: Session;
@@ -24,6 +28,8 @@ interface ReplayChartProps {
 export function ReplayChart({ session, events, onMarkerClick }: ReplayChartProps) {
   const [candles, setCandles] = useState<Candle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [resolvedSymbol, setResolvedSymbol] = useState('BTC/USD');
+  const [chartError, setChartError] = useState<string | null>(null);
 
   const resolveReplaySymbol = (playbook: Awaited<ReturnType<typeof playbookApi.getPlaybook>> | null, replayEvents: SessionEvent[]) => {
     const playbookSymbol = playbook ? resolvePlaybookSymbol(playbook) : null;
@@ -122,6 +128,7 @@ export function ReplayChart({ session, events, onMarkerClick }: ReplayChartProps
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      setChartError(null);
       try {
         let resolvedPlaybook = null;
         try {
@@ -130,15 +137,21 @@ export function ReplayChart({ session, events, onMarkerClick }: ReplayChartProps
           console.warn('[ReplayChart] Failed to fetch playbook for replay hydration, using event fallback.');
         }
 
-        const resolvedSymbol = resolveReplaySymbol(resolvedPlaybook, events);
+        const nextResolvedSymbol = resolveReplaySymbol(resolvedPlaybook, events);
+        setResolvedSymbol(nextResolvedSymbol);
 
-        const history = await BackendMarketDataProvider.getHistory(resolvedSymbol, 60, {
+        const history = await BackendMarketDataProvider.getHistory(nextResolvedSymbol, 60, {
           start_time: session.start_time,
           end_time: session.end_time || new Date().toISOString(),
         });
         setCandles(history);
+        if (history.length === 0) {
+          setChartError('No market candles were returned for this session window.');
+        }
       } catch (err) {
         console.error('[ReplayChart] Failed to load replay market data', err);
+        setCandles([]);
+        setChartError(err instanceof Error ? err.message : 'Failed to load replay market data.');
       } finally {
         setLoading(false);
       }
@@ -153,6 +166,8 @@ export function ReplayChart({ session, events, onMarkerClick }: ReplayChartProps
 
   const {
     chartContainerRef,
+    deduplicateEvents,
+    setDeduplicateEvents,
     markers
   } = usePriceChart(ruleEvents, candles, null, ema9, null, false);
 
@@ -171,6 +186,28 @@ export function ReplayChart({ session, events, onMarkerClick }: ReplayChartProps
     </div>
   );
 
+  if (chartError) {
+    return (
+      <StatusPlaceholder
+        icon={CandlestickChart}
+        title="Replay Chart Unavailable"
+        subtitle={`${chartError} We have the saved session events, but we could not rehydrate the candle series needed to recreate the live display.`}
+        style={{ height: '100%' }}
+      />
+    );
+  }
+
+  if (candles.length === 0) {
+    return (
+      <StatusPlaceholder
+        icon={Activity}
+        title="No Replay Candles"
+        subtitle="No market history was returned for this session range, so the chart cannot be redrawn yet."
+        style={{ height: '100%' }}
+      />
+    );
+  }
+
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 0, flex: 1 }}>
       <div 
@@ -178,6 +215,11 @@ export function ReplayChart({ session, events, onMarkerClick }: ReplayChartProps
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} 
       />
       <MarkerLayer markers={markers} onMarkerClick={onMarkerClick} />
+      <ChartControls
+        deduplicateEvents={deduplicateEvents}
+        onToggle={() => setDeduplicateEvents(!deduplicateEvents)}
+      />
+      <ChartLegend isMockData={false} symbol={resolvedSymbol} />
     </div>
   );
 }
