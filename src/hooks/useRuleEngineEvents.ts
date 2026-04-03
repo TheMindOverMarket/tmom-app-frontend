@@ -2,12 +2,14 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { RuleEngineRawMessage, RuleEngineEvent } from '../domain/ruleEngine/types';
 import { generateMockEvent } from '../domain/ruleEngine/mockGenerator';
 import { CONFIG } from '../config/constants';
+import { useUserSession } from '../contexts/UserSessionContext';
 
 /**
  * Hook to connect to the Rule Engine WebSocket and manage event stream.
  * Optimized for production with exponential backoff retries and dependency gating.
  */
 export function useRuleEngineEvents(isActive: boolean = false, sessionId?: string) {
+  const { currentUser } = useUserSession();
   const [events, setEvents] = useState<RuleEngineEvent[]>([]);
   const [lastEvent, setLastEvent] = useState<RuleEngineEvent | null>(null);
   const [isMockMode, setIsMockMode] = useState(false);
@@ -27,9 +29,14 @@ export function useRuleEngineEvents(isActive: boolean = false, sessionId?: strin
     if (wsRef.current || !isActive || isMockMode) return;
 
     try {
-      // Append session_id if available to enable server-side filtering
-      const wsUrl = sessionId 
-        ? `${CONFIG.WS_ENGINE_URL}?session_id=${sessionId}`
+      // Append session_id and user_id if available to enable server-side filtering
+      const params = new URLSearchParams();
+      if (sessionId) params.append('session_id', sessionId);
+      if (currentUser?.id) params.append('user_id', currentUser.id);
+
+      const queryString = params.toString();
+      const wsUrl = queryString 
+        ? `${CONFIG.WS_ENGINE_URL}?${queryString}`
         : CONFIG.WS_ENGINE_URL;
 
       const ws = new WebSocket(wsUrl);
