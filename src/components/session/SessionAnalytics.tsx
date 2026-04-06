@@ -7,7 +7,7 @@ import { ReplayPlayer } from './ReplayPlayer';
 import { RefreshButton } from '../common/RefreshButton';
 
 export function SessionAnalytics() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const userIdParam = searchParams.get('user_id');
   const sessionIdParam = searchParams.get('session_id');
 
@@ -59,7 +59,13 @@ export function SessionAnalytics() {
     }
   };
 
-  const closeModal = () => setSelectedSession(null);
+  const closeModal = () => {
+    setSelectedSession(null);
+    // Clear the search params to prevent the auto-open effect from re-triggering
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete('session_id');
+    setSearchParams(newParams);
+  };
 
   return (
     <div style={{
