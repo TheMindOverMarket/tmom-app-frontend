@@ -191,15 +191,15 @@ export function MonitorPage() {
                   padding: '8px',
                   borderRadius: '4px',
                   border: `1px solid ${
-                    lastEvent?.deviation_true?.includes(rule.id) ? '#fee2e2' : 
-                    lastEvent?.deviation_false?.includes(rule.id) ? '#dcfce7' : '#f1f5f9'
+                    lastEvent?.rule_status?.[rule.id] === false ? '#fee2e2' : 
+                    lastEvent?.rule_status?.[rule.id] === true ? '#dcfce7' : '#f1f5f9'
                   }`,
                   backgroundColor: '#ffffff',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '4px',
                   transition: 'all 0.3s ease',
-                  boxShadow: lastEvent?.deviation_true?.includes(rule.id) ? '0 0 10px rgba(239, 68, 68, 0.1)' : 'none'
+                  boxShadow: lastEvent?.rule_status?.[rule.id] === false ? '0 0 10px rgba(239, 68, 68, 0.1)' : 'none'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
@@ -214,9 +214,9 @@ export function MonitorPage() {
                         {rule.name}
                       </div>
                     </div>
-                    {lastEvent?.deviation_true?.includes(rule.id) ? (
+                    {lastEvent?.rule_status?.[rule.id] === false ? (
                       <X size={12} color="#ef4444" strokeWidth={3} />
-                    ) : lastEvent?.deviation_false?.includes(rule.id) ? (
+                    ) : lastEvent?.rule_status?.[rule.id] === true ? (
                       <Check size={12} color="#10b981" strokeWidth={3} />
                     ) : (
                       <Circle size={8} color="#cbd5e1" />

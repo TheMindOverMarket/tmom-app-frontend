@@ -43,6 +43,9 @@ export function generateMockEvent(basePrice: number = 71500, forceDeviation?: bo
         action: !isDeviation, 
         deviation: isDeviation,
         deviation_true: isDeviation ? [ruleId] : [],
-        deviation_false: isDeviation ? [] : [ruleId]
+        deviation_false: isDeviation ? [] : [ruleId],
+        rule_status: {
+            [ruleId]: !isDeviation,
+        }
     };
 }

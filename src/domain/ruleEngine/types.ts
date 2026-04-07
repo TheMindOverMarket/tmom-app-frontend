@@ -12,6 +12,7 @@ export interface RuleEngineRawMessage {
   rule_triggered: boolean;
   triggered_entries: string[];
   rule_evaluations: Record<string, boolean>;
+  rule_status?: Record<string, boolean>;
   action: boolean;
   deviation: boolean;
   deviation_true?: string[];
