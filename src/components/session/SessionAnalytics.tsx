@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useSessions } from '../../hooks/useSessions';
 import { Session, SessionStatus } from '../../domain/session/types';
@@ -10,6 +10,7 @@ export function SessionAnalytics() {
   const [searchParams, setSearchParams] = useSearchParams();
   const userIdParam = searchParams.get('user_id');
   const sessionIdParam = searchParams.get('session_id');
+  const initialTab = searchParams.get('tab') === 'completed' ? 'completed' : 'all';
 
   const { 
     sessions, 
@@ -26,17 +27,22 @@ export function SessionAnalytics() {
   
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [searchQuery, setSearchQuery] = useState(sessionIdParam || '');
+  const [activeTab, setActiveTab] = useState<'all' | 'completed'>(initialTab);
+  const lastProcessedSessionId = useRef<string | null>(null);
 
   // Auto-select session if sessionIdParam is present and sessions are loaded
   useEffect(() => {
-    if (sessionIdParam && sessions.length > 0 && !selectedSession) {
+    if (sessionIdParam && sessions.length > 0 && sessionIdParam !== lastProcessedSessionId.current) {
       const session = sessions.find(s => s.id === sessionIdParam);
       if (session) {
         setSelectedSession(session);
         loadReplay(session.id);
+        lastProcessedSessionId.current = sessionIdParam;
       }
+    } else if (!sessionIdParam) {
+      lastProcessedSessionId.current = null;
     }
-  }, [sessionIdParam, sessions, selectedSession, loadReplay]);
+  }, [sessionIdParam, sessions, loadReplay]);
 
   const stats = useMemo(() => ({
     total: sessions.length,
@@ -47,10 +53,13 @@ export function SessionAnalytics() {
     }).length
   }), [sessions]);
 
-  const filteredSessions = useMemo(() => 
-    sessions.filter(s => s.id.toLowerCase().includes(searchQuery.toLowerCase())),
-    [sessions, searchQuery]
-  );
+  const filteredSessions = useMemo(() => {
+    let list = sessions;
+    if (activeTab === 'completed') {
+      list = list.filter(s => s.status === SessionStatus.COMPLETED);
+    }
+    return list.filter(s => s.id.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [sessions, searchQuery, activeTab]);
 
   const handleSelectSession = async (session: Session) => {
     setSelectedSession(session);
@@ -61,6 +70,7 @@ export function SessionAnalytics() {
 
   const closeModal = () => {
     setSelectedSession(null);
+    lastProcessedSessionId.current = null; // Reset so it can be re-opened if the URL changes back/to something else
     // Clear the search params to prevent the auto-open effect from re-triggering
     const newParams = new URLSearchParams(searchParams);
     newParams.delete('session_id');
@@ -120,6 +130,36 @@ export function SessionAnalytics() {
               <div style={{ fontSize: '24px', fontWeight: '900', color: '#0f172a' }}>{stat.value}</div>
             )}
           </div>
+        ))}
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: '32px', borderBottom: '1px solid #f1f5f9', marginBottom: '24px', flexShrink: 0 }}>
+        {[
+          { id: 'all', label: 'All Sessions' },
+          { id: 'completed', label: 'Completed Audit' }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            style={{
+              padding: '12px 0',
+              fontSize: '13px',
+              fontWeight: 800,
+              color: activeTab === tab.id ? '#0f172a' : '#94a3b8',
+              borderBottom: `2px solid ${activeTab === tab.id ? '#0f172a' : 'transparent'}`,
+              backgroundColor: 'transparent',
+              borderTop: 'none',
+              borderLeft: 'none',
+              borderRight: 'none',
+              cursor: 'pointer',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              transition: 'all 0.2s'
+            }}
+          >
+            {tab.label}
+          </button>
         ))}
       </div>
 

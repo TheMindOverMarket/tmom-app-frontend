@@ -27,14 +27,14 @@ export function AdminDashboard() {
     fetchAnalytics();
   }, []);
 
-  const handleUserClick = (userId: string, latestSessionId?: string) => {
-    if (latestSessionId) {
-      // Navigate to analytics page with the user_id and session_id as search params
-      // We'll need to update AnalyticsPage or useSessions to handle these params
-      navigate(`/analytics?user_id=${userId}&session_id=${latestSessionId}`);
-    } else {
-      alert('This user has no sessions yet.');
-    }
+  const handleUserClick = (userId: string) => {
+    // Navigate to analytics page with the user_id and force the completed tab
+    navigate(`/analytics?user_id=${userId}&tab=completed`);
+  };
+
+  const handleViewReplay = (e: React.MouseEvent, userId: string, latestSessionId: string) => {
+    e.stopPropagation(); // Prevent the row click from firing
+    navigate(`/analytics?user_id=${userId}&session_id=${latestSessionId}`);
   };
 
   return (
@@ -88,7 +88,7 @@ export function AdminDashboard() {
                   style={{ borderBottom: '1px solid #f1f5f9', cursor: 'pointer' }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  onClick={() => handleUserClick(u.user_id, u.latest_session_id)}
+                  onClick={() => handleUserClick(u.user_id)}
               >
                 <td style={{ padding: '16px' }}>
                   <div style={{ fontWeight: '700', color: '#0f172a', fontSize: '14px' }}>{u.email}</div>
@@ -135,6 +135,7 @@ export function AdminDashboard() {
                 <td style={{ padding: '16px', textAlign: 'right' }}>
                   <button 
                     disabled={!u.latest_session_id}
+                    onClick={(e) => u.latest_session_id && handleViewReplay(e, u.user_id, u.latest_session_id)}
                     style={{
                       padding: '8px 16px',
                       fontSize: '12px',
