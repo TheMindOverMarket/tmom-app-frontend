@@ -5,7 +5,7 @@ import { useUserSession } from '../../contexts/UserSessionContext';
 export function Header() {
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
-  const { currentUser, clearSelectedUser } = useUserSession();
+  const { currentUser, logout } = useUserSession();
 
   const copyToClipboard = () => {
     if (!currentUser) return;
@@ -60,8 +60,8 @@ export function Header() {
 
             <button
               onClick={() => {
-                clearSelectedUser();
-                navigate('/select-user');
+                logout();
+                navigate('/login');
               }}
               style={{
                 padding: '4px 12px',

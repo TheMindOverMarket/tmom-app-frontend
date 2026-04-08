@@ -6,79 +6,53 @@ const SESSION_STORAGE_KEY = 'tmom:selected-user-id';
 
 interface UserSessionContextType {
   currentUser: User | null;
-  users: User[];
-  isLoadingUsers: boolean;
-  selectUserById: (userId: string) => Promise<void>;
-  createAndSelectUser: (email: string) => Promise<User>;
-  refreshUsers: () => Promise<void>;
-  clearSelectedUser: () => void;
+  isLoading: boolean;
+  login: (email: string) => Promise<void>;
+  signup: (email: string) => Promise<void>;
+  logout: () => void;
 }
 
 const UserSessionContext = createContext<UserSessionContextType | undefined>(undefined);
 
 export function UserSessionProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const refreshUsers = useCallback(async () => {
-    setIsLoadingUsers(true);
-    try {
-      const fetchedUsers = await userApi.listUsers();
-      setUsers(fetchedUsers);
-
-      const selectedUserId = sessionStorage.getItem(SESSION_STORAGE_KEY);
-      if (!selectedUserId) {
-        setCurrentUser(null);
+  // Rehydrate session on mount
+  useEffect(() => {
+    const hydrateSession = async () => {
+      const storedId = sessionStorage.getItem(SESSION_STORAGE_KEY);
+      if (!storedId) {
+        setIsLoading(false);
         return;
       }
-
-      const matchedUser = fetchedUsers.find(user => user.id === selectedUserId) || null;
-      setCurrentUser(matchedUser);
-
-      if (!matchedUser) {
+      try {
+        const user = await userApi.getUserById(storedId);
+        setCurrentUser(user);
+      } catch (e) {
+        console.warn('Failed to hydrate session, clearing state', e);
         sessionStorage.removeItem(SESSION_STORAGE_KEY);
+      } finally {
+        setIsLoading(false);
       }
-    } finally {
-      setIsLoadingUsers(false);
-    }
+    };
+    
+    void hydrateSession();
   }, []);
 
-  useEffect(() => {
-    void refreshUsers();
-  }, [refreshUsers]);
+  const login = useCallback(async (email: string) => {
+    const user = await userApi.loginUser({ email });
+    sessionStorage.setItem(SESSION_STORAGE_KEY, user.id);
+    setCurrentUser(user);
+  }, []);
 
-  const selectUserById = useCallback(async (userId: string) => {
-    const matchedUser = users.find(user => user.id === userId);
-    if (matchedUser) {
-      sessionStorage.setItem(SESSION_STORAGE_KEY, matchedUser.id);
-      setCurrentUser(matchedUser);
-      return;
-    }
+  const signup = useCallback(async (email: string) => {
+    const user = await userApi.createUser({ email });
+    sessionStorage.setItem(SESSION_STORAGE_KEY, user.id);
+    setCurrentUser(user);
+  }, []);
 
-    const freshUsers = await userApi.listUsers();
-    setUsers(freshUsers);
-    const freshMatch = freshUsers.find(user => user.id === userId);
-    if (!freshMatch) {
-      throw new Error('Selected user could not be found');
-    }
-
-    sessionStorage.setItem(SESSION_STORAGE_KEY, freshMatch.id);
-    setCurrentUser(freshMatch);
-  }, [users]);
-
-  const createAndSelectUser = useCallback(async (email: string) => {
-    // Temporary/dirty implementation: this is only a lightweight test harness,
-    // not a real auth or identity flow.
-    const newUser = await userApi.createUser({ email });
-    const nextUsers = [newUser, ...users];
-    setUsers(nextUsers);
-    sessionStorage.setItem(SESSION_STORAGE_KEY, newUser.id);
-    setCurrentUser(newUser);
-    return newUser;
-  }, [users]);
-
-  const clearSelectedUser = useCallback(() => {
+  const logout = useCallback(() => {
     sessionStorage.removeItem(SESSION_STORAGE_KEY);
     setCurrentUser(null);
   }, []);
@@ -87,12 +61,10 @@ export function UserSessionProvider({ children }: { children: ReactNode }) {
     <UserSessionContext.Provider
       value={{
         currentUser,
-        users,
-        isLoadingUsers,
-        selectUserById,
-        createAndSelectUser,
-        refreshUsers,
-        clearSelectedUser,
+        isLoading,
+        login,
+        signup,
+        logout,
       }}
     >
       {children}

@@ -13,3 +13,7 @@ export interface UserCreate {
 export interface UserUpdate {
   email?: string;
 }
+
+export interface UserLogin {
+  email: string;
+}

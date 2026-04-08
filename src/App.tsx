@@ -6,12 +6,14 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { PlaybooksPage } from './pages/PlaybooksPage';
 import { MonitorPage } from './pages/MonitorPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
-import { UserSelectionPage } from './pages/UserSelectionPage';
+import { LoginPage } from './pages/LoginPage';
+import { SignupPage } from './pages/SignupPage';
+import { AuthLayout } from './components/layout/AuthLayout';
 
 function UserScopedApp() {
-  const { currentUser, isLoadingUsers } = useUserSession();
+  const { currentUser, isLoading } = useUserSession();
 
-  if (isLoadingUsers) {
+  if (isLoading) {
     return (
       <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', color: '#64748b', backgroundColor: '#f8fafc' }}>
         Loading user context...
@@ -24,8 +26,12 @@ function UserScopedApp() {
   return (
     <PlaybookProvider>
       <Routes>
-        <Route path="/" element={currentUser ? <Navigate to="/playbooks" replace /> : <UserSelectionPage />} />
-        <Route path="/select-user" element={<UserSelectionPage />} />
+        <Route path="/" element={currentUser ? <Navigate to="/playbooks" replace /> : <Navigate to="/login" replace />} />
+        
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+        </Route>
         {currentUser ? (
           <Route element={<AppLayout />}>
             <Route path="/playbooks" element={<PlaybooksPage />} />
