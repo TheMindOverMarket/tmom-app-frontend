@@ -5,8 +5,8 @@ import type { User, UserCreate, UserLogin } from '../domain/user/types';
 interface UserSessionContextType {
   currentUser: User | null;
   isLoading: boolean;
-  login: (credentials: UserLogin) => Promise<void>;
-  signup: (payload: UserCreate) => Promise<void>;
+  login: (credentials: UserLogin) => Promise<User>;
+  signup: (payload: UserCreate) => Promise<User>;
   logout: () => Promise<void>;
 }
 
@@ -36,18 +36,18 @@ export function UserSessionProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (credentials: UserLogin) => {
     const user = await userApi.loginUser(credentials);
     setCurrentUser(user);
+    return user;
   }, []);
 
   const signup = useCallback(async (payload: UserCreate) => {
     await userApi.createUser(payload);
     // Explicitly login the user internally if createUser doesn't set a cookie itself.
-    // wait, we modified createUser to be normal registration. We should probably
-    // call login right after creation so the cookie gets set.
     const loggedInUser = await userApi.loginUser({
       email: payload.email,
       password: payload.password
     });
     setCurrentUser(loggedInUser);
+    return loggedInUser;
   }, []);
 
   const logout = useCallback(async () => {

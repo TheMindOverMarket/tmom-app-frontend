@@ -13,7 +13,7 @@ export function Navbar() {
   const { selectedPlaybook } = usePlaybookContext();
   const { currentUser } = useUserSession();
 
-  const isAdmin = currentUser?.role === 'ADMIN';
+  const isAdmin = currentUser?.role === 'MANAGER';
   const navItems = isAdmin 
     ? [...NAV_ITEMS, { path: '/admin', label: 'ADMIN CONTROL', icon: LayoutGrid }]
     : NAV_ITEMS;

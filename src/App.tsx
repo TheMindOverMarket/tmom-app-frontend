@@ -14,7 +14,7 @@ import { ProtectedRoute } from './components/layout/ProtectedRoute';
 function AppRoutes() {
   const { currentUser } = useUserSession();
 
-  const isAdmin = currentUser?.role === 'ADMIN';
+  const isAdmin = currentUser?.role === 'MANAGER';
 
   return (
     <PlaybookProvider>

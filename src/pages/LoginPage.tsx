@@ -5,6 +5,7 @@ import { useUserSession } from '../contexts/UserSessionContext';
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<'TRADER' | 'MANAGER'>('TRADER');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useUserSession();
@@ -12,17 +13,20 @@ export function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!email.trim() || !password) return;
     
     setError('');
     setIsLoading(true);
     
     try {
-      await login({ email: email.trim(), password });
-      navigate('/playbooks');
+      const user = await login({ email: email.trim(), password });
+      // We can also verify if the user's role matches the selected role if we want,
+      // but for now we just navigate to the appropriate dashboard.
+      navigate(user.role === 'MANAGER' ? '/admin' : '/playbooks');
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {
+      setIsLoading(true); // Keep loading while navigating
       setIsLoading(false);
     }
   };
@@ -77,6 +81,58 @@ export function LoginPage() {
               boxSizing: 'border-box'
             }}
           />
+        </div>
+
+        <div>
+          <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>
+            LOGIN AS
+          </label>
+          <div style={{ 
+            display: 'flex', 
+            padding: '4px', 
+            backgroundColor: '#f1f5f9', 
+            borderRadius: '8px', 
+            gap: '4px' 
+          }}>
+            <button
+              type="button"
+              onClick={() => setRole('TRADER')}
+              style={{
+                flex: 1,
+                padding: '10px',
+                borderRadius: '6px',
+                border: 'none',
+                fontSize: '12px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                backgroundColor: role === 'TRADER' ? '#ffffff' : 'transparent',
+                color: role === 'TRADER' ? '#0f172a' : '#64748b',
+                boxShadow: role === 'TRADER' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.2s'
+              }}
+            >
+              TRADER
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole('MANAGER')}
+              style={{
+                flex: 1,
+                padding: '10px',
+                borderRadius: '6px',
+                border: 'none',
+                fontSize: '12px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                backgroundColor: role === 'MANAGER' ? '#ffffff' : 'transparent',
+                color: role === 'MANAGER' ? '#0f172a' : '#64748b',
+                boxShadow: role === 'MANAGER' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.2s'
+              }}
+            >
+              MANAGER
+            </button>
+          </div>
         </div>
 
         {error && (
