@@ -8,6 +8,9 @@ export interface User {
 
 export interface UserCreate {
   email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
 }
 
 export interface UserUpdate {
@@ -16,4 +19,5 @@ export interface UserUpdate {
 
 export interface UserLogin {
   email: string;
+  password: string;
 }

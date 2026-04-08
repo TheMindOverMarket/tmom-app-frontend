@@ -9,30 +9,24 @@ import { AnalyticsPage } from './pages/AnalyticsPage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { AuthLayout } from './components/layout/AuthLayout';
+import { ProtectedRoute } from './components/layout/ProtectedRoute';
 
-function UserScopedApp() {
-  const { currentUser, isLoading } = useUserSession();
-
-  if (isLoading) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', color: '#64748b', backgroundColor: '#f8fafc' }}>
-        Loading user context...
-      </div>
-    );
-  }
+function AppRoutes() {
+  const { currentUser } = useUserSession();
 
   const isAdmin = currentUser?.role === 'ADMIN';
 
   return (
     <PlaybookProvider>
       <Routes>
-        <Route path="/" element={currentUser ? <Navigate to="/playbooks" replace /> : <Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/playbooks" replace />} />
         
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
         </Route>
-        {currentUser ? (
+        
+        <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
             <Route path="/playbooks" element={<PlaybooksPage />} />
             <Route path="/supervision" element={<MonitorPage />} />
@@ -40,9 +34,7 @@ function UserScopedApp() {
             {isAdmin && <Route path="/admin" element={<AdminDashboard />} />}
             <Route path="*" element={<Navigate to="/playbooks" replace />} />
           </Route>
-        ) : (
-          <Route path="*" element={<Navigate to="/" replace />} />
-        )}
+        </Route>
       </Routes>
     </PlaybookProvider>
   );
@@ -52,7 +44,7 @@ function App() {
   return (
     <Router>
       <UserSessionProvider>
-        <UserScopedApp />
+        <AppRoutes />
       </UserSessionProvider>
     </Router>
   );

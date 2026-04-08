@@ -4,6 +4,10 @@ import { useUserSession } from '../contexts/UserSessionContext';
 
 export function SignupPage() {
   const [email, setEmail] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signup } = useUserSession();
@@ -11,13 +15,23 @@ export function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!email.trim() || !firstName.trim() || !lastName.trim() || !password) return;
+    
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
     
     setError('');
     setIsLoading(true);
     
     try {
-      await signup(email.trim());
+      await signup({ 
+        email: email.trim(), 
+        first_name: firstName.trim(), 
+        last_name: lastName.trim(), 
+        password 
+      });
       navigate('/playbooks');
     } catch (err: any) {
       setError(err.message || 'Registration failed');
@@ -43,6 +57,95 @@ export function SignupPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="trader@example.com"
+            disabled={isLoading}
+            style={{
+              width: '100%',
+              padding: '14px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              fontSize: '14px',
+              outline: 'none',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+        
+        <div style={{ display: 'flex', gap: '16px' }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>
+              FIRST NAME
+            </label>
+            <input
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="John"
+              disabled={isLoading}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                fontSize: '14px',
+                outline: 'none',
+                boxSizing: 'border-box'
+              }}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>
+              LAST NAME
+            </label>
+            <input
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Doe"
+              disabled={isLoading}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                fontSize: '14px',
+                outline: 'none',
+                boxSizing: 'border-box'
+              }}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>
+            PASSWORD
+          </label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            disabled={isLoading}
+            style={{
+              width: '100%',
+              padding: '14px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              fontSize: '14px',
+              outline: 'none',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+
+        <div>
+          <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>
+            CONFIRM PASSWORD
+          </label>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="••••••••"
             disabled={isLoading}
             style={{
               width: '100%',

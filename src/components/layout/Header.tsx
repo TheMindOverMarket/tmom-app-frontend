@@ -74,7 +74,7 @@ export function Header() {
                 cursor: 'pointer'
               }}
             >
-              SWITCH USER
+              LOG OUT
             </button>
           </>
         )}

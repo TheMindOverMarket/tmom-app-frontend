@@ -1,15 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { userApi } from '../domain/user/api';
-import type { User } from '../domain/user/types';
-
-const SESSION_STORAGE_KEY = 'tmom:selected-user-id';
+import type { User, UserCreate, UserLogin } from '../domain/user/types';
 
 interface UserSessionContextType {
   currentUser: User | null;
   isLoading: boolean;
-  login: (email: string) => Promise<void>;
-  signup: (email: string) => Promise<void>;
-  logout: () => void;
+  login: (credentials: UserLogin) => Promise<void>;
+  signup: (payload: UserCreate) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const UserSessionContext = createContext<UserSessionContextType | undefined>(undefined);
@@ -18,20 +16,15 @@ export function UserSessionProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Rehydrate session on mount
+  // Rehydrate session by verifying the HttpOnly cookie with the backend
   useEffect(() => {
     const hydrateSession = async () => {
-      const storedId = sessionStorage.getItem(SESSION_STORAGE_KEY);
-      if (!storedId) {
-        setIsLoading(false);
-        return;
-      }
       try {
-        const user = await userApi.getUserById(storedId);
+        const user = await userApi.getCurrentUser();
         setCurrentUser(user);
       } catch (e) {
-        console.warn('Failed to hydrate session, clearing state', e);
-        sessionStorage.removeItem(SESSION_STORAGE_KEY);
+        // expected if no active JWT session cookie
+        setCurrentUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -40,20 +33,25 @@ export function UserSessionProvider({ children }: { children: ReactNode }) {
     void hydrateSession();
   }, []);
 
-  const login = useCallback(async (email: string) => {
-    const user = await userApi.loginUser({ email });
-    sessionStorage.setItem(SESSION_STORAGE_KEY, user.id);
+  const login = useCallback(async (credentials: UserLogin) => {
+    const user = await userApi.loginUser(credentials);
     setCurrentUser(user);
   }, []);
 
-  const signup = useCallback(async (email: string) => {
-    const user = await userApi.createUser({ email });
-    sessionStorage.setItem(SESSION_STORAGE_KEY, user.id);
-    setCurrentUser(user);
+  const signup = useCallback(async (payload: UserCreate) => {
+    await userApi.createUser(payload);
+    // Explicitly login the user internally if createUser doesn't set a cookie itself.
+    // wait, we modified createUser to be normal registration. We should probably
+    // call login right after creation so the cookie gets set.
+    const loggedInUser = await userApi.loginUser({
+      email: payload.email,
+      password: payload.password
+    });
+    setCurrentUser(loggedInUser);
   }, []);
 
-  const logout = useCallback(() => {
-    sessionStorage.removeItem(SESSION_STORAGE_KEY);
+  const logout = useCallback(async () => {
+    await userApi.logoutUser();
     setCurrentUser(null);
   }, []);
 
@@ -77,6 +75,5 @@ export function useUserSession() {
   if (!context) {
     throw new Error('useUserSession must be used within a UserSessionProvider');
   }
-
   return context;
 }

@@ -4,6 +4,7 @@ import { useUserSession } from '../contexts/UserSessionContext';
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useUserSession();
@@ -17,7 +18,7 @@ export function LoginPage() {
     setIsLoading(true);
     
     try {
-      await login(email.trim());
+      await login({ email: email.trim(), password });
       navigate('/playbooks');
     } catch (err: any) {
       setError(err.message || 'Login failed');
@@ -43,6 +44,28 @@ export function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="trader@example.com"
+            disabled={isLoading}
+            style={{
+              width: '100%',
+              padding: '14px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              fontSize: '14px',
+              outline: 'none',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+
+        <div>
+          <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>
+            PASSWORD
+          </label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
             disabled={isLoading}
             style={{
               width: '100%',
