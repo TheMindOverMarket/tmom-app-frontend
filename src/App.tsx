@@ -10,8 +10,6 @@ import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { AuthLayout } from './components/layout/AuthLayout';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
-import { SystemStatusProvider } from './contexts/SystemStatusContext';
-import { BootingPopup } from './components/ui/BootingPopup';
 
 function AppRoutes() {
   const { currentUser } = useUserSession();
@@ -38,7 +36,6 @@ function AppRoutes() {
           </Route>
         </Route>
       </Routes>
-      <BootingPopup />
     </PlaybookProvider>
   );
 }
@@ -46,11 +43,9 @@ function AppRoutes() {
 function App() {
   return (
     <Router>
-      <SystemStatusProvider>
-        <UserSessionProvider>
-          <AppRoutes />
-        </UserSessionProvider>
-      </SystemStatusProvider>
+      <UserSessionProvider>
+        <AppRoutes />
+      </UserSessionProvider>
     </Router>
   );
 }

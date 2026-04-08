@@ -1,5 +1,4 @@
 import { CONFIG } from '../../config/constants';
-import { safeFetch } from '../../utils/apiUtils';
 import { MarketOption, Playbook, PlaybookCreate } from './types';
 
 const API_BASE = CONFIG.BACKEND_BASE_URL;
@@ -15,7 +14,7 @@ const parsePlaybookError = async (response: Response, fallbackMessage: string): 
 };
 
 const postPlaybook = async (path: string, data: PlaybookCreate, fallbackMessage: string): Promise<Response> => {
-  const response = await safeFetch(`${API_BASE}${path}`, {
+  const response = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -57,7 +56,7 @@ export const playbookApi = {
   },
 
   listUserPlaybooks: async (userId: string): Promise<Playbook[]> => {
-    const response = await safeFetch(`${API_BASE}/users/${userId}/playbooks`);
+    const response = await fetch(`${API_BASE}/users/${userId}/playbooks`);
     if (!response.ok) {
       const errorMessage = await parsePlaybookError(response, 'Failed to list playbooks');
       throw new Error(errorMessage);
@@ -66,13 +65,13 @@ export const playbookApi = {
   },
 
   getPlaybook: async (id: string): Promise<Playbook> => {
-    const response = await safeFetch(`${API_BASE}/playbooks/${id}`);
+    const response = await fetch(`${API_BASE}/playbooks/${id}`);
     if (!response.ok) throw new Error('Failed to get playbook');
     return response.json();
   },
 
   updatePlaybook: async (id: string, data: Partial<Playbook>): Promise<Playbook> => {
-    const response = await safeFetch(`${API_BASE}/playbooks/${id}`, {
+    const response = await fetch(`${API_BASE}/playbooks/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -92,25 +91,25 @@ export const playbookApi = {
   },
 
   listPlaybookRules: async (playbookId: string): Promise<any[]> => {
-    const response = await safeFetch(`${API_BASE}/playbooks/${playbookId}/rules`);
+    const response = await fetch(`${API_BASE}/playbooks/${playbookId}/rules`);
     if (!response.ok) throw new Error('Failed to list playbook rules');
     return response.json();
   },
 
   listMarkets: async (): Promise<MarketOption[]> => {
-    const response = await safeFetch(`${API_BASE}/market-data/markets`);
+    const response = await fetch(`${API_BASE}/market-data/markets`);
     if (!response.ok) throw new Error('Failed to list markets');
     return response.json();
   },
 
   deletePlaybook: async (id: string): Promise<void> => {
-    const response = await safeFetch(`${API_BASE}/playbooks/${id}`, {
+    const response = await fetch(`${API_BASE}/playbooks/${id}`, {
       method: 'DELETE'
     });
     if (!response.ok) throw new Error('Failed to delete playbook');
   },
   deleteAllPlaybooks: async (userId: string): Promise<void> => {
-    const response = await safeFetch(`${API_BASE}/users/${userId}/playbooks`, {
+    const response = await fetch(`${API_BASE}/users/${userId}/playbooks`, {
       method: 'DELETE'
     });
     if (!response.ok) throw new Error('Failed to delete all playbooks');

@@ -1,18 +1,17 @@
 import { CONFIG } from '../../config/constants';
-import { safeFetch } from '../../utils/apiUtils';
 import { User, UserCreate, UserLogin } from './types';
 
 const API_BASE = CONFIG.BACKEND_BASE_URL;
 
 export const userApi = {
   listUsers: async (): Promise<User[]> => {
-    const response = await safeFetch(`${API_BASE}/users/`, { credentials: 'include' });
+    const response = await fetch(`${API_BASE}/users/`, { credentials: 'include' });
     if (!response.ok) throw new Error('Failed to list users');
     return response.json();
   },
 
   getUserById: async (id: string): Promise<User> => {
-    const response = await safeFetch(`${API_BASE}/users/${id}`, { credentials: 'include' });
+    const response = await fetch(`${API_BASE}/users/${id}`, { credentials: 'include' });
     if (!response.ok) {
       if (response.status === 404) throw new Error('User not found');
       throw new Error('Failed to fetch user');
@@ -21,7 +20,7 @@ export const userApi = {
   },
 
   getCurrentUser: async (): Promise<User> => {
-    const response = await safeFetch(`${API_BASE}/users/me`, { credentials: 'include' });
+    const response = await fetch(`${API_BASE}/users/me`, { credentials: 'include' });
     if (!response.ok) {
       throw new Error('Not authenticated');
     }
@@ -29,7 +28,7 @@ export const userApi = {
   },
 
   loginUser: async (credentials: UserLogin): Promise<User> => {
-    const response = await safeFetch(`${API_BASE}/users/login`, {
+    const response = await fetch(`${API_BASE}/users/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials),
@@ -43,14 +42,14 @@ export const userApi = {
   },
 
   logoutUser: async (): Promise<void> => {
-    await safeFetch(`${API_BASE}/users/logout`, {
+    await fetch(`${API_BASE}/users/logout`, {
       method: 'POST',
       credentials: 'include'
     });
   },
 
   createUser: async (user: UserCreate): Promise<User> => {
-    const response = await safeFetch(`${API_BASE}/users/`, {
+    const response = await fetch(`${API_BASE}/users/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(user),

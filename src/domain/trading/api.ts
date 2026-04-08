@@ -1,5 +1,4 @@
 import { CONFIG } from '../../config/constants';
-import { safeFetch } from '../../utils/apiUtils';
 import { Order, OrderCreate } from './types';
 
 const API_BASE = CONFIG.BACKEND_BASE_URL;
@@ -13,7 +12,7 @@ export const tradingApi = {
    * with the active supervision session for replay auditing.
    */
   placeOrder: async (data: OrderCreate): Promise<Order> => {
-    const response = await safeFetch(`${API_BASE}/orders/`, {
+    const response = await fetch(`${API_BASE}/orders/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),

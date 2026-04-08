@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { safeFetch } from '../utils/apiUtils';
 
 
 // ─── Types ───────────────────────────────────────────────────────────
@@ -75,7 +74,7 @@ export function useDeviationEngine(sessionId: string | null | undefined) {
   const fetchSummary = useCallback(async () => {
     if (!sessionId) return;
     try {
-      const res = await safeFetch(`${DEVIATION_ENGINE_API}/deviations/session/${sessionId}/summary`);
+      const res = await fetch(`${DEVIATION_ENGINE_API}/deviations/session/${sessionId}/summary`);
       if (res.ok) {
         const data = await res.json();
         setSummary(data);
@@ -89,7 +88,7 @@ export function useDeviationEngine(sessionId: string | null | undefined) {
   const fetchRecords = useCallback(async () => {
     if (!sessionId) return;
     try {
-      const res = await safeFetch(`${DEVIATION_ENGINE_API}/deviations/session/${sessionId}/records`);
+      const res = await fetch(`${DEVIATION_ENGINE_API}/deviations/session/${sessionId}/records`);
       if (res.ok) {
         const data = await res.json();
         setRecords(data);

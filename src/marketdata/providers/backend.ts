@@ -1,7 +1,6 @@
 import { type Time } from 'lightweight-charts';
 import { type Candle, type MarketDataProvider } from '../types';
 import { CONFIG } from '../../config/constants';
-import { safeFetch } from '../../utils/apiUtils';
 
 let lastKnownPrice = 71500;
 
@@ -23,7 +22,7 @@ export const BackendMarketDataProvider: MarketDataProvider = {
     if (options?.end_time) url += `&end_time=${encodeURIComponent(options.end_time)}`;
     if (!options?.start_time) url += `&limit=100`; // Default to last 100 if no range provided
 
-    const response = await safeFetch(url);
+    const response = await fetch(url);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch history from backend: ${response.status}`);
