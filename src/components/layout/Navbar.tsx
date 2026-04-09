@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { ShieldCheck, Activity, Database, LayoutGrid } from 'lucide-react';
+import { ShieldCheck, Activity, Database, LayoutGrid, PlusCircle } from 'lucide-react';
 import { usePlaybookContext } from '../../contexts/PlaybookContext';
 import { useUserSession } from '../../contexts/UserSessionContext';
 
 const NAV_ITEMS = [
   { path: '/playbooks', label: 'PLAYBOOKS', icon: Database },
+  { path: '/new-strategy', label: 'NEW STRATEGY', icon: PlusCircle },
   { path: '/supervision', label: 'LIVE SUPERVISION', icon: Activity, requiresPlaybook: true },
   { path: '/analytics', label: 'SESSION ANALYTICS', icon: ShieldCheck },
 ];

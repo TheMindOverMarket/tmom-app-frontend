@@ -1,22 +1,14 @@
 import { useState } from 'react';
 import { usePlaybookContext } from '../contexts/PlaybookContext';
-import { PlaybookIngestion } from '../components/playbook/PlaybookIngestion';
 import { RuleCondition, Playbook } from '../domain/playbook/types';
-import { ChevronDown, ChevronUp, Trash2, Copy, Check, Info } from 'lucide-react';
+import { ChevronDown, ChevronUp, Trash2, Copy, Check, Info, ArrowLeft } from 'lucide-react';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { RefreshButton } from '../components/common/RefreshButton';
 import { resolvePlaybookSymbol } from '../domain/playbook/utils';
+import { RuleLogicTree } from '../components/playbook/RuleLogicTree';
 
 export function PlaybooksPage() {
   const { 
-    playbookInput, 
-    setPlaybookInput, 
-    selectedMarket,
-    setSelectedMarket,
-    availableMarkets,
-    isLoadingMarkets,
-    createPlaybookFromNL, 
-    isSubmitting,
     playbooks,
     selectedPlaybook,
     setSelectedPlaybook,
@@ -35,9 +27,13 @@ export function PlaybooksPage() {
       await deletePlaybook(confirmConfig.id);
     }
     setIsConfirmOpen(false);
+    if (showDetailView && confirmConfig.id === selectedPlaybook?.id) {
+      setShowDetailView(false);
+      setSelectedPlaybook(null);
+    }
   };
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showDetailView, setShowDetailView] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   
@@ -56,34 +52,215 @@ export function PlaybooksPage() {
 
   const handleOpenAnalysis = (pb: Playbook) => {
     setSelectedPlaybook(pb);
-    setIsModalOpen(true);
+    setShowDetailView(true);
     setShowOriginal(false);
   };
 
+  const handleBackToLibrary = () => {
+    setShowDetailView(false);
+    // Setting selectedPlaybook to null might clear the active feed if one exists, 
+    // so we only close the view, keeping context attached.
+  };
+
+  if (showDetailView && selectedPlaybook) {
+    // Render the Expanded Detail View
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', flex: 1, minHeight: 0 }}>
+        {/* Header Ribbon */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          padding: '16px 24px', 
+          backgroundColor: 'white', 
+          borderBottom: '1px solid #e2e8f0',
+          borderRadius: '8px 8px 0 0',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button 
+              onClick={handleBackToLibrary}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '4px',
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: '#64748b', fontSize: '11px', fontWeight: 800,
+                padding: '4px 8px', borderRadius: '4px',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <ArrowLeft size={14} />
+              BACK TO LIBRARY
+            </button>
+            <div style={{ width: '1px', height: '24px', backgroundColor: '#e2e8f0' }} />
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--brand)' }} />
+                <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--brand)', letterSpacing: '0.1em' }}>STRATEGY INSPECTOR</div>
+              </div>
+              <div style={{ fontSize: '20px', fontWeight: '900', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                {selectedPlaybook.name}
+                <span style={{ fontSize: '11px', fontWeight: 800, color: '#1d4ed8', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '999px', padding: '2px 8px' }}>
+                  {resolvePlaybookSymbol(selectedPlaybook)}
+                </span>
+                {selectedPlaybook.is_active && (
+                  <span style={{ fontSize: '10px', fontWeight: 900, padding: '2px 8px', backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: '4px' }}>
+                    ACTIVE
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+             {!selectedPlaybook.is_active && (
+                <button 
+                  onClick={() => activatePlaybook(selectedPlaybook)}
+                  disabled={selectedPlaybook.generation_status !== 'COMPLETED'}
+                  title={selectedPlaybook.generation_status !== 'COMPLETED' ? "Extraction incomplete. Deployment restricted." : "Deploy strategy to live supervision feed"}
+                  style={{
+                    padding: '8px 24px',
+                    borderRadius: '4px',
+                    border: 'none',
+                    backgroundColor: '#0f172a',
+                    color: 'white',
+                    fontSize: '11px',
+                    fontWeight: 900,
+                    cursor: selectedPlaybook.generation_status === 'COMPLETED' ? 'pointer' : 'not-allowed',
+                    opacity: selectedPlaybook.generation_status === 'COMPLETED' ? 1 : 0.6,
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}
+                >
+                  ACTIVATE PLAYBOOK
+                </button>
+              )}
+             <button
+                onClick={() => {
+                  setConfirmConfig({ id: selectedPlaybook.id, name: selectedPlaybook.name });
+                  setIsConfirmOpen(true);
+                }}
+                style={{
+                  background: 'none',
+                  border: '1px solid #fee2e2',
+                  backgroundColor: '#fef2f2',
+                  padding: '8px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  color: '#ef4444',
+                  display: 'flex',
+                  alignItems: 'center',
+                  transition: 'all 0.2s ease'
+                }}
+                title="Delete playbook"
+              >
+                <Trash2 size={14} />
+              </button>
+          </div>
+        </div>
+
+        {/* Playbook Detailed Content */}
+        <div style={{ display: 'flex', gap: '24px', flex: 1, overflowY: 'auto', padding: '0 24px 24px' }}>
+          
+          {/* Left Pane: Original Context */}
+          <div style={{ flex: '0 0 400px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+             <div style={{ borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: 'white', overflow: 'hidden' }}>
+                <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 900, color: '#475569', letterSpacing: '0.1em' }}>NATURAL LANGUAGE SOURCE</span>
+                  <button
+                    onClick={() => handleCopy(selectedPlaybook.original_nl_input)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: '4px',
+                      cursor: 'pointer',
+                      color: copySuccess ? '#16a34a' : '#94a3b8',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '9px',
+                      fontWeight: 800,
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {copySuccess ? <Check size={12} /> : <Copy size={12} />}
+                    {copySuccess ? 'COPIED' : 'COPY'}
+                  </button>
+                </div>
+                <div style={{ padding: '16px', fontSize: '12px', color: '#334155', fontFamily: 'monospace', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                  {selectedPlaybook.original_nl_input}
+                </div>
+             </div>
+          </div>
+
+          {/* Right Pane: Extracted Rules Explorer */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ fontSize: '12px', fontWeight: 900, color: '#64748b', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              DETERMINISTIC EVALUATION ENGINE
+              <div style={{ height: '1px', flex: 1, backgroundColor: '#e2e8f0' }} />
+            </div>
+
+            {selectedPlaybook.generation_status === 'PENDING' ? (
+                <div style={{ padding: '60px 0', textAlign: 'center', backgroundColor: 'white', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
+                  <div style={{ 
+                    width: '24px', 
+                    height: '24px', 
+                    borderRadius: '50%', 
+                    border: '3px solid #e2e8f0', 
+                    borderTopColor: 'var(--brand)', 
+                    animation: 'spin 1s linear infinite',
+                    margin: '0 auto 16px' 
+                  }} />
+                  <div style={{ fontWeight: 800, fontSize: '16px', color: '#0f172a' }}>Analyzing Logic & Validating Primitives...</div>
+                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>The Rule Engine is translating natural language dependencies into strict execution graphs.</div>
+                </div>
+              ) : selectedPlaybook.generation_status === 'FAILED' ? (
+                <div style={{ padding: '40px 32px', backgroundColor: '#fef2f2', borderRadius: '8px', border: '1px solid #fee2e2' }}>
+                  <div style={{ fontWeight: 900, fontSize: '16px', color: 'var(--danger)', marginBottom: '8px' }}>Extraction Failed</div>
+                  <div style={{ fontSize: '13px', color: '#7f1d1d', fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
+                    {selectedPlaybook.failure_reason || "Unknown compiler error."}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+                  {rules.length === 0 ? (
+                     <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8', fontSize: '13px', fontStyle: 'italic', backgroundColor: 'white', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
+                        No extractable rules found in the strategy context.
+                     </div>
+                  ) : (
+                     <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '16px' }}>
+                       {rules.map((rule) => Object.keys(rule).length > 0 && (
+                          <RuleLogicTree key={rule.id} rule={rule} />
+                       ))}
+                     </div>
+                  )}
+                </div>
+              )}
+          </div>
+        </div>
+
+        <ConfirmationModal
+          isOpen={isConfirmOpen}
+          onClose={() => setIsConfirmOpen(false)}
+          onConfirm={handleConfirmDelete}
+          title={confirmConfig.id === 'all' ? 'Delete All Playbooks' : 'Delete Playbook'}
+          message={confirmConfig.id === 'all' 
+            ? 'Are you absolutely sure you want to delete ALL playbooks? This action is permanent and will remove all associated rules and trading history.' 
+            : `Are you sure you want to delete "${confirmConfig.name}"? This will permanently remove the playbook and its compiled logic.`
+          }
+          confirmText={confirmConfig.id === 'all' ? 'Delete All' : 'Delete Playbook'}
+        />
+
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes spin { to { transform: rotate(360deg); } }
+        ` }} />
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1, minHeight: 0 }}>
-      {/* Ingestion Section */}
-      <section style={{ 
-        padding: '16px', 
-        backgroundColor: 'white', 
-        borderRadius: '6px', 
-        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-        border: '1px solid #e2e8f0',
-        flexShrink: 0
-      }}>
-        <h3 style={{ margin: '0 0 12px 0', fontSize: '11px', fontWeight: 900, color: '#64748b', letterSpacing: '0.05em' }}>NEW STRATEGY INGESTION</h3>
-        <PlaybookIngestion 
-          value={playbookInput}
-          onChange={setPlaybookInput}
-          selectedMarket={selectedMarket}
-          onMarketChange={setSelectedMarket}
-          availableMarkets={availableMarkets}
-          isLoadingMarkets={isLoadingMarkets}
-          onSubmit={createPlaybookFromNL}
-          isSubmitting={isSubmitting}
-        />
-      </section>
-
       {/* Main Library Area */}
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         
@@ -166,10 +343,14 @@ export function PlaybooksPage() {
                   onMouseEnter={e => {
                     e.currentTarget.style.borderColor = 'var(--brand)';
                     e.currentTarget.style.backgroundColor = '#fcfdfe';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
                   }}
                   onMouseLeave={e => {
                     e.currentTarget.style.borderColor = 'var(--slate-200)';
                     e.currentTarget.style.backgroundColor = 'white';
+                    e.currentTarget.style.transform = 'none';
+                    e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
                   {(pb.generation_status === 'PENDING' || pb.generation_status === 'FAILED') && (
@@ -222,24 +403,6 @@ export function PlaybooksPage() {
                         {new Date(pb.created_at).toLocaleDateString()}
                       </div>
 
-                      <div 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenAnalysis(pb);
-                        }}
-                        style={{
-                          padding: '6px',
-                          borderRadius: '6px',
-                          color: '#64748b',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s',
-                          backgroundColor: '#f8fafc'
-                        }}
-                        title="View details"
-                      >
-                        <Info size={16} />
-                      </div>
-
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -262,31 +425,6 @@ export function PlaybooksPage() {
                       >
                         <Trash2 size={12} />
                       </button>
-                      
-                      {!pb.is_active && (
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (pb.generation_status === 'COMPLETED') activatePlaybook(pb);
-                          }}
-                          disabled={pb.generation_status !== 'COMPLETED'}
-                          title={pb.generation_status === 'PENDING' ? "Extraction pending..." : (pb.generation_status === 'FAILED' ? "Extraction failed." : "Activate strategy")}
-                          style={{
-                            fontSize: '10px',
-                            fontWeight: 800,
-                            backgroundColor: 'white',
-                            color: '#64748b',
-                            border: '1px solid #e2e8f0',
-                            padding: '4px 10px',
-                            borderRadius: '4px',
-                            cursor: pb.generation_status === 'COMPLETED' ? 'pointer' : 'not-allowed',
-                            opacity: pb.generation_status === 'COMPLETED' ? 1 : 0.6,
-                            transition: 'all 0.2s ease'
-                          }}
-                        >
-                          ACTIVATE
-                        </button>
-                      )}
                     </div>
                   </div>
                   
@@ -320,169 +458,6 @@ export function PlaybooksPage() {
             )}
           </div>
         </section>
-
-        {/* Modal sharpened */}
-        {isModalOpen && selectedPlaybook && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '20px'
-          }} onClick={() => setIsModalOpen(false)}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '4px',
-              width: '100%',
-              maxWidth: '850px',
-              maxHeight: '90vh',
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-              overflow: 'hidden',
-              border: '1px solid var(--slate-200)'
-            }} onClick={e => e.stopPropagation()}>
-              
-              <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', backgroundColor: '#f8fafc' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--brand)' }} />
-                      <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--brand)', letterSpacing: '0.1em' }}>STRATEGY INSPECTOR</div>
-                    </div>
-                    <div style={{ fontSize: '20px', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.02em' }}>{selectedPlaybook.name}</div>
-                    <div style={{ marginTop: '8px', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 800, color: '#1d4ed8', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '999px', padding: '6px 10px' }}>
-                      {resolvePlaybookSymbol(selectedPlaybook)}
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => setIsModalOpen(false)}
-                    style={{ background: 'none', border: 'none', fontSize: '24px', color: '#94a3b8', cursor: 'pointer' }}
-                  >&times;</button>
-                </div>
-              </div>
-
-              <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
-                {selectedPlaybook.generation_status === 'PENDING' ? (
-                  <div style={{ padding: '60px 0', textAlign: 'center' }}>
-                    <div style={{ fontWeight: 800, fontSize: '18px', color: '#0f172a' }}>Analyzing Strategy Logic...</div>
-                  </div>
-                ) : selectedPlaybook.generation_status === 'FAILED' ? (
-                  <div style={{ padding: '60px 32px', textAlign: 'center' }}>
-                    <div style={{ fontWeight: 800, fontSize: '18px', color: 'var(--danger)', marginBottom: '8px' }}>Extraction Failed</div>
-                    {selectedPlaybook.failure_reason && (
-                      <div style={{ 
-                        fontSize: '13px', 
-                        color: '#64748b', 
-                        backgroundColor: '#fef2f2', 
-                        padding: '12px 16px', 
-                        borderRadius: '4px',
-                        border: '1px solid #fee2e2',
-                        maxWidth: '500px',
-                        margin: '0 auto',
-                        wordBreak: 'break-word',
-                        fontFamily: 'monospace'
-                      }}>
-                        {selectedPlaybook.failure_reason}
-                      </div>
-                    )}
-                    <button onClick={() => setIsModalOpen(false)} style={{ marginTop: '24px', padding: '8px 24px', border: '1px solid #e2e8f0', background: 'white', borderRadius: '4px', cursor: 'pointer', fontWeight: 700, color: '#475569' }}>Dismiss</button>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-                    <div style={{ borderRadius: '4px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-                      <div style={{ padding: '8px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'white' }}>
-                        <div 
-                          onClick={() => setShowOriginal(!showOriginal)} 
-                          style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', flex: 1 }}
-                        >
-                          <span style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', letterSpacing: '0.1em' }}>SOURCE NATURAL LANGUAGE [CLICK TO TOGGLE]</span>
-                          {showOriginal ? <ChevronUp size={10} color="#94a3b8" /> : <ChevronDown size={10} color="#94a3b8" />}
-                        </div>
-                        
-                        <button
-                          onClick={() => handleCopy(selectedPlaybook.original_nl_input)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            padding: '4px',
-                            cursor: 'pointer',
-                            color: copySuccess ? '#16a34a' : '#94a3b8',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '9px',
-                            fontWeight: 800,
-                            transition: 'all 0.2s ease'
-                          }}
-                          title="Copy prompt to clipboard"
-                        >
-                          {copySuccess ? <Check size={12} /> : <Copy size={12} />}
-                          {copySuccess ? 'COPIED' : 'COPY'}
-                        </button>
-                      </div>
-                      {showOriginal && (
-                        <div style={{ padding: '16px', fontSize: '12px', backgroundColor: '#f8fafc', color: '#334155', fontFamily: 'monospace', whiteSpace: 'pre-wrap', borderTop: '1px solid #f1f5f9' }}>
-                          {selectedPlaybook.original_nl_input}
-                        </div>
-                      )}
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', letterSpacing: '0.1em' }}>DETERMINISTIC RULESET</div>
-                      {rules.map((rule, idx) => (
-                        <div key={rule.id || idx} style={{
-                          padding: '20px',
-                          borderRadius: '4px',
-                          border: '1px solid #e2e8f0',
-                          backgroundColor: 'white'
-                        }}>
-                          <div style={{ fontSize: '16px', fontWeight: '900', color: '#0f172a', marginBottom: '8px' }}>{rule.name}</div>
-                          <div style={{ fontSize: '13px', color: '#64748b', lineHeight: '1.6', marginBottom: '16px' }}>{rule.description}</div>
-                          {rule.conditions?.map((cond: RuleCondition, cIdx: number) => (
-                            <div key={cond.id || cIdx} style={{ fontSize: '13px', padding: '10px 16px', backgroundColor: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '4px', marginBottom: '4px', display: 'flex', gap: '12px' }}>
-                              <span style={{ fontWeight: 800, color: 'var(--brand)' }}>{cond.metric}</span>
-                              <span style={{ color: '#94a3b8', fontWeight: 700 }}>{cond.comparator}</span>
-                              <span style={{ fontWeight: 800, color: '#0f172a' }}>{cond.value}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div style={{ padding: '24px 32px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end' }}>
-                {!selectedPlaybook.is_active && (
-                  <button 
-                    onClick={() => { activatePlaybook(selectedPlaybook); setIsModalOpen(false); }}
-                    disabled={selectedPlaybook.generation_status !== 'COMPLETED'}
-                    title={selectedPlaybook.generation_status !== 'COMPLETED' ? "Extraction incomplete. Deployment restricted." : "Deploy strategy to live supervision feed"}
-                    style={{
-                      padding: '10px 32px',
-                      borderRadius: '4px',
-                      border: 'none',
-                      backgroundColor: '#0f172a',
-                      color: 'white',
-                      fontSize: '11px',
-                      fontWeight: 900,
-                      cursor: selectedPlaybook.generation_status === 'COMPLETED' ? 'pointer' : 'not-allowed',
-                      opacity: selectedPlaybook.generation_status === 'COMPLETED' ? 1 : 0.6,
-                      transition: 'all 0.2s ease'
-                    }}
-                  >ACTIVATE PLAYBOOK</button>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       <ConfirmationModal

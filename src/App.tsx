@@ -4,6 +4,7 @@ import { UserSessionProvider, useUserSession } from './contexts/UserSessionConte
 import { AppLayout } from './components/layout/AppLayout';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { PlaybooksPage } from './pages/PlaybooksPage';
+import { NewStrategyPage } from './pages/NewStrategyPage';
 import { MonitorPage } from './pages/MonitorPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { LoginPage } from './pages/LoginPage';
@@ -29,6 +30,7 @@ function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
             <Route path="/playbooks" element={<PlaybooksPage />} />
+            <Route path="/new-strategy" element={<NewStrategyPage />} />
             <Route path="/supervision" element={<MonitorPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             {isAdmin && <Route path="/admin" element={<AdminDashboard />} />}

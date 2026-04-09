@@ -26,7 +26,7 @@ export interface Rule {
   playbook_id: string;
   created_at: string;
   conditions?: RuleCondition[];
-  edges?: ConditionEdge[];
+  condition_edges?: ConditionEdge[];
 }
 
 export interface Playbook {
