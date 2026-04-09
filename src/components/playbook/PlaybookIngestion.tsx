@@ -14,6 +14,8 @@ interface PlaybookIngestionProps {
   isStreaming?: boolean;
   disabled?: boolean;
   showSessionControls?: boolean;
+  chatHistory?: Array<{role: string, content: string}> | null;
+  hideMarket?: boolean;
 }
 
 export function PlaybookIngestion({ 
@@ -29,10 +31,13 @@ export function PlaybookIngestion({
   onStopSession,
   isStreaming = false,
   disabled = false,
-  showSessionControls = false
+  showSessionControls = false,
+  chatHistory = null,
+  hideMarket = false
 }: PlaybookIngestionProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      {!hideMarket && (
       <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: '12px', alignItems: 'end', marginBottom: '8px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <label style={{ fontSize: '10px', fontWeight: 900, color: '#64748b', letterSpacing: '0.06em' }}>
@@ -81,9 +86,39 @@ export function PlaybookIngestion({
           {availableMarkets.find((market) => market.symbol === selectedMarket)?.display_name || selectedMarket}
         </div>
       </div>
+      )}
+
+      {chatHistory && chatHistory.length > 0 && (
+         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px', padding: '16px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+            {chatHistory.map((msg, i) => (
+                <div key={i} style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' 
+                }}>
+                    <span style={{ fontSize: '10px', fontWeight: 800, color: '#64748b', marginBottom: '4px', textTransform: 'uppercase' }}>
+                        {msg.role === 'user' ? 'YOU' : 'SYSTEM'}
+                    </span>
+                    <div style={{ 
+                        padding: '10px 14px', 
+                        borderRadius: '8px', 
+                        backgroundColor: msg.role === 'user' ? '#0f172a' : 'white', 
+                        color: msg.role === 'user' ? 'white' : 'var(--slate-900)',
+                        border: msg.role === 'user' ? 'none' : '1px solid #e2e8f0',
+                        fontSize: '13px',
+                        maxWidth: '85%',
+                        lineHeight: '1.5',
+                        whiteSpace: 'pre-wrap'
+                    }}>
+                        {msg.content}
+                    </div>
+                </div>
+            ))}
+         </div>
+      )}
 
       <div style={{ 
-        position: 'relative', 
+        position: 'relative',  
         display: 'flex', 
         flexDirection: 'column',
         backgroundColor: 'white',
@@ -161,10 +196,10 @@ export function PlaybookIngestion({
           title={
             isSubmitting
               ? "Background extraction in progress..."
-              : !selectedMarket
+              : (!hideMarket && !selectedMarket)
                 ? "Select a market before ingesting a playbook."
                 : !value.trim()
-                  ? "Input descriptive logic to enable strategy ingestion."
+                  ? "Input descriptive logic or an answer to enable strategy ingestion."
                   : "Submit logic for deterministic derivation"
           }
           style={{

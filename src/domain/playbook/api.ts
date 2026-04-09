@@ -55,6 +55,19 @@ export const playbookApi = {
     }
   },
 
+  chatPlaybook: async (id: string, message: string): Promise<Playbook> => {
+    const response = await fetch(`${API_BASE}/playbooks/${id}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message }),
+    });
+    if (!response.ok) {
+      const errorMessage = await parsePlaybookError(response, 'Failed to update playbook conversation');
+      throw new Error(errorMessage);
+    }
+    return response.json();
+  },
+
   listUserPlaybooks: async (userId: string): Promise<Playbook[]> => {
     const response = await fetch(`${API_BASE}/users/${userId}/playbooks`);
     if (!response.ok) {

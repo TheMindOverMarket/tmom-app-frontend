@@ -16,6 +16,7 @@ interface PlaybookContextType {
   notification: { type: 'success' | 'error'; message: string } | null;
   setNotification: (val: { type: 'success' | 'error'; message: string } | null) => void;
   createPlaybookFromNL: () => Promise<Playbook | undefined>;
+  chatWithSystem: (message: string) => Promise<Playbook | undefined>;
   playbooks: Playbook[];
   selectedPlaybook: Playbook | null;
   setSelectedPlaybook: (pb: Playbook | null) => void;
@@ -187,7 +188,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
         // Resilience: If backend hasn't deployed the field yet, but we are in a pending state locally
         const status = updated.generation_status || 'COMPLETED'; 
 
-        if (status === 'COMPLETED' || status === 'FAILED') {
+        if (status === 'COMPLETED' || status === 'FAILED' || status === 'INCOMPLETE') {
           setSelectedPlaybook(updated);
           
           if (status === 'COMPLETED') {
@@ -350,6 +351,24 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const chatWithSystem = async (message: string) => {
+    if (!message.trim() || !selectedPlaybook) return;
+    
+    setIsSubmitting(true);
+    setNotification(null);
+    try {
+        const updated = await playbookApi.chatPlaybook(selectedPlaybook.id, message);
+        setSelectedPlaybook(updated);
+        await fetchPlaybooks();
+        return updated;
+    } catch (error: unknown) {
+        console.error('Failed to send message:', error);
+        setNotification({ type: 'error', message: `Failed to communicate: ${error instanceof Error ? error.message : 'Unknown error'}` });
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
+
   const activatePlaybook = async (pb: Playbook) => {
     try {
       // The backend now handles atomic deactivation of other playbooks 
@@ -398,7 +417,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     selectedMarket, setSelectedMarket,
     availableMarkets, isLoadingMarkets,
     isSubmitting, notification, setNotification,
-    createPlaybookFromNL, playbooks, selectedPlaybook, setSelectedPlaybook,
+    createPlaybookFromNL, chatWithSystem, playbooks, selectedPlaybook, setSelectedPlaybook,
     isLoadingPlaybooks, fetchPlaybooks, activatePlaybook,
     activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream,
     rules,

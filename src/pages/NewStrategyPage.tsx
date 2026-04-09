@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { PlaybookIngestion } from '../components/playbook/PlaybookIngestion';
 import { useNavigate } from 'react-router-dom';
@@ -11,15 +12,26 @@ export function NewStrategyPage() {
     availableMarkets,
     isLoadingMarkets,
     createPlaybookFromNL,
+    chatWithSystem,
+    selectedPlaybook,
     isSubmitting
   } = usePlaybookContext();
 
   const navigate = useNavigate();
 
-  const handleSubmit = async () => {
-    const playbook = await createPlaybookFromNL();
-    if (playbook) {
+  useEffect(() => {
+    if (selectedPlaybook?.generation_status === 'COMPLETED') {
       navigate('/playbooks');
+    }
+  }, [selectedPlaybook?.generation_status, navigate]);
+
+  const handleSubmit = async () => {
+    if (selectedPlaybook?.generation_status === 'INCOMPLETE') {
+      await chatWithSystem(playbookInput);
+      setPlaybookInput('');
+    } else if (!selectedPlaybook || selectedPlaybook.generation_status === 'FAILED') {
+      await createPlaybookFromNL();
+      setPlaybookInput('');
     }
   };
 
@@ -75,6 +87,8 @@ export function NewStrategyPage() {
             isLoadingMarkets={isLoadingMarkets}
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
+            chatHistory={selectedPlaybook?.chat_history}
+            hideMarket={!!selectedPlaybook && selectedPlaybook.generation_status !== 'FAILED'}
           />
         </section>
       </div>

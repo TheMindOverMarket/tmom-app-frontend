@@ -1,4 +1,4 @@
-export type GenerationStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
+export type GenerationStatus = 'PENDING' | 'INCOMPLETE' | 'COMPLETED' | 'FAILED';
 
 export interface RuleCondition {
   id: string;
@@ -37,6 +37,7 @@ export interface Playbook {
   market: string;
   original_nl_input: string;
   context?: Record<string, unknown> | null;
+  chat_history?: Array<{role: string, content: string}> | null;
   generation_status: GenerationStatus;
   failure_reason?: string;
   is_active: boolean;
