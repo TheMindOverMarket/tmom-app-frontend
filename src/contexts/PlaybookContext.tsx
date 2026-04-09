@@ -34,6 +34,14 @@ interface PlaybookContextType {
   rules: any[]; 
   deletePlaybook: (id: string) => Promise<void>;
   deleteAllPlaybooks: () => Promise<void>;
+  
+  // Draft / Stateless Management
+  draftChatHistory: any[];
+  currentDraft: any | null;
+  setDraftChatHistory: (val: any[]) => void;
+  setCurrentDraft: (val: any | null) => void;
+  resetDraft: () => void;
+  finalizePlaybook: () => Promise<Playbook | undefined>;
 }
 
 const PlaybookContext = createContext<PlaybookContextType | undefined>(undefined);
@@ -57,6 +65,10 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isStartingStream, setIsStartingStream] = useState(false);
   const [isStoppingStream, setIsStoppingStream] = useState(false);
+
+  // Draft State
+  const [draftChatHistory, setDraftChatHistory] = useState<any[]>([]);
+  const [currentDraft, setCurrentDraft] = useState<any | null>(null);
 
   const buildSamplePlaybook = useCallback((market: string) => `I’m using ${market.split('/')[0]}.
 1. Setup Logic (Deterministic Inputs)
@@ -304,7 +316,46 @@ Cooldown:
     setActiveSession(null);
     setIsStreaming(false);
     setRules([]);
+    setDraftChatHistory([]);
+    setCurrentDraft(null);
   }, [currentUser?.id]);
+
+  // LocalStorage Sync
+  useEffect(() => {
+    if (!currentUser) return;
+    const key = `tmom_strategy_draft_${currentUser.id}`;
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      try {
+        const { chatHistory, draft, market } = JSON.parse(saved);
+        if (chatHistory) setDraftChatHistory(chatHistory);
+        if (draft) setCurrentDraft(draft);
+        if (market) setSelectedMarket(market);
+      } catch (e) {
+        console.error('Failed to restore draft from localStorage:', e);
+      }
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const key = `tmom_strategy_draft_${currentUser.id}`;
+    if (draftChatHistory.length > 0 || currentDraft || selectedMarket) {
+      localStorage.setItem(key, JSON.stringify({
+        chatHistory: draftChatHistory,
+        draft: currentDraft,
+        market: selectedMarket
+      }));
+    } else {
+      localStorage.removeItem(key);
+    }
+  }, [draftChatHistory, currentDraft, selectedMarket, currentUser]);
+
+  const resetDraft = useCallback(() => {
+    setDraftChatHistory([]);
+    setCurrentDraft(null);
+    setStreamingMessage('');
+  }, []);
 
   const startStream = async (playbookId: string) => {
     if (!currentUser) return;
@@ -374,19 +425,87 @@ Cooldown:
   };
 
   const chatWithSystem = async (message: string) => {
-    if (!message.trim() || !selectedPlaybook) return;
+    if (!message.trim() || (!selectedPlaybook && draftChatHistory.length === 0 && !playbookInput)) return;
     
     setIsSubmitting(true);
     setNotification(null);
+    setStreamingMessage('');
+
     try {
-        const updated = await playbookApi.chatPlaybook(selectedPlaybook.id, message);
-        setSelectedPlaybook(updated);
-        await fetchPlaybooks();
-        void handleStream(selectedPlaybook.id);
-        return updated;
+        const history = [...draftChatHistory, { role: 'user', content: message }];
+        setDraftChatHistory(history);
+
+        if (selectedPlaybook) {
+            // Archived/Existing playbook chat
+            const updated = await playbookApi.chatPlaybook(selectedPlaybook.id, message);
+            setSelectedPlaybook(updated);
+            await fetchPlaybooks();
+            void handleStream(selectedPlaybook.id);
+            return updated;
+        } else {
+            // New strategy draft chat (Stateless)
+            const response = await fetch(`${CONFIG.BACKEND_BASE_URL}/playbooks/stream-preview`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ turn: { chat_history: history } })
+            });
+
+            if (!response.body) throw new Error('No stream body');
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let accumulated = '';
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                accumulated += decoder.decode(value);
+                setStreamingMessage(accumulated);
+            }
+
+            // Once stream ends, get the full parsed preview logic
+            const preview = await fetch(`${CONFIG.BACKEND_BASE_URL}/playbooks/preview`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ turn: { chat_history: history } })
+            }).then(res => res.json());
+
+            setCurrentDraft(preview);
+            if (preview.dialogue) {
+               setDraftChatHistory([...history, { role: 'assistant', content: preview.dialogue }]);
+            }
+        }
     } catch (error: unknown) {
         console.error('Failed to send message:', error);
         setNotification({ type: 'error', message: `Failed to communicate: ${error instanceof Error ? error.message : 'Unknown error'}` });
+    } finally {
+        setIsSubmitting(false);
+        setStreamingMessage('');
+    }
+  };
+
+  const finalizePlaybook = async () => {
+    if (!currentUser || !currentDraft || !selectedMarket) return;
+    
+    setIsSubmitting(true);
+    try {
+        const playbook = await playbookApi.ingestPlaybook({
+          name: `${selectedMarket.split('/')[0]} Strategy ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+          user_id: currentUser.id,
+          symbol: selectedMarket,
+          market: selectedMarket,
+          original_nl_input: draftChatHistory[0]?.content || '',
+          chat_history: draftChatHistory,
+          is_active: true
+        });
+
+        await fetchPlaybooks();
+        setSelectedPlaybook(playbook);
+        resetDraft();
+        setNotification({ type: 'success', message: 'Strategy deployed and archived.' });
+        return playbook;
+    } catch (error: unknown) {
+        console.error('Failed to finalize playbook:', error);
+        setNotification({ type: 'error', message: 'Failed to deploy strategy.' });
     } finally {
         setIsSubmitting(false);
     }
@@ -440,7 +559,13 @@ Cooldown:
     activeSession, isStreaming, streamingMessage, isStartingStream, isStoppingStream, startStream, stopStream,
     rules,
     deletePlaybook,
-    deleteAllPlaybooks
+    deleteAllPlaybooks,
+    draftChatHistory,
+    currentDraft,
+    setDraftChatHistory,
+    setCurrentDraft,
+    resetDraft,
+    finalizePlaybook
   };
 
   return <PlaybookContext.Provider value={value}>{children}</PlaybookContext.Provider>;

@@ -11,7 +11,13 @@ import {
   Shield,
   Target,
   BarChart3,
-  ChevronRight
+  ChevronRight,
+  Trash2,
+  CheckCircle2,
+  XCircle,
+  Activity,
+  FileCode,
+  AlertCircle
 } from 'lucide-react';
 
 const STRATEGY_TEMPLATES = [
@@ -53,13 +59,18 @@ export function NewStrategyPage() {
     setSelectedMarket,
     availableMarkets,
     isLoadingMarkets,
-    createPlaybookFromNL,
     chatWithSystem,
     selectedPlaybook,
     setSelectedPlaybook,
     playbooks,
     isSubmitting,
-    streamingMessage
+    streamingMessage,
+    draftChatHistory,
+    currentDraft,
+    finalizePlaybook,
+    resetDraft,
+    deletePlaybook,
+    fetchPlaybooks
   } = usePlaybookContext();
 
   const navigate = useNavigate();
@@ -92,21 +103,17 @@ export function NewStrategyPage() {
   const handleSubmit = async () => {
     if (!playbookInput.trim() || isSubmitting) return;
     
-    if (selectedPlaybook?.generation_status === 'INCOMPLETE' || selectedPlaybook?.generation_status === 'INITIALIZING') {
-      await chatWithSystem(playbookInput);
-      setPlaybookInput('');
-    } else if (!selectedPlaybook || selectedPlaybook.generation_status === 'FAILED') {
-      await createPlaybookFromNL();
-      setPlaybookInput('');
-    }
+    // Always use chatWithSystem now; it handles both stateful and draft flows
+    await chatWithSystem(playbookInput);
+    setPlaybookInput('');
   };
 
   const handleSelectTemplate = (content: string) => {
     setPlaybookInput(content);
   };
 
-  const isInitialTurn = !selectedPlaybook || selectedPlaybook.generation_status === 'FAILED';
-  const chatHistory = selectedPlaybook?.chat_history || [];
+  const isInitialTurn = !selectedPlaybook && draftChatHistory.length === 0;
+  const chatHistory = selectedPlaybook ? (selectedPlaybook.chat_history || []) : draftChatHistory;
   const isInitialView = chatHistory.length === 0 && !isSubmitting;
 
   const cardStyle = {
@@ -193,32 +200,54 @@ export function NewStrategyPage() {
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {playbooks.map(pb => (
-                <button
-                  key={pb.id}
-                  onClick={() => setSelectedPlaybook(pb)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '10px 12px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    backgroundColor: selectedPlaybook?.id === pb.id ? 'rgba(255,255,255,0.05)' : 'transparent',
-                    fontSize: '13px',
-                    color: selectedPlaybook?.id === pb.id ? '#ffffff' : 'var(--auth-text-muted)',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseEnter={e => { if (selectedPlaybook?.id !== pb.id) e.currentTarget.style.color = '#ffffff' }}
-                  onMouseLeave={e => { if (selectedPlaybook?.id !== pb.id) e.currentTarget.style.color = 'var(--auth-text-muted)' }}
-                >
-                  <MessageSquare size={13} style={{ flexShrink: 0, opacity: 0.6 }} />
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: selectedPlaybook?.id === pb.id ? 600 : 400 }}>{pb.name}</span>
-                </button>
+                <div key={pb.id} style={{ display: 'flex', alignItems: 'center', gap: '2px', position: 'relative' }} className="history-item-container">
+                  <button
+                    onClick={() => setSelectedPlaybook(pb)}
+                    style={{
+                      flex: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '10px 12px',
+                      borderRadius: '4px',
+                      border: 'none',
+                      backgroundColor: selectedPlaybook?.id === pb.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                      fontSize: '13px',
+                      color: selectedPlaybook?.id === pb.id ? '#ffffff' : 'var(--auth-text-muted)',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={e => { if (selectedPlaybook?.id !== pb.id) e.currentTarget.style.color = '#ffffff' }}
+                    onMouseLeave={e => { if (selectedPlaybook?.id !== pb.id) e.currentTarget.style.color = 'var(--auth-text-muted)' }}
+                  >
+                    <MessageSquare size={13} style={{ flexShrink: 0, opacity: 0.6 }} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: selectedPlaybook?.id === pb.id ? 600 : 400 }}>{pb.name}</span>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm('Permanently delete this strategy archive?')) {
+                        deletePlaybook(pb.id);
+                      }
+                    }}
+                    className="delete-btn"
+                    style={{
+                      padding: '8px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      color: 'rgba(255, 99, 71, 0.4)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      opacity: 0
+                    }}
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
               ))}
             </div>
           </div>
@@ -238,11 +267,14 @@ export function NewStrategyPage() {
           height: '56px', 
           display: 'flex', 
           alignItems: 'center', 
+          justifyContent: 'space-between',
           padding: '0 20px',
           position: 'absolute',
           top: 0,
           left: 0,
-          zIndex: 10
+          right: 0,
+          zIndex: 60,
+          background: 'linear-gradient(to bottom, rgba(5,5,5,0.8), transparent)'
         }}>
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -263,6 +295,38 @@ export function NewStrategyPage() {
           >
             <Menu size={20} />
           </button>
+
+          {/* Condensed Logic Inspector (Top Right) */}
+          {currentDraft && !selectedPlaybook && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '8px 16px',
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid var(--auth-border)',
+              borderRadius: '99px',
+              animation: 'fadeIn 0.5s ease-out'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <FileCode size={12} color="#00ff88" />
+                <span style={{ fontSize: '10px', fontWeight: 900, color: '#ffffff', letterSpacing: '0.1em' }}>
+                  {currentDraft.rules?.length || 0} RULES EXTRACTED
+                </span>
+              </div>
+              <div style={{ width: '1px', height: '12px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Activity size={12} color="rgba(255,255,255,0.6)" />
+                <span style={{ fontSize: '10px', fontWeight: 900, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.1em' }}>
+                  {currentDraft.context_skeleton?.ta_lib_metrics?.length || 0} INDICATORS
+                </span>
+              </div>
+              {currentDraft.status === 'ok' && (
+                <CheckCircle2 size={12} color="#00ff88" style={{ marginLeft: '4px' }} />
+              )}
+            </div>
+          )}
         </div>
 
         {/* Unified Container for SCROLLING Chat and INITIAL Parser */}
@@ -657,6 +721,91 @@ export function NewStrategyPage() {
               </div>
             </div>
           )}
+          
+          {/* Strategy Progression Model (Fixed Right) */}
+          {!isInitialView && !selectedPlaybook && (
+            <div style={{
+              position: 'fixed',
+              right: '24px',
+              top: '120px',
+              width: '240px',
+              backgroundColor: 'rgba(5, 5, 5, 0.4)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid var(--auth-border)',
+              borderRadius: '4px',
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+              animation: 'heroFade 0.6s ease-out',
+              zIndex: 30
+            }}>
+              <div style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                Strategy Progression
+              </div>
+              
+              {[
+                { label: 'Analyzing Intent', status: chatHistory.length > 0 ? 'COMPLETED' : 'PENDING' },
+                { label: 'Logic Extraction', status: currentDraft ? 'COMPLETED' : 'PENDING' },
+                { label: 'Indicator Mapping', status: (currentDraft?.context_skeleton?.ta_lib_metrics?.length > 0) ? 'COMPLETED' : 'PENDING' },
+                { label: 'Structural Validation', status: currentDraft?.status === 'ok' ? 'COMPLETED' : 'PENDING' }
+              ].map((step, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ 
+                    width: '16px', 
+                    height: '16px', 
+                    borderRadius: '50%', 
+                    border: `1px solid ${step.status === 'COMPLETED' ? '#00ff88' : 'var(--auth-border)'}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: step.status === 'COMPLETED' ? 'rgba(0, 255, 136, 0.1)' : 'transparent'
+                  }}>
+                    {step.status === 'COMPLETED' ? <CheckCircle2 size={10} color="#00ff88" /> : <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.1)' }} />}
+                  </div>
+                  <span style={{ 
+                    fontSize: '11px', 
+                    fontWeight: 600, 
+                    color: step.status === 'COMPLETED' ? '#ffffff' : 'var(--auth-text-muted)',
+                    letterSpacing: '0.05em'
+                  }}>
+                    {step.label}
+                  </span>
+                </div>
+              ))}
+
+              {currentDraft?.status === 'ok' && (
+                <div style={{ marginTop: '12px', paddingTop: '20px', borderTop: '1px solid var(--auth-border)' }}>
+                  <button
+                    onClick={() => finalizePlaybook()}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      borderRadius: '4px',
+                      backgroundColor: '#00ff88',
+                      color: 'black',
+                      border: 'none',
+                      fontSize: '10px',
+                      fontWeight: 900,
+                      letterSpacing: '0.15em',
+                      textTransform: 'uppercase',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 10px 30px rgba(0, 255, 136, 0.2)'
+                    }}
+                  >
+                    Commit & Deploy
+                  </button>
+                  <p style={{ fontSize: '9px', color: 'var(--auth-text-muted)', textAlign: 'center', marginTop: '12px', lineHeight: '1.4' }}>
+                    Deployment will finalize the logic and move it to your historical archives.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Input Area (only fixed for chat mode) */}
@@ -674,6 +823,29 @@ export function NewStrategyPage() {
             zIndex: 100
           }}>
             <div style={{ width: '100%', maxWidth: '800px' }}>
+              {!selectedPlaybook && (
+                <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '8px', gap: '12px', transform: 'translateY(-10px)' }}>
+                   <button 
+                     onClick={resetDraft}
+                     style={{
+                       display: 'flex',
+                       alignItems: 'center',
+                       gap: '6px',
+                       padding: '6px 12px',
+                       borderRadius: '4px',
+                       backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                       border: '1px solid var(--auth-border)',
+                       color: 'var(--auth-text-muted)',
+                       fontSize: '10px',
+                       fontWeight: 900,
+                       textTransform: 'uppercase',
+                       cursor: 'pointer'
+                     }}
+                   >
+                     Reset Draft
+                   </button>
+                </div>
+              )}
               <div style={{ 
                 backgroundColor: 'rgba(5, 5, 5, 0.9)', 
                 backdropFilter: 'blur(20px)',
@@ -687,7 +859,7 @@ export function NewStrategyPage() {
               }}>
                 <span style={{ color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace", fontSize: '20px', marginTop: '4px', opacity: 0.5 }}>&gt;</span>
                  <textarea 
-                   placeholder="Input refinement logic..."
+                   placeholder={selectedPlaybook ? "Refine this strategy..." : "Describe your strategy constraints..."}
                    value={playbookInput}
                    onChange={(e) => setPlaybookInput(e.target.value)}
                    onKeyDown={(e) => {
@@ -717,7 +889,7 @@ export function NewStrategyPage() {
                    style={{
                      padding: '10px 20px',
                      borderRadius: '2px',
-                     backgroundColor: (isSubmitting || !playbookInput.trim()) ? 'rgba(255,255,255,0.03)' : '#ffffff',
+                     backgroundColor: (isSubmitting || !playbookInput.trim()) ? 'rgba(255,255,255,0.03)' : (currentDraft?.status === 'ok' ? '#00ff88' : '#ffffff'),
                      color: (isSubmitting || !playbookInput.trim()) ? 'rgba(255,255,255,0.2)' : 'black',
                      border: 'none',
                      display: 'flex',
@@ -734,7 +906,7 @@ export function NewStrategyPage() {
                    }}
                  >
                    {isSubmitting ? <div className="loading-spinner" /> : <Send size={15} strokeWidth={2.5} />}
-                   {isSubmitting ? 'Parsing' : 'Transmit'}
+                   {isSubmitting ? 'Parsing' : (currentDraft?.status === 'ok' ? 'Add Detail' : 'Transmit')}
                  </button>
               </div>
             </div>
@@ -782,6 +954,13 @@ export function NewStrategyPage() {
         @keyframes logicPulse {
           0% { left: -40%; }
           100% { left: 100%; }
+        }
+        .history-item-container:hover .delete-btn {
+          opacity: 1 !important;
+        }
+        .delete-btn:hover {
+          color: #ff6347 !important;
+          transform: scale(1.1);
         }
         textarea::-webkit-scrollbar {
           width: 4px;

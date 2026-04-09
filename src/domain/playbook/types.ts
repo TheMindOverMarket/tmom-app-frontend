@@ -51,6 +51,7 @@ export interface PlaybookCreate {
   symbol?: string;
   market: string;
   original_nl_input: string;
+  chat_history?: Array<{role: string, content: string}> | null;
   is_active?: boolean;
 }
 
@@ -59,6 +60,7 @@ export interface PlaybookUpdate {
   symbol?: string;
   market?: string;
   is_active?: boolean;
+  chat_history?: Array<{role: string, content: string}> | null;
 }
 
 export interface MarketOption {
