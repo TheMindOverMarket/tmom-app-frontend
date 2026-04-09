@@ -2,23 +2,44 @@ import { Rule } from '../../domain/playbook/types';
 
 interface RuleLogicTreeProps {
     rule: Rule;
+    isDark?: boolean;
 }
 
-const getEvaluatorBadge = (metric: string) => {
+const getEvaluatorBadge = (metric: string, isDark: boolean = false) => {
     const m = metric.toLowerCase();
     if (m.includes('price') || m.includes('vwap') || m.includes('ema') || m.includes('atr')) {
-        return { label: 'Price Action', color: '#3b82f6', bg: '#eff6ff' };
+        return { 
+            label: 'Price Action', 
+            color: isDark ? 'var(--auth-accent)' : '#3b82f6', 
+            bg: isDark ? 'rgba(0, 255, 136, 0.1)' : '#eff6ff',
+            border: isDark ? 'rgba(0, 255, 136, 0.2)' : 'transparent'
+        };
     }
     if (m.includes('time') || m.includes('within') || m.includes('cooldown')) {
-        return { label: 'Temporal Gate', color: '#8b5cf6', bg: '#f5f3ff' };
+        return { 
+            label: 'Temporal Gate', 
+            color: isDark ? '#a855f7' : '#8b5cf6', 
+            bg: isDark ? 'rgba(168, 85, 247, 0.1)' : '#f5f3ff',
+            border: isDark ? 'rgba(168, 85, 247, 0.2)' : 'transparent'
+        };
     }
     if (m.includes('loss') || m.includes('pnl') || m.includes('trades')) {
-        return { label: 'Risk / Accumulative', color: '#ef4444', bg: '#fef2f2' };
+        return { 
+            label: 'Risk / Accumulative', 
+            color: isDark ? '#f87171' : '#ef4444', 
+            bg: isDark ? 'rgba(248, 113, 113, 0.1)' : '#fef2f2',
+            border: isDark ? 'rgba(248, 113, 113, 0.2)' : 'transparent'
+        };
     }
-    return { label: 'Comparison', color: '#10b981', bg: '#ecfdf5' };
+    return { 
+        label: 'Comparison', 
+        color: isDark ? '#34d399' : '#10b981', 
+        bg: isDark ? 'rgba(52, 211, 153, 0.1)' : '#ecfdf5',
+        border: isDark ? 'rgba(52, 211, 153, 0.2)' : 'transparent'
+    };
 };
 
-export function RuleLogicTree({ rule }: RuleLogicTreeProps) {
+export function RuleLogicTree({ rule, isDark = false }: RuleLogicTreeProps) {
     const conditions = rule.conditions || [];
     const edges = rule.condition_edges || [];
 
@@ -26,32 +47,53 @@ export function RuleLogicTree({ rule }: RuleLogicTreeProps) {
         <div style={{
             padding: '24px',
             borderRadius: '8px',
-            border: '1px solid #e2e8f0',
-            backgroundColor: 'white',
+            border: isDark ? '1px solid var(--auth-border)' : '1px solid #e2e8f0',
+            backgroundColor: isDark ? 'rgba(255, 255, 255, 0.01)' : 'white',
             marginBottom: '16px',
             position: 'relative',
             overflow: 'hidden'
         }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: '#cbd5e1' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: isDark ? 'var(--auth-border)' : '#cbd5e1' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                 <div>
-                    <h4 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: 900, color: '#0f172a' }}>{rule.name}</h4>
+                    <h4 style={{ 
+                        margin: '0 0 4px 0', 
+                        fontSize: '18px', 
+                        fontWeight: isDark ? 400 : 900, 
+                        color: isDark ? '#ffffff' : '#0f172a',
+                        fontFamily: isDark ? "'Cormorant Garamond', serif" : 'inherit'
+                    }}>{rule.name}</h4>
                     {rule.description && (
-                        <p style={{ margin: 0, fontSize: '12px', color: '#64748b', fontWeight: 500 }}>{rule.description}</p>
+                        <p style={{ 
+                            margin: 0, 
+                            fontSize: '11px', 
+                            color: 'var(--auth-text-muted)', 
+                            fontWeight: 500,
+                            fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
+                        }}>{rule.description}</p>
                     )}
                 </div>
-                <div style={{ padding: '4px 8px', borderRadius: '4px', backgroundColor: '#f1f5f9', color: '#475569', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase' }}>
+                <div style={{ 
+                    padding: '4px 10px', 
+                    borderRadius: '2px', 
+                    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#f1f5f9', 
+                    color: isDark ? '#ffffff' : '#475569', 
+                    fontSize: '10px', 
+                    fontWeight: 800, 
+                    textTransform: 'uppercase',
+                    fontFamily: isDark ? "'Space Mono', monospace" : 'inherit',
+                    border: isDark ? '1px solid var(--auth-border)' : 'none'
+                }}>
                     {rule.category}
                 </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {conditions.length === 0 ? (
-                    <div style={{ fontSize: '13px', color: '#94a3b8', fontStyle: 'italic' }}>No conditions bound.</div>
+                    <div style={{ fontSize: '12px', color: 'var(--auth-text-muted)', fontStyle: 'italic', fontFamily: isDark ? "'Space Mono', monospace" : 'inherit' }}>No conditions bound.</div>
                 ) : (
                     conditions.map((cond, idx) => {
-                        const badge = getEvaluatorBadge(cond.metric);
-                        // Locate an edge matching this condition as a parent
+                        const badge = getEvaluatorBadge(cond.metric, isDark);
                         const edge = idx < conditions.length - 1 ? edges.find(e => e.parent_condition_id === cond.id || e.parent_condition_id === conditions[idx + 1].id) : null;
                         const logicalOperator = edge?.logical_operator || 'AND';
 
@@ -59,29 +101,68 @@ export function RuleLogicTree({ rule }: RuleLogicTreeProps) {
                             <div key={cond.id || idx} style={{ display: 'flex', flexDirection: 'column' }}>
                                 <div style={{
                                     padding: '12px 16px',
-                                    backgroundColor: '#f8fafc',
-                                    border: '1px solid #f1f5f9',
-                                    borderRadius: '6px',
+                                    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.015)' : '#f8fafc',
+                                    border: isDark ? '1px solid var(--auth-border)' : '1px solid #f1f5f9',
+                                    borderRadius: '4px',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
-                                    transition: 'transform 0.2s ease, border-color 0.2s ease'
+                                    transition: 'all 0.2s ease'
                                 }}
-                                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                                    onMouseLeave={e => { e.currentTarget.style.borderColor = '#f1f5f9'; e.currentTarget.style.transform = 'none'; }}
+                                    onMouseEnter={e => { 
+                                        e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.2)' : '#cbd5e1'; 
+                                        e.currentTarget.style.transform = 'translateY(-1px)'; 
+                                    }}
+                                    onMouseLeave={e => { 
+                                        e.currentTarget.style.borderColor = isDark ? 'var(--auth-border)' : '#f1f5f9'; 
+                                        e.currentTarget.style.transform = 'none'; 
+                                    }}
                                 >
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <div style={{ padding: '2px 6px', borderRadius: '4px', backgroundColor: badge.bg, color: badge.color, fontSize: '9px', fontWeight: 800, textTransform: 'uppercase' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <div style={{ 
+                                            padding: '2px 8px', 
+                                            borderRadius: '2px', 
+                                            backgroundColor: badge.bg, 
+                                            color: badge.color, 
+                                            fontSize: '9px', 
+                                            fontWeight: 800, 
+                                            textTransform: 'uppercase',
+                                            fontFamily: isDark ? "'Space Mono', monospace" : 'inherit',
+                                            border: isDark ? `1px solid ${badge.border}` : 'none'
+                                        }}>
                                             {badge.label}
                                         </div>
-                                        <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '13px' }}>{cond.metric}</span>
+                                        <span style={{ 
+                                            fontWeight: 700, 
+                                            color: isDark ? '#ffffff' : '#0f172a', 
+                                            fontSize: '13px',
+                                            fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
+                                        }}>{cond.metric}</span>
                                     </div>
 
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        <span style={{ color: '#64748b', fontWeight: 800, backgroundColor: 'white', padding: '2px 6px', borderRadius: '4px', border: '1px solid #e2e8f0', fontSize: '12px' }}>
+                                        <span style={{ 
+                                            color: isDark ? 'var(--brand)' : '#64748b', 
+                                            fontWeight: 800, 
+                                            backgroundColor: isDark ? 'rgba(99, 102, 241, 0.1)' : 'white', 
+                                            padding: '2px 8px', 
+                                            borderRadius: '2px', 
+                                            border: isDark ? '1px solid rgba(99, 102, 241, 0.2)' : '1px solid #e2e8f0', 
+                                            fontSize: '11px',
+                                            fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
+                                        }}>
                                             {cond.comparator}
                                         </span>
-                                        <span style={{ fontWeight: 700, color: '#334155', fontFamily: 'monospace', fontSize: '13px', backgroundColor: '#f1f5f9', padding: '4px 8px', borderRadius: '4px' }}>
+                                        <span style={{ 
+                                            fontWeight: 700, 
+                                            color: isDark ? 'var(--auth-accent)' : '#334155', 
+                                            fontFamily: "'Space Mono', monospace", 
+                                            fontSize: '13px', 
+                                            backgroundColor: isDark ? 'rgba(0, 255, 136, 0.05)' : '#f1f5f9', 
+                                            padding: '4px 10px', 
+                                            borderRadius: '2px',
+                                            border: isDark ? '1px solid rgba(0, 255, 136, 0.1)' : 'none'
+                                        }}>
                                             {cond.value}
                                         </span>
                                     </div>
@@ -89,17 +170,27 @@ export function RuleLogicTree({ rule }: RuleLogicTreeProps) {
 
                                 {idx < conditions.length - 1 && (
                                     <div style={{ display: 'flex', justifyContent: 'center', margin: '4px 0', position: 'relative', height: '24px' }}>
-                                        <div style={{ position: 'absolute', top: '0', left: '50%', transform: 'translateX(-50%)', width: '2px', height: '100%', backgroundColor: '#e2e8f0', zIndex: 0 }} />
+                                        <div style={{ 
+                                            position: 'absolute', 
+                                            top: '0', 
+                                            left: '50%', 
+                                            transform: 'translateX(-50%)', 
+                                            width: '1px', 
+                                            height: '100%', 
+                                            backgroundColor: isDark ? 'var(--auth-border)' : '#e2e8f0', 
+                                            zIndex: 0 
+                                        }} />
                                         <div style={{
-                                            backgroundColor: logicalOperator === 'OR' ? '#fef3c7' : '#e0e7ff',
-                                            color: logicalOperator === 'OR' ? '#d97706' : '#4f46e5',
-                                            border: `1px solid ${logicalOperator === 'OR' ? '#fde68a' : '#c7d2fe'}`,
-                                            padding: '2px 8px',
+                                            backgroundColor: logicalOperator === 'OR' ? 'rgba(217, 119, 6, 0.1)' : 'rgba(99, 102, 241, 0.1)',
+                                            color: logicalOperator === 'OR' ? '#d97706' : 'var(--brand)',
+                                            border: `1px solid ${logicalOperator === 'OR' ? 'rgba(217, 119, 6, 0.2)' : 'rgba(99, 102, 241, 0.2)'}`,
+                                            padding: '2px 10px',
                                             borderRadius: '12px',
                                             fontSize: '9px',
                                             fontWeight: 900,
                                             zIndex: 1,
-                                            alignSelf: 'center'
+                                            alignSelf: 'center',
+                                            fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
                                         }}>
                                             {logicalOperator}
                                         </div>

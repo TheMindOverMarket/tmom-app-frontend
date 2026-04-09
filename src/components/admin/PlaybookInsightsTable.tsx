@@ -2,41 +2,56 @@ import type { AdminPlaybookRow } from '../../domain/admin/types';
 
 interface PlaybookInsightsTableProps {
   playbooks: AdminPlaybookRow[];
+  isDark?: boolean;
 }
 
-export function PlaybookInsightsTable({ playbooks }: PlaybookInsightsTableProps) {
+export function PlaybookInsightsTable({ playbooks, isDark = false }: PlaybookInsightsTableProps) {
   return (
     <div
       style={{
-        borderRadius: '20px',
-        border: '1px solid rgba(148,163,184,0.18)',
-        backgroundColor: '#ffffff',
+        borderRadius: '8px',
+        border: isDark ? '1px solid var(--auth-border)' : '1px solid rgba(148,163,184,0.18)',
+        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.01)' : '#ffffff',
         overflow: 'hidden',
-        boxShadow: '0 16px 40px -28px rgba(15,23,42,0.35)',
+        boxShadow: isDark ? 'none' : '0 16px 40px -28px rgba(15,23,42,0.35)',
+        transition: 'all 0.3s ease'
       }}
     >
-      <div style={{ padding: '18px 20px', borderBottom: '1px solid #e2e8f0' }}>
-        <div style={{ fontSize: '18px', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.03em' }}>Playbook Friction Map</div>
-        <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
-          Exposes where strategy design and trader behavior are colliding.
+      <div style={{ padding: '24px 32px', borderBottom: `1px solid ${isDark ? 'var(--auth-border)' : '#e2e8f0'}` }}>
+        <div style={{ 
+          fontSize: '20px', 
+          fontWeight: isDark ? 400 : 900, 
+          color: isDark ? '#ffffff' : '#0f172a', 
+          letterSpacing: isDark ? '0.01em' : '-0.03em',
+          fontFamily: isDark ? "'Cormorant Garamond', serif" : 'inherit'
+        }}>Strategy Friction Map</div>
+        <div style={{ 
+          fontSize: '13px', 
+          color: 'var(--auth-text-muted)', 
+          marginTop: '6px',
+          fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
+        }}>
+          Exposing collision points between strategy architecture and execution reality.
         </div>
       </div>
 
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '720px' }}>
           <thead>
-            <tr style={{ backgroundColor: '#f8fafc' }}>
+            <tr style={{ backgroundColor: isDark ? 'rgba(255, 255, 255, 0.01)' : '#f8fafc' }}>
               {['Playbook', 'Traders', 'Sessions', 'Adherence', 'Deviation Cost', 'Broken Most'].map((header) => (
                 <th
                   key={header}
                   style={{
                     textAlign: 'left',
-                    padding: '12px 18px',
-                    fontSize: '11px',
+                    padding: '16px 32px',
+                    fontSize: '10px',
                     fontWeight: 800,
                     textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    color: '#64748b',
+                    letterSpacing: '0.15em',
+                    color: isDark ? 'var(--auth-text-muted)' : '#64748b',
+                    fontFamily: isDark ? "'Space Mono', monospace" : 'inherit',
+                    borderBottom: `1px solid ${isDark ? 'var(--auth-border)' : '#e2e8f0'}`
                   }}
                 >
                   {header}
@@ -46,25 +61,66 @@ export function PlaybookInsightsTable({ playbooks }: PlaybookInsightsTableProps)
           </thead>
           <tbody>
             {playbooks.map((row) => (
-              <tr key={row.playbook_id} style={{ borderTop: '1px solid #f1f5f9' }}>
-                <td style={{ padding: '14px 18px' }}>
-                  <div style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>{row.playbook_name}</div>
+              <tr key={row.playbook_id} style={{ borderBottom: `1px solid ${isDark ? 'var(--auth-border)' : '#f1f5f9'}` }}>
+                <td style={{ padding: '20px 32px' }}>
+                  <div style={{ 
+                    fontSize: '14px', 
+                    fontWeight: 600, 
+                    color: isDark ? '#ffffff' : '#0f172a',
+                    fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
+                  }}>{row.playbook_name}</div>
                 </td>
-                <td style={{ padding: '14px 18px', fontSize: '13px', color: '#334155', fontWeight: 700 }}>{row.trader_count}</td>
-                <td style={{ padding: '14px 18px', fontSize: '13px', color: '#334155', fontWeight: 700 }}>{row.sessions_count}</td>
-                <td style={{ padding: '14px 18px', fontSize: '14px', color: '#0f766e', fontWeight: 800 }}>{row.adherence_rate.toFixed(1)}%</td>
-                <td style={{ padding: '14px 18px', fontSize: '14px', color: row.total_deviation_cost > 0 ? '#b91c1c' : '#0f766e', fontWeight: 800 }}>
+                <td style={{ 
+                  padding: '20px 32px', 
+                  fontSize: '14px', 
+                  color: isDark ? '#ffffff' : '#334155', 
+                  fontWeight: 400,
+                  fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
+                }}>{row.trader_count}</td>
+                <td style={{ 
+                  padding: '20px 32px', 
+                  fontSize: '14px', 
+                  color: isDark ? '#ffffff' : '#334155', 
+                  fontWeight: 400,
+                  fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
+                }}>{row.sessions_count}</td>
+                <td style={{ 
+                  padding: '20px 32px', 
+                  fontSize: '15px', 
+                  color: isDark ? 'var(--auth-accent)' : '#0f766e', 
+                  fontWeight: 400,
+                  fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
+                }}>{row.adherence_rate.toFixed(1)}%</td>
+                <td style={{ 
+                  padding: '20px 32px', 
+                  fontSize: '15px', 
+                  color: row.total_deviation_cost > 0 ? '#ef4444' : (isDark ? 'var(--auth-accent)' : '#0f766e'), 
+                  fontWeight: 400,
+                  fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
+                }}>
                   ${row.total_deviation_cost.toFixed(2)}
                 </td>
-                <td style={{ padding: '14px 18px', fontSize: '13px', color: '#475569', fontWeight: 700 }}>
-                  {row.most_broken_rule ?? 'No recurring break yet'}
+                <td style={{ 
+                  padding: '20px 32px', 
+                  fontSize: '13px', 
+                  color: isDark ? '#ffffff' : '#475569', 
+                  fontWeight: 400,
+                  fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
+                }}>
+                  {row.most_broken_rule?.toUpperCase() ?? 'NONE'}
                 </td>
               </tr>
             ))}
             {playbooks.length === 0 && (
               <tr>
-                <td colSpan={6} style={{ padding: '18px', fontSize: '13px', color: '#64748b' }}>
-                  No playbook data yet.
+                <td colSpan={6} style={{ 
+                  padding: '40px 32px', 
+                  fontSize: '12px', 
+                  color: 'var(--auth-text-muted)', 
+                  textAlign: 'center',
+                  fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
+                }}>
+                  NO PLAYBOOK INTELLIGENCE CAPTURED
                 </td>
               </tr>
             )}

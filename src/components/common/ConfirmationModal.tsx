@@ -9,6 +9,7 @@ interface ConfirmationModalProps {
   confirmText?: string;
   cancelText?: string;
   isDanger?: boolean;
+  isDark?: boolean;
 }
 
 export function ConfirmationModal({
@@ -19,7 +20,8 @@ export function ConfirmationModal({
   message,
   confirmText = 'Proceed',
   cancelText = 'Cancel',
-  isDanger = true
+  isDanger = true,
+  isDark = false
 }: ConfirmationModalProps) {
   if (!isOpen) return null;
 
@@ -39,11 +41,12 @@ export function ConfirmationModal({
       padding: '24px'
     }}>
       <div style={{
-        backgroundColor: 'white',
+        backgroundColor: isDark ? 'var(--auth-black)' : 'white',
+        border: isDark ? '1px solid var(--auth-border)' : 'none',
         borderRadius: '12px',
         width: '100%',
         maxWidth: '440px',
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        boxShadow: isDark ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
         overflow: 'hidden',
         animation: 'modalEnter 0.2s ease-out'
       }}>
@@ -58,11 +61,16 @@ export function ConfirmationModal({
             width: '48px',
             height: '48px',
             borderRadius: '12px',
-            backgroundColor: isDanger ? '#fef2f2' : '#f0f9ff',
+            backgroundColor: isDark 
+              ? (isDanger ? 'rgba(239, 68, 68, 0.1)' : 'rgba(0, 255, 136, 0.1)')
+              : (isDanger ? '#fef2f2' : '#f0f9ff'),
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: isDanger ? '#dc2626' : '#0284c7'
+            color: isDark
+              ? (isDanger ? '#ef4444' : 'var(--auth-accent)')
+              : (isDanger ? '#dc2626' : '#0284c7'),
+            border: isDark ? `1px solid ${isDanger ? 'rgba(239, 68, 68, 0.2)' : 'rgba(0, 255, 136, 0.2)'}` : 'none'
           }}>
             <AlertTriangle size={24} />
           </div>
@@ -73,7 +81,7 @@ export function ConfirmationModal({
               border: 'none',
               padding: '4px',
               cursor: 'pointer',
-              color: '#94a3b8',
+              color: 'var(--auth-text-muted)',
               borderRadius: '6px'
             }}
           >
@@ -83,18 +91,20 @@ export function ConfirmationModal({
 
         <div style={{ padding: '24px' }}>
           <h3 style={{ 
-            fontSize: '18px', 
-            fontWeight: 700, 
-            color: '#0f172a',
+            fontSize: '20px', 
+            fontFamily: isDark ? "'Cormorant Garamond', serif" : 'inherit',
+            fontWeight: isDark ? 400 : 700, 
+            color: isDark ? '#ffffff' : '#0f172a',
             margin: '0 0 8px 0'
           }}>
             {title}
           </h3>
           <p style={{ 
             fontSize: '14px', 
-            color: '#64748b',
+            color: 'var(--auth-text-muted)',
             lineHeight: 1.5,
-            margin: 0
+            margin: 0,
+            fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
           }}>
             {message}
           </p>
@@ -105,19 +115,21 @@ export function ConfirmationModal({
           display: 'flex',
           gap: '12px',
           justifyContent: 'flex-end',
-          backgroundColor: '#f8fafc'
+          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.02)' : '#f8fafc',
+          borderTop: isDark ? '1px solid var(--auth-border)' : 'none'
         }}>
           <button
             onClick={onClose}
             style={{
               padding: '10px 18px',
               borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              backgroundColor: 'white',
-              fontSize: '14px',
-              fontWeight: 600,
-              color: '#475569',
-              cursor: 'pointer'
+              border: isDark ? '1px solid var(--auth-border)' : '1px solid #e2e8f0',
+              backgroundColor: isDark ? 'transparent' : 'white',
+              fontSize: '12px',
+              fontWeight: 700,
+              color: isDark ? '#ffffff' : '#475569',
+              cursor: 'pointer',
+              fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
             }}
           >
             {cancelText}
@@ -128,14 +140,16 @@ export function ConfirmationModal({
               onClose();
             }}
             style={{
-              padding: '10px 18px',
+              padding: '10px 24px',
               borderRadius: '8px',
               border: 'none',
-              backgroundColor: isDanger ? '#dc2626' : '#0f172a',
-              fontSize: '14px',
-              fontWeight: 600,
-              color: 'white',
-              cursor: 'pointer'
+              backgroundColor: isDanger ? '#dc2626' : (isDark ? '#ffffff' : '#0f172a'),
+              fontSize: '12px',
+              fontWeight: 800,
+              color: (isDark && !isDanger) ? '#000000' : 'white',
+              cursor: 'pointer',
+              fontFamily: isDark ? "'Space Mono', monospace" : 'inherit',
+              textTransform: isDark ? 'uppercase' : 'none'
             }}
           >
             {confirmText}

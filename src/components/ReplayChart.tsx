@@ -17,6 +17,7 @@ interface ReplayChartProps {
   session: Session;
   events: SessionEvent[];
   onMarkerClick: (timestamp: number, type?: 'adherence' | 'deviation') => void;
+  isDark?: boolean;
 }
 
 /**
@@ -25,7 +26,7 @@ interface ReplayChartProps {
  * Specifically designed to recreate the historical market state for a session.
  * Fetches the exact price action range and overlays rule events from the replay stream.
  */
-export function ReplayChart({ session, events, onMarkerClick }: ReplayChartProps) {
+export function ReplayChart({ session, events, onMarkerClick, isDark = false }: ReplayChartProps) {
   const [candles, setCandles] = useState<Candle[]>([]);
   const [loading, setLoading] = useState(true);
   const [resolvedSymbol, setResolvedSymbol] = useState('');
@@ -182,9 +183,15 @@ export function ReplayChart({ session, events, onMarkerClick }: ReplayChartProps
       alignItems: 'center', 
       justifyContent: 'center', 
       height: '100%', 
-      backgroundColor: '#ffffff' 
+      backgroundColor: isDark ? 'var(--auth-black)' : '#ffffff' 
     }}>
-        <div style={{ fontSize: '10px', fontWeight: 900, color: '#94a3b8', letterSpacing: '0.1em' }}>
+        <div style={{ 
+          fontSize: '10px', 
+          fontWeight: 900, 
+          color: isDark ? 'var(--auth-text-muted)' : '#94a3b8', 
+          letterSpacing: '0.15em',
+          fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
+        }}>
             REHYDRATING MARKET ESTATE...
         </div>
     </div>

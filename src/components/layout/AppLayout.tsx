@@ -10,10 +10,11 @@ export function AppLayout() {
   return (
     <div style={{ 
       height: '100vh', 
-      backgroundColor: 'var(--slate-50)',
+      backgroundColor: 'var(--auth-black)',
       display: 'flex',
       flexDirection: 'column',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      color: '#ffffff'
     }}>
       <div style={{ flexShrink: 0 }}>
         <Header />
@@ -36,7 +37,8 @@ export function AppLayout() {
         display: 'flex',
         flexDirection: 'column',
         minHeight: 0,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        backgroundColor: 'var(--auth-black)'
       }}>
         <Outlet />
       </main>

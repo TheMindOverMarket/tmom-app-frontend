@@ -16,46 +16,56 @@ export function Header() {
 
   return (
     <header style={{ 
-      padding: '8px 24px', 
+      padding: '12px 24px', 
       display: 'flex', 
       justifyContent: 'space-between', 
       alignItems: 'center',
-      borderBottom: '1px solid #f1f5f9',
-      backgroundColor: '#ffffff'
+      borderBottom: '1px solid var(--auth-border)',
+      backgroundColor: 'var(--auth-black)',
+      color: '#ffffff'
     }}>
-      <h1 style={{ fontSize: '0.9rem', fontWeight: '800', color: '#111827', margin: 0, letterSpacing: '-0.01em' }}>
-        TheMindOverMarket <span style={{ fontWeight: '400', color: '#64748b' }}>| Scaffolding</span>
+      <h1 style={{ 
+        fontSize: '18px', 
+        fontFamily: "'Cormorant Garamond', serif",
+        fontWeight: '400', 
+        color: '#ffffff', 
+        margin: 0, 
+        letterSpacing: '0.02em',
+        textTransform: 'uppercase'
+      }}>
+        TheMindOverMarket <span style={{ fontWeight: '300', color: 'var(--auth-text-muted)', fontSize: '12px' }}>| System v1.0</span>
       </h1>
       
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         {currentUser && (
           <>
             <div 
               onClick={copyToClipboard}
               title={copied ? 'Copied!' : `Copy User ID: ${currentUser.id}`}
               style={{
-                padding: '4px 12px',
-                backgroundColor: copied ? '#eff6ff' : '#f8fafc',
-                borderRadius: '100px',
+                padding: '6px 16px',
+                backgroundColor: copied ? 'rgba(0, 255, 136, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+                borderRadius: '4px',
                 fontSize: '11px',
-                fontWeight: '600',
-                color: copied ? '#3b82f6' : '#64748b',
-                border: `1px solid ${copied ? '#3b82f6' : '#e2e8f0'}`,
+                fontWeight: '700',
+                fontFamily: "'Space Mono', monospace",
+                color: copied ? 'var(--auth-accent)' : 'var(--auth-text-muted)',
+                border: `1px solid ${copied ? 'var(--auth-accent)' : 'var(--auth-border)'}`,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '8px',
                 transition: 'all 0.2s'
               }}
               onMouseOver={(e) => {
-                if (!copied) e.currentTarget.style.backgroundColor = '#f1f5f9';
+                if (!copied) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.06)';
               }}
               onMouseOut={(e) => {
-                if (!copied) e.currentTarget.style.backgroundColor = '#f8fafc';
+                if (!copied) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
               }}
             >
-              <span style={{ fontSize: '11px', opacity: 0.8 }}>👤</span>
-              {copied ? 'ID Copied!' : currentUser.email}
+              <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--auth-accent)' }} />
+              {copied ? 'ID COPIED' : currentUser.email.toUpperCase()}
             </div>
 
             <button
@@ -64,17 +74,25 @@ export function Header() {
                 navigate('/login');
               }}
               style={{
-                padding: '4px 12px',
-                backgroundColor: '#ffffff',
-                borderRadius: '100px',
+                padding: '6px 16px',
+                backgroundColor: 'transparent',
+                borderRadius: '4px',
                 fontSize: '11px',
                 fontWeight: '700',
-                color: '#64748b',
-                border: '1px solid #e2e8f0',
-                cursor: 'pointer'
+                fontFamily: "'Space Mono', monospace",
+                color: '#ffffff',
+                border: '1px solid var(--auth-border)',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.backgroundColor = 'transparent';
               }}
             >
-              LOG OUT
+              DISCONNECT
             </button>
           </>
         )}

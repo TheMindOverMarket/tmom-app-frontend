@@ -27,83 +27,116 @@ export function ManagerAnalyticsDashboard() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '24px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', padding: '32px', backgroundColor: 'transparent' }}>
       <div
         style={{
-          padding: '28px',
-          borderRadius: '28px',
-          background:
-            'radial-gradient(circle at top left, rgba(251,191,36,0.28) 0%, rgba(255,255,255,0.96) 28%, rgba(248,250,252,0.95) 100%)',
-          border: '1px solid rgba(148,163,184,0.18)',
-          boxShadow: '0 28px 80px -48px rgba(15,23,42,0.55)',
+          padding: '40px',
+          borderRadius: '12px',
+          background: 'rgba(255, 255, 255, 0.02)',
+          border: '1px solid var(--auth-border)',
+          boxShadow: '0 20px 60px -20px rgba(0,0,0,0.5)',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '18px' }}>
-          <div style={{ maxWidth: '760px' }}>
-            <div style={{ fontSize: '12px', fontWeight: 900, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
-              Strategy Supervisor Analytics
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '24px' }}>
+          <div style={{ maxWidth: '800px' }}>
+            <div style={{ 
+              fontSize: '11px', 
+              fontWeight: 800, 
+              color: 'var(--auth-accent)', 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.2em',
+              fontFamily: "'Space Mono', monospace",
+              marginBottom: '12px'
+            }}>
+              Strategy Supervisor Intelligence
             </div>
-            <h1 style={{ margin: '10px 0 0 0', fontSize: '34px', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.05em' }}>
-              Make discipline visible, auditable, and actionable.
+            <h1 style={{ 
+              margin: 0, 
+              fontSize: '42px', 
+              fontWeight: 400, 
+              color: '#ffffff', 
+              letterSpacing: '0.02em',
+              fontFamily: "'Cormorant Garamond', serif",
+              lineHeight: 1.1
+            }}>
+              Quantify discipline, audit execution, and maximize adherence.
             </h1>
-            <p style={{ margin: '12px 0 0 0', fontSize: '15px', lineHeight: 1.6, color: '#475569' }}>
-              This view is built for a prop-firm risk manager: consistency, strategy adherence, hidden cost of deviation,
-              and the next intervention to make before a bad pattern turns into a blow-up.
+            <p style={{ 
+              margin: '16px 0 0 0', 
+              fontSize: '15px', 
+              lineHeight: 1.6, 
+              color: 'var(--auth-text-muted)',
+              fontFamily: "'Space Mono', monospace"
+            }}>
+              Consolidated audit trail for all active and completed sessions. Monitor deviation drift, process leakage, and intervenable patterns in real-time.
             </p>
           </div>
-          <RefreshButton onRefresh={() => void refresh()} isLoading={loading} label="REFRESH DASHBOARD" />
+          <RefreshButton onRefresh={() => void refresh()} isLoading={loading} label="REFRESH INTELLIGENCE" isDark={true} />
         </div>
       </div>
 
       {error && (
         <div
           style={{
-            padding: '16px 18px',
-            borderRadius: '14px',
-            border: '1px solid #fecaca',
-            backgroundColor: '#fef2f2',
-            color: '#b91c1c',
+            padding: '20px 24px',
+            borderRadius: '8px',
+            border: '1px solid rgba(239, 68, 68, 0.2)',
+            backgroundColor: 'rgba(239, 68, 68, 0.05)',
+            color: '#f87171',
             fontSize: '13px',
-            fontWeight: 700,
+            fontWeight: 800,
+            fontFamily: "'Space Mono', monospace",
+            letterSpacing: '0.05em'
           }}
         >
-          {error}
+          <span style={{ color: '#ef4444', marginRight: '8px' }}>[CRITICAL]</span> {error}
         </div>
       )}
 
       {dashboard ? (
         <>
-          <AnalyticsOverview overview={dashboard.overview} />
+          <AnalyticsOverview overview={dashboard.overview} isDark={true} />
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
             <AnalyticsTrendChart
               title="Adherence Trend"
-              subtitle="How consistently the firm is following plan across audited sessions."
+              subtitle="Firm-wide process consistency across audited sessions."
               points={dashboard.trends}
               metric="adherence_rate"
+              isDark={true}
             />
             <AnalyticsTrendChart
               title="Deviation Cost Trend"
-              subtitle="How much process leakage is costing over time."
+              subtitle="Impact of process leakage over chronological scope."
               points={dashboard.trends}
               metric="deviation_cost"
+              isDark={true}
             />
           </div>
 
-          <InterventionQueue interventions={dashboard.interventions} onOpenReplay={handleOpenReplay} />
+          <InterventionQueue interventions={dashboard.interventions} onOpenReplay={handleOpenReplay} isDark={true} />
 
-          <TraderRiskTable traders={dashboard.traders} onOpenReplay={handleOpenReplay} />
+          <TraderRiskTable traders={dashboard.traders} onOpenReplay={handleOpenReplay} isDark={true} />
 
-          <DeviationBreakdown breakdown={dashboard.deviations} />
+          <DeviationBreakdown breakdown={dashboard.deviations} isDark={true} />
 
-          <PlaybookInsightsTable playbooks={dashboard.playbooks} />
+          <PlaybookInsightsTable playbooks={dashboard.playbooks} isDark={true} />
         </>
       ) : loading ? (
-        <div style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>Loading analytics...</div>
+        <div style={{ 
+          padding: '80px', 
+          textAlign: 'center', 
+          color: 'var(--auth-text-muted)', 
+          fontSize: '12px', 
+          fontFamily: "'Space Mono', monospace",
+          letterSpacing: '0.2em'
+        }}>
+          INITIALIZING ANALYTICS ENGINE...
+        </div>
       ) : null}
 
       {showAuditTrail && (
-        <div style={{ marginTop: '8px' }}>
+        <div style={{ marginTop: '16px' }}>
           <SessionAnalytics />
         </div>
       )}

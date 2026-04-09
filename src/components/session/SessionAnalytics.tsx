@@ -79,11 +79,8 @@ export function SessionAnalytics() {
 
   return (
     <div style={{
-      padding: '24px',
-      backgroundColor: '#ffffff',
-      borderRadius: '4px',
-      boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-      border: '1px solid #e2e8f0',
+      padding: '32px',
+      backgroundColor: 'transparent',
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
@@ -92,10 +89,22 @@ export function SessionAnalytics() {
     }}>
       <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexShrink: 0 }}>
         <div>
-          <h2 style={{ fontSize: '20px', fontWeight: '900', margin: 0, color: '#0f172a', letterSpacing: '-0.02em' }}>
+          <h2 style={{ 
+            fontSize: '28px', 
+            fontFamily: "'Cormorant Garamond', serif",
+            fontWeight: '400', 
+            margin: 0, 
+            color: '#ffffff', 
+            letterSpacing: '0.02em' 
+          }}>
             Session Analytics
           </h2>
-          <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '13px' }}>
+          <p style={{ 
+            margin: '8px 0 0 0', 
+            color: 'var(--auth-text-muted)', 
+            fontSize: '13px',
+            fontFamily: "'Space Mono', monospace"
+          }}>
             Quantify cost of deviation, evaluate playbook performance, and audit execution consistency.
           </p>
         </div>
@@ -103,38 +112,53 @@ export function SessionAnalytics() {
         <RefreshButton 
           onRefresh={fetchSessions}
           isLoading={loading}
+          isDark={true}
         />
       </div>
 
       {/* Stats Dashboard */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '40px', flexShrink: 0 }}>
         {[
-          { label: 'Total Sessions', value: stats.total, color: '#6366f1' },
-          { label: 'Completed Audit', value: stats.completed, color: '#10b981' },
+          { label: 'Total Sessions', value: stats.total, color: 'var(--brand)' },
+          { label: 'Completed Audit', value: stats.completed, color: 'var(--auth-accent)' },
           { label: 'Last 24 Hours', value: stats.recent, color: '#f59e0b' }
         ].map(stat => (
           <div key={stat.label} style={{
             padding: '24px',
-            backgroundColor: '#f8fafc',
-            borderRadius: '4px',
-            border: '1px solid #f1f5f9',
-            minHeight: '100px',
+            backgroundColor: 'rgba(255, 255, 255, 0.02)',
+            borderRadius: '8px',
+            border: '1px solid var(--auth-border)',
+            minHeight: '120px',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            transition: 'all 0.3s ease'
           }}>
-            <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '4px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
+            <div style={{ 
+              fontSize: '10px', 
+              color: 'var(--auth-text-muted)', 
+              marginBottom: '8px', 
+              fontWeight: '800', 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.1em',
+              fontFamily: "'Space Mono', monospace"
+            }}>{stat.label}</div>
             {loading && sessions.length === 0 ? (
-              <div style={{ fontSize: '24px', fontWeight: '900', color: '#f1f5f9', animation: 'pulse 1.5s infinite' }}>...</div>
+              <div style={{ fontSize: '32px', fontWeight: '400', color: 'rgba(255, 255, 255, 0.05)', animation: 'pulse 1.5s infinite', fontFamily: "'Space Mono', monospace" }}>...</div>
             ) : (
-              <div style={{ fontSize: '24px', fontWeight: '900', color: '#0f172a' }}>{stat.value}</div>
+              <div style={{ 
+                fontSize: '32px', 
+                fontWeight: '400', 
+                color: '#ffffff',
+                fontFamily: "'Space Mono', monospace"
+              }}>{stat.value}</div>
             )}
           </div>
         ))}
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '32px', borderBottom: '1px solid #f1f5f9', marginBottom: '24px', flexShrink: 0 }}>
+      <div style={{ display: 'flex', gap: '40px', borderBottom: '1px solid var(--auth-border)', marginBottom: '32px', flexShrink: 0 }}>
         {[
           { id: 'all', label: 'All Sessions' },
           { id: 'completed', label: 'Completed Audit' }
@@ -144,17 +168,18 @@ export function SessionAnalytics() {
             onClick={() => setActiveTab(tab.id as any)}
             style={{
               padding: '12px 0',
-              fontSize: '13px',
+              fontSize: '11px',
               fontWeight: 800,
-              color: activeTab === tab.id ? '#0f172a' : '#94a3b8',
-              borderBottom: `2px solid ${activeTab === tab.id ? '#0f172a' : 'transparent'}`,
+              fontFamily: "'Space Mono', monospace",
+              color: activeTab === tab.id ? 'var(--auth-accent)' : 'var(--auth-text-muted)',
+              borderBottom: `2px solid ${activeTab === tab.id ? 'var(--auth-accent)' : 'transparent'}`,
               backgroundColor: 'transparent',
               borderTop: 'none',
               borderLeft: 'none',
               borderRight: 'none',
               cursor: 'pointer',
               textTransform: 'uppercase',
-              letterSpacing: '0.05em',
+              letterSpacing: '0.15em',
               transition: 'all 0.2s'
             }}
           >
@@ -164,44 +189,49 @@ export function SessionAnalytics() {
       </div>
 
       {/* Search Bar */}
-      <div style={{ marginBottom: '24px', flexShrink: 0 }}>
+      <div style={{ marginBottom: '32px', flexShrink: 0 }}>
         <input 
           type="text" 
-          placeholder="Filter by Session ID..."
+          placeholder="FILTER BY SESSION ID..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{
             width: '100%',
-            padding: '12px 20px',
-            fontSize: '14px',
+            padding: '14px 24px',
+            fontSize: '12px',
+            fontWeight: 600,
+            fontFamily: "'Space Mono', monospace",
             borderRadius: '4px',
-            border: '1px solid #e2e8f0',
-            backgroundColor: '#fcfdfe',
-            outline: 'none'
+            border: '1px solid var(--auth-border)',
+            backgroundColor: 'rgba(255, 255, 255, 0.01)',
+            color: '#ffffff',
+            outline: 'none',
+            letterSpacing: '0.05em',
+            transition: 'all 0.2s'
           }}
+          onFocus={e => e.currentTarget.style.borderColor = 'rgba(0, 255, 136, 0.3)'}
+          onBlur={e => e.currentTarget.style.borderColor = 'var(--auth-border)'}
         />
       </div>
 
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: '4px' }}>
         {error && (
-          <div style={{ padding: '24px', backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '4px', color: '#b91c1c', marginBottom: '24px' }}>
-            <div style={{ fontSize: '9px', fontWeight: 900, color: '#ef4444', marginBottom: '6px', letterSpacing: '0.05em' }}>NETWORKING ERROR</div>
-            <div style={{ fontSize: '13px', fontWeight: '800' }}>{error}</div>
-            <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '8px' }}>The server could not be reached. Verify session health and backend service status.</div>
+          <div style={{ padding: '24px', backgroundColor: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', color: '#f87171', marginBottom: '24px' }}>
+            <div style={{ fontSize: '9px', fontWeight: 900, color: '#ef4444', marginBottom: '6px', letterSpacing: '0.1em', fontFamily: "'Space Mono', monospace" }}>NETWORKING ERROR</div>
+            <div style={{ fontSize: '14px', fontWeight: '800' }}>{error}</div>
           </div>
         )}
 
         {deleteError && (
-          <div style={{ padding: '24px', backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '4px', color: '#b91c1c', marginBottom: '24px', position: 'relative' }}>
+          <div style={{ padding: '24px', backgroundColor: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', color: '#f87171', marginBottom: '24px', position: 'relative' }}>
             <button 
               onClick={clearDeleteError}
-              style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', color: '#b91c1c', cursor: 'pointer', fontSize: '14px' }}
+              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '18px' }}
             >
               ×
             </button>
-            <div style={{ fontSize: '9px', fontWeight: 900, color: '#ef4444', marginBottom: '6px', letterSpacing: '0.05em' }}>PURGE ERROR</div>
-            <div style={{ fontSize: '13px', fontWeight: '800' }}>{deleteError}</div>
-            <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '8px' }}>Ensure the session record is valid and exists in technical history before deletion.</div>
+            <div style={{ fontSize: '9px', fontWeight: 900, color: '#ef4444', marginBottom: '6px', letterSpacing: '0.1em', fontFamily: "'Space Mono', monospace" }}>PURGE ERROR</div>
+            <div style={{ fontSize: '14px', fontWeight: '800' }}>{deleteError}</div>
           </div>
         )}
 
@@ -211,6 +241,7 @@ export function SessionAnalytics() {
             onSelect={handleSelectSession} 
             onDelete={deleteSession}
             selectedId={selectedSession?.id} 
+            isDark={true}
           />
         )}
       </div>
@@ -222,38 +253,39 @@ export function SessionAnalytics() {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.4)',
-          backdropFilter: 'blur(12px)',
-          zIndex: 1000,
+          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(20px)',
+          zIndex: 2000,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           padding: '40px'
         }} onClick={closeModal}>
           <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '28px',
+            backgroundColor: 'var(--auth-black)',
+            borderRadius: '12px',
             width: '100%',
-            maxWidth: '1200px',
-            height: '85vh',
+            maxWidth: '1400px',
+            height: '90vh',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
-            boxShadow: '0 40px 100px -20px rgba(0, 0, 0, 0.3)',
-            border: '1px solid #e2e8f0'
+            boxShadow: '0 40px 120px -20px rgba(0, 0, 0, 0.8)',
+            border: '1px solid var(--auth-border)'
           }} onClick={e => e.stopPropagation()}>
             <ReplayPlayer 
               session={selectedSession} 
               events={replayEvents} 
               loading={loadingReplay} 
               onClose={closeModal} 
+              isDark={true}
             />
           </div>
         </div>
       )}
 
       <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 0.7; } 100% { opacity: 0.3; } }
       ` }} />
     </div>
   );

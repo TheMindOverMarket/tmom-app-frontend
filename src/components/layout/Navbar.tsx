@@ -22,12 +22,12 @@ export function Navbar() {
   return (
     <nav style={{
       display: 'flex',
-      gap: '24px',
+      gap: '32px',
       padding: '0 24px',
-      borderBottom: '1px solid #e2e8f0',
-      backgroundColor: '#ffffff',
+      borderBottom: '1px solid var(--auth-border)',
+      backgroundColor: 'var(--auth-black)',
       flexShrink: 0,
-      height: '36px',
+      height: '40px',
       alignItems: 'center'
     }}>
       {navItems.map(({ path, label, icon: Icon, requiresPlaybook }) => {
@@ -40,26 +40,40 @@ export function Navbar() {
             onClick={(e) => {
               if (isDisabled) e.preventDefault();
             }}
-            title={isDisabled ? "Select or initiate a Playbook to enable real-time supervision orchestration" : "Monitor active playbook execution"}
+            title={isDisabled ? "Select or initiate a Playbook to enable real-time supervision orchestration" : label}
             style={({ isActive }) => ({
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
+              gap: '8px',
               padding: '0 4px',
-              fontSize: '11px',
-              fontWeight: 800,
-              color: isDisabled ? '#cbd5e1' : (isActive ? '#6366f1' : '#64748b'),
+              fontSize: '10px',
+              fontWeight: 700,
+              fontFamily: "'Space Mono', monospace",
+              color: isDisabled ? 'rgba(255, 255, 255, 0.15)' : (isActive ? 'var(--auth-accent)' : 'var(--auth-text-muted)'),
               textDecoration: 'none',
-              borderBottom: !isDisabled && isActive ? '2px solid #6366f1' : '2px solid transparent',
+              borderBottom: !isDisabled && isActive ? '2px solid var(--auth-accent)' : '2px solid transparent',
               cursor: isDisabled ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s',
               height: '100%',
-              letterSpacing: '0.05em',
+              letterSpacing: '0.1em',
               pointerEvents: 'auto'
             })}
+            onMouseEnter={e => {
+              if (!isDisabled) e.currentTarget.style.color = '#ffffff';
+            }}
+            onMouseLeave={e => {
+              if (!isDisabled) {
+                const isActive = window.location.pathname === path;
+                e.currentTarget.style.color = isActive ? 'var(--auth-accent)' : 'var(--auth-text-muted)';
+              }
+            }}
           >
-            <Icon size={12} strokeWidth={3} />
-            {label}
+            {({ isActive }) => (
+              <>
+                <Icon size={12} strokeWidth={isActive ? 3 : 2} />
+                {label}
+              </>
+            )}
           </NavLink>
         );
       })}

@@ -4,12 +4,14 @@ interface RefreshButtonProps {
   onRefresh: () => void;
   isLoading: boolean;
   label?: string;
+  isDark?: boolean;
 }
 
 export function RefreshButton({ 
   onRefresh, 
   isLoading, 
-  label = 'REFRESH'
+  label = 'REFRESH',
+  isDark = false
 }: RefreshButtonProps) {
   return (
     <button 
@@ -23,22 +25,27 @@ export function RefreshButton({
         height: '32px',
         fontSize: '10px',
         fontWeight: '900',
-        backgroundColor: isLoading ? 'var(--slate-50)' : '#ffffff',
-        border: `1px solid var(--slate-200)`,
+        backgroundColor: isLoading 
+          ? (isDark ? 'rgba(255, 255, 255, 0.02)' : 'var(--slate-50)') 
+          : (isDark ? 'transparent' : '#ffffff'),
+        border: `1px solid ${isDark ? 'var(--auth-border)' : 'var(--slate-200)'}`,
         borderRadius: '4px',
-        color: isLoading ? 'var(--slate-400)' : 'var(--slate-600)',
+        color: isLoading 
+          ? (isDark ? 'rgba(255, 255, 255, 0.3)' : 'var(--slate-400)') 
+          : (isDark ? '#ffffff' : 'var(--slate-600)'),
         cursor: isLoading ? 'default' : 'pointer',
         transition: 'all 0.2s ease',
         boxShadow: 'none',
-        letterSpacing: '0.05em'
+        letterSpacing: '0.05em',
+        fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
       }}
-      onMouseOver={e => !isLoading && (e.currentTarget.style.backgroundColor = 'var(--slate-50)')}
-      onMouseOut={e => !isLoading && (e.currentTarget.style.backgroundColor = '#ffffff')}
+      onMouseOver={e => !isLoading && (e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'var(--slate-50)')}
+      onMouseOut={e => !isLoading && (e.currentTarget.style.backgroundColor = isDark ? 'transparent' : '#ffffff')}
     >
       <RefreshCw 
         size={12} 
         style={{ 
-          color: isLoading ? 'var(--brand)' : 'var(--slate-600)',
+          color: isLoading ? 'var(--auth-accent)' : (isDark ? '#ffffff' : 'var(--slate-600)'),
           animation: isLoading ? 'spin 1.5s linear infinite' : 'none' 
         }} 
       />
