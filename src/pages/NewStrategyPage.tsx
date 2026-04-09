@@ -13,16 +13,28 @@ export function NewStrategyPage() {
     createPlaybookFromNL,
     chatWithSystem,
     selectedPlaybook,
+    setSelectedPlaybook,
     isSubmitting
   } = usePlaybookContext();
 
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const prevStatusRef = useRef(selectedPlaybook?.generation_status);
 
+  // If they navigate here while viewing a COMPLETED playbook in the library, clear it so they can start fresh.
   useEffect(() => {
     if (selectedPlaybook?.generation_status === 'COMPLETED') {
+      setSelectedPlaybook(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Only navigate away if the playbook transitions INTO a COMPLETED state during this session.
+  useEffect(() => {
+    if (prevStatusRef.current !== 'COMPLETED' && selectedPlaybook?.generation_status === 'COMPLETED') {
       navigate('/playbooks');
     }
+    prevStatusRef.current = selectedPlaybook?.generation_status;
   }, [selectedPlaybook?.generation_status, navigate]);
 
   // Scroll to bottom whenever chat changes
