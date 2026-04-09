@@ -14,10 +14,8 @@ import {
   ChevronRight,
   Trash2,
   CheckCircle2,
-  XCircle,
   Activity,
-  FileCode,
-  AlertCircle
+  FileCode
 } from 'lucide-react';
 
 const STRATEGY_TEMPLATES = [
@@ -69,8 +67,7 @@ export function NewStrategyPage() {
     currentDraft,
     finalizePlaybook,
     resetDraft,
-    deletePlaybook,
-    fetchPlaybooks
+    deletePlaybook
   } = usePlaybookContext();
 
   const navigate = useNavigate();
