@@ -20,154 +20,186 @@ export function LoginPage() {
     
     try {
       const user = await login({ email: email.trim(), password });
-      // We can also verify if the user's role matches the selected role if we want,
-      // but for now we just navigate to the appropriate dashboard.
       navigate(user.role === 'MANAGER' ? '/admin' : '/playbooks');
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {
-      setIsLoading(true); // Keep loading while navigating
       setIsLoading(false);
     }
   };
 
+  const inputStyle = {
+    width: '100%',
+    padding: '16px',
+    backgroundColor: 'var(--auth-input-bg)',
+    border: '1px solid var(--auth-border)',
+    borderRadius: '4px',
+    color: '#ffffff',
+    fontSize: '14px',
+    fontFamily: "'Space Mono', monospace",
+    outline: 'none',
+    transition: 'border-color 0.2s',
+  };
+
+  const labelStyle = {
+    display: 'block',
+    fontSize: '10px',
+    fontWeight: 700,
+    color: 'var(--auth-text-muted)',
+    marginBottom: '8px',
+    letterSpacing: '0.15em',
+    textTransform: 'uppercase' as const,
+  };
+
   return (
-    <div>
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 900, color: '#0f172a', margin: '0 0 8px 0' }}>Welcome Back</h1>
-        <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>Log in to access your playbooks</p>
+    <div style={{ 
+      backgroundColor: 'rgba(255, 255, 255, 0.03)',
+      border: '1px solid var(--auth-border)',
+      borderRadius: '8px',
+      overflow: 'hidden',
+    }}>
+      {/* Form Header */}
+      <div style={{ 
+        padding: '20px 32px', 
+        borderBottom: '1px solid var(--auth-border)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}>
+        <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', color: 'var(--auth-text-muted)' }}>USER AUTHORIZATION</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--auth-accent)' }}></div>
+          <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--auth-accent)' }}>COMPLIANT</span>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <div>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>
-            EMAIL ADDRESS
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="trader@example.com"
-            disabled={isLoading}
-            style={{
-              width: '100%',
-              padding: '14px',
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              fontSize: '14px',
-              outline: 'none',
-              boxSizing: 'border-box'
-            }}
-          />
-        </div>
-
-        <div>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>
-            PASSWORD
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            disabled={isLoading}
-            style={{
-              width: '100%',
-              padding: '14px',
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              fontSize: '14px',
-              outline: 'none',
-              boxSizing: 'border-box'
-            }}
-          />
-        </div>
-
-        <div>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>
-            LOGIN AS
-          </label>
-          <div style={{ 
-            display: 'flex', 
-            padding: '4px', 
-            backgroundColor: '#f1f5f9', 
-            borderRadius: '8px', 
-            gap: '4px' 
-          }}>
-            <button
-              type="button"
-              onClick={() => setRole('TRADER')}
-              style={{
-                flex: 1,
-                padding: '10px',
-                borderRadius: '6px',
-                border: 'none',
-                fontSize: '12px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                backgroundColor: role === 'TRADER' ? '#ffffff' : 'transparent',
-                color: role === 'TRADER' ? '#0f172a' : '#64748b',
-                boxShadow: role === 'TRADER' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                transition: 'all 0.2s'
-              }}
-            >
-              TRADER
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole('MANAGER')}
-              style={{
-                flex: 1,
-                padding: '10px',
-                borderRadius: '6px',
-                border: 'none',
-                fontSize: '12px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                backgroundColor: role === 'MANAGER' ? '#ffffff' : 'transparent',
-                color: role === 'MANAGER' ? '#0f172a' : '#64748b',
-                boxShadow: role === 'MANAGER' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                transition: 'all 0.2s'
-              }}
-            >
-              MANAGER
-            </button>
-          </div>
-        </div>
-
-        {error && (
-          <div style={{ padding: '12px', borderRadius: '8px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', fontSize: '13px' }}>
-            {error}
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={!email || isLoading}
-          style={{
-            width: '100%',
-            padding: '14px',
-            borderRadius: '8px',
-            backgroundColor: '#0f172a',
-            color: '#ffffff',
-            border: 'none',
-            fontSize: '13px',
-            fontWeight: 800,
-            cursor: !email || isLoading ? 'not-allowed' : 'pointer',
-            opacity: !email || isLoading ? 0.7 : 1,
-            letterSpacing: '0.05em'
-          }}
-        >
-          {isLoading ? 'VERIFYING...' : 'LOG IN'}
-        </button>
-
-        <p style={{ textAlign: 'center', fontSize: '13px', color: '#64748b', margin: '16px 0 0 0' }}>
-          Don't have an account?{' '}
-          <Link to="/signup" style={{ color: '#0f172a', fontWeight: 800, textDecoration: 'none' }}>
-            Sign up
-          </Link>
+      <div style={{ padding: '32px 32px 40px 32px' }}>
+        <h2 style={{ 
+          fontSize: '32px', 
+          fontFamily: "'Cormorant Garamond', serif", 
+          margin: '0 0 8px 0',
+          fontWeight: 400,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em'
+        }}>
+          Authenticate Session
+        </h2>
+        <p style={{ 
+          fontSize: '14px', 
+          color: 'var(--auth-text-muted)', 
+          margin: '0 0 24px 0',
+          lineHeight: '1.5'
+        }}>
+          Sign in to continue under your active supervision profile.
         </p>
-      </form>
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div>
+            <label style={labelStyle}>Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="trader@example.com"
+              disabled={isLoading}
+              style={inputStyle}
+            />
+          </div>
+
+          <div>
+            <label style={labelStyle}>Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              disabled={isLoading}
+              style={inputStyle}
+            />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '4px' }}>
+            <button
+              type="submit"
+              disabled={!email || isLoading}
+              style={{
+                width: '100%',
+                padding: '16px',
+                backgroundColor: '#ffffff',
+                color: '#000000',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                transition: 'opacity 0.2s',
+              }}
+            >
+              {isLoading ? 'Processing...' : 'Enter System'}
+            </button>
+            <button
+              type="button"
+              style={{
+                width: '100%',
+                padding: '16px',
+                backgroundColor: 'transparent',
+                color: '#ffffff',
+                border: '1px solid var(--auth-border)',
+                borderRadius: '4px',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                transition: 'background-color 0.2s',
+              }}
+            >
+              Continue With Google
+            </button>
+          </div>
+
+          {error && (
+            <div style={{ 
+              padding: '12px', 
+              backgroundColor: 'rgba(239, 68, 68, 0.1)', 
+              border: '1px solid rgba(239, 68, 68, 0.2)', 
+              color: '#ef4444', 
+              fontSize: '12px',
+              fontFamily: "'Space Mono', monospace"
+            }}>
+              {error}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '4px' }}>
+            <button 
+              type="button"
+              onClick={() => setRole(role === 'TRADER' ? 'MANAGER' : 'TRADER')}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: 'var(--auth-text-muted)',
+                fontSize: '10px',
+                fontWeight: 700,
+                letterSpacing: '0.1em',
+                cursor: 'pointer',
+                textDecoration: 'underline'
+              }}
+            >
+              SWITCH TO {role === 'TRADER' ? 'MANAGER' : 'TRADER'} LOGIN
+            </button>
+          </div>
+
+          <p style={{ textAlign: 'center', fontSize: '13px', color: 'var(--auth-text-muted)', margin: 0 }}>
+            No account?{' '}
+            <Link to="/signup" style={{ color: '#ffffff', fontWeight: 700, textDecoration: 'none' }}>
+              Create Profile
+            </Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }

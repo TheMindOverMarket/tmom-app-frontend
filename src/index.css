@@ -1,4 +1,4 @@
-/* Canonical Reset & Design Tokens */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 :root {
   --brand: #6366f1;
@@ -21,6 +21,15 @@
   --radius-lg: 12px;
   --radius-xl: 16px;
   --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Auth Theme Variables */
+  --auth-black: #050505;
+  --auth-grid: rgba(255, 255, 255, 0.05);
+  --auth-accent: #00ff88;
+  --auth-text-main: #ffffff;
+  --auth-text-muted: rgba(255, 255, 255, 0.4);
+  --auth-border: rgba(255, 255, 255, 0.1);
+  --auth-input-bg: rgba(255, 255, 255, 0.03);
 }
 
 *,

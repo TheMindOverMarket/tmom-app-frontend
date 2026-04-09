@@ -42,215 +42,222 @@ export function SignupPage() {
     }
   };
 
+  const inputStyle = {
+    width: '100%',
+    padding: '14px',
+    backgroundColor: 'var(--auth-input-bg)',
+    border: '1px solid var(--auth-border)',
+    borderRadius: '4px',
+    color: '#ffffff',
+    fontSize: '13px',
+    fontFamily: "'Space Mono', monospace",
+    outline: 'none',
+    transition: 'border-color 0.2s',
+  };
+
+  const labelStyle = {
+    display: 'block',
+    fontSize: '9px',
+    fontWeight: 700,
+    color: 'var(--auth-text-muted)',
+    marginBottom: '6px',
+    letterSpacing: '0.15em',
+    textTransform: 'uppercase' as const,
+  };
+
   return (
-    <div>
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 900, color: '#0f172a', margin: '0 0 8px 0' }}>Create Account</h1>
-        <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>Join to manage your trading playbooks</p>
+    <div style={{ 
+      backgroundColor: 'rgba(255, 255, 255, 0.03)',
+      border: '1px solid var(--auth-border)',
+      borderRadius: '8px',
+      overflow: 'hidden',
+    }}>
+      {/* Form Header */}
+      <div style={{ 
+        padding: '16px 24px', 
+        borderBottom: '1px solid var(--auth-border)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}>
+        <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.2em', color: 'var(--auth-text-muted)' }}>INITIALIZATION</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--auth-accent)' }}></div>
+          <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--auth-accent)' }}>READY</span>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <div>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>
-            EMAIL ADDRESS
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="trader@example.com"
-            disabled={isLoading}
-            style={{
-              width: '100%',
-              padding: '14px',
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              fontSize: '14px',
-              outline: 'none',
-              boxSizing: 'border-box'
-            }}
-          />
-        </div>
-        
-        <div style={{ display: 'flex', gap: '16px' }}>
-          <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>
-              FIRST NAME
-            </label>
-            <input
-              type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="John"
-              disabled={isLoading}
-              style={{
-                width: '100%',
-                padding: '14px',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-                fontSize: '14px',
-                outline: 'none',
-                boxSizing: 'border-box'
-              }}
-            />
-          </div>
-          <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>
-              LAST NAME
-            </label>
-            <input
-              type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Doe"
-              disabled={isLoading}
-              style={{
-                width: '100%',
-                padding: '14px',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-                fontSize: '14px',
-                outline: 'none',
-                boxSizing: 'border-box'
-              }}
-            />
-          </div>
-        </div>
-
-        <div>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>
-            PASSWORD
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            disabled={isLoading}
-            style={{
-              width: '100%',
-              padding: '14px',
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              fontSize: '14px',
-              outline: 'none',
-              boxSizing: 'border-box'
-            }}
-          />
-        </div>
-
-        <div>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>
-            CONFIRM PASSWORD
-          </label>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="••••••••"
-            disabled={isLoading}
-            style={{
-              width: '100%',
-              padding: '14px',
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              fontSize: '14px',
-              outline: 'none',
-              boxSizing: 'border-box'
-            }}
-          />
-        </div>
-
-        <div>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px' }}>
-            ACCOUNT TYPE
-          </label>
-          <div style={{ 
-            display: 'flex', 
-            padding: '4px', 
-            backgroundColor: '#f1f5f9', 
-            borderRadius: '8px', 
-            gap: '4px' 
-          }}>
-            <button
-              type="button"
-              onClick={() => setRole('TRADER')}
-              style={{
-                flex: 1,
-                padding: '10px',
-                borderRadius: '6px',
-                border: 'none',
-                fontSize: '12px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                backgroundColor: role === 'TRADER' ? '#ffffff' : 'transparent',
-                color: role === 'TRADER' ? '#0f172a' : '#64748b',
-                boxShadow: role === 'TRADER' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                transition: 'all 0.2s'
-              }}
-            >
-              TRADER
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole('MANAGER')}
-              style={{
-                flex: 1,
-                padding: '10px',
-                borderRadius: '6px',
-                border: 'none',
-                fontSize: '12px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                backgroundColor: role === 'MANAGER' ? '#ffffff' : 'transparent',
-                color: role === 'MANAGER' ? '#0f172a' : '#64748b',
-                boxShadow: role === 'MANAGER' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                transition: 'all 0.2s'
-              }}
-            >
-              MANAGER
-            </button>
-          </div>
-          <p style={{ fontSize: '11px', color: '#64748b', marginTop: '8px', fontStyle: 'italic' }}>
-            {role === 'TRADER' 
-              ? 'Traders can create and backtest their own execution playbooks.' 
-              : 'Managers gain access to the Admin Dashboard to supervise all system users.'}
-          </p>
-        </div>
-
-        {error && (
-          <div style={{ padding: '12px', borderRadius: '8px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', fontSize: '13px' }}>
-            {error}
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={!email || isLoading}
-          style={{
-            width: '100%',
-            padding: '14px',
-            borderRadius: '8px',
-            backgroundColor: '#0f172a',
-            color: '#ffffff',
-            border: 'none',
-            fontSize: '13px',
-            fontWeight: 800,
-            cursor: !email || isLoading ? 'not-allowed' : 'pointer',
-            opacity: !email || isLoading ? 0.7 : 1,
-            letterSpacing: '0.05em'
-          }}
-        >
-          {isLoading ? 'CREATING...' : 'SIGN UP'}
-        </button>
-
-        <p style={{ textAlign: 'center', fontSize: '13px', color: '#64748b', margin: '16px 0 0 0' }}>
-          Already have an account?{' '}
-          <Link to="/login" style={{ color: '#0f172a', fontWeight: 800, textDecoration: 'none' }}>
-            Log in
-          </Link>
+      <div style={{ padding: '24px 24px 32px 24px' }}>
+        <h2 style={{ 
+          fontSize: '28px', 
+          fontFamily: "'Cormorant Garamond', serif", 
+          margin: '0 0 4px 0',
+          fontWeight: 400,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em'
+        }}>
+          Create Profile
+        </h2>
+        <p style={{ 
+          fontSize: '13px', 
+          color: 'var(--auth-text-muted)', 
+          margin: '0 0 16px 0',
+          lineHeight: '1.4'
+        }}>
+          Join the system to establish your trading supervision baseline.
         </p>
-      </form>
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div>
+            <label style={labelStyle}>Email Address</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="trader@example.com"
+              disabled={isLoading}
+              style={inputStyle}
+            />
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={labelStyle}>First Name</label>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="John"
+                disabled={isLoading}
+                style={inputStyle}
+              />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={labelStyle}>Last Name</label>
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Doe"
+                disabled={isLoading}
+                style={inputStyle}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label style={labelStyle}>Create Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              disabled={isLoading}
+              style={inputStyle}
+            />
+          </div>
+
+          <div>
+            <label style={labelStyle}>Confirm Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="••••••••"
+              disabled={isLoading}
+              style={inputStyle}
+            />
+          </div>
+
+          <div style={{ 
+            padding: '10px', 
+            backgroundColor: 'rgba(255, 255, 255, 0.02)', 
+            border: '1px solid var(--auth-border)',
+            borderRadius: '4px'
+          }}>
+            <label style={labelStyle}>Account Role</label>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => setRole('TRADER')}
+                style={{
+                  flex: 1,
+                  padding: '6px',
+                  backgroundColor: role === 'TRADER' ? '#ffffff' : 'transparent',
+                  color: role === 'TRADER' ? '#000000' : 'var(--auth-text-muted)',
+                  border: role === 'TRADER' ? 'none' : '1px solid var(--auth-border)',
+                  borderRadius: '2px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  textTransform: 'uppercase'
+                }}
+              >
+                Trader
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole('MANAGER')}
+                style={{
+                  flex: 1,
+                  padding: '6px',
+                  backgroundColor: role === 'MANAGER' ? '#ffffff' : 'transparent',
+                  color: role === 'MANAGER' ? '#000000' : 'var(--auth-text-muted)',
+                  border: role === 'MANAGER' ? 'none' : '1px solid var(--auth-border)',
+                  borderRadius: '2px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  textTransform: 'uppercase'
+                }}
+              >
+                Manager
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <div style={{ 
+              padding: '8px', 
+              backgroundColor: 'rgba(239, 68, 68, 0.1)', 
+              border: '1px solid rgba(239, 68, 68, 0.2)', 
+              color: '#ef4444', 
+              fontSize: '11px',
+              fontFamily: "'Space Mono', monospace"
+            }}>
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={!email || isLoading}
+            style={{
+              width: '100%',
+              padding: '12px',
+              backgroundColor: '#ffffff',
+              color: '#000000',
+              border: 'none',
+              borderRadius: '4px',
+              fontSize: '12px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              marginTop: '4px'
+            }}
+          >
+            {isLoading ? 'Initialising...' : 'Create Profile'}
+          </button>
+
+          <p style={{ textAlign: 'center', fontSize: '12px', color: 'var(--auth-text-muted)', margin: 0 }}>
+            Already registered?{' '}
+            <Link to="/login" style={{ color: '#ffffff', fontWeight: 700, textDecoration: 'none' }}>
+              Authenticate
+            </Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }
