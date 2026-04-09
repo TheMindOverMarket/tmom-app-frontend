@@ -5,12 +5,9 @@ import {
   Menu, 
   Plus, 
   MessageSquare, 
-  Trash2, 
-  LayoutGrid, 
   Clock,
   Send,
-  Sparkles,
-  ChevronRight
+  Sparkles
 } from 'lucide-react';
 
 export function NewStrategyPage() {
