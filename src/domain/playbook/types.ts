@@ -1,4 +1,4 @@
-export type GenerationStatus = 'PENDING' | 'INCOMPLETE' | 'COMPLETED' | 'FAILED';
+export type GenerationStatus = 'PENDING' | 'INITIALIZING' | 'INCOMPLETE' | 'COMPLETED' | 'FAILED';
 
 export interface RuleCondition {
   id: string;

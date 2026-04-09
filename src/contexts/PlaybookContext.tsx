@@ -188,7 +188,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
         // Resilience: If backend hasn't deployed the field yet, but we are in a pending state locally
         const status = updated.generation_status || 'COMPLETED'; 
 
-        if (status === 'COMPLETED' || status === 'FAILED' || status === 'INCOMPLETE') {
+        if (status === 'COMPLETED' || status === 'FAILED' || status === 'INCOMPLETE' || status === 'INITIALIZING') {
           setSelectedPlaybook(updated);
           
           if (status === 'COMPLETED') {
@@ -251,7 +251,9 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       });
 
       console.log(`Fetched and sorted ${sorted.length} playbooks.`);
-      setPlaybooks(sorted);
+      // Filter out playbooks that are only in the INITIALIZING (greeting) state
+      const filtered = sorted.filter(pb => pb.generation_status !== 'INITIALIZING');
+      setPlaybooks(filtered);
       
       // Only auto-select the one active in the DB if we don't have a selection yet
       const activeInDb = sorted.find(pb => pb.is_active);
