@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { usePlaybookContext } from '../contexts/PlaybookContext';
-import { RuleCondition, Playbook } from '../domain/playbook/types';
-import { ChevronDown, ChevronUp, Trash2, Copy, Check, Info, ArrowLeft } from 'lucide-react';
+import { Playbook } from '../domain/playbook/types';
+import { Trash2, Copy, Check, ArrowLeft } from 'lucide-react';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { RefreshButton } from '../components/common/RefreshButton';
 import { resolvePlaybookSymbol } from '../domain/playbook/utils';
@@ -34,7 +34,6 @@ export function PlaybooksPage() {
   };
 
   const [showDetailView, setShowDetailView] = useState(false);
-  const [showOriginal, setShowOriginal] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   
   // Deletion Confirmation State
@@ -53,7 +52,6 @@ export function PlaybooksPage() {
   const handleOpenAnalysis = (pb: Playbook) => {
     setSelectedPlaybook(pb);
     setShowDetailView(true);
-    setShowOriginal(false);
   };
 
   const handleBackToLibrary = () => {
