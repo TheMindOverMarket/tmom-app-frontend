@@ -447,7 +447,7 @@ Cooldown:
             const response = await fetch(`${CONFIG.BACKEND_BASE_URL}/playbooks/stream-preview`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ turn: { chat_history: history } })
+                body: JSON.stringify({ chat_history: history })
             });
 
             if (!response.body) throw new Error('No stream body');
@@ -466,7 +466,7 @@ Cooldown:
             const preview = await fetch(`${CONFIG.BACKEND_BASE_URL}/playbooks/preview`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ turn: { chat_history: history } })
+                body: JSON.stringify({ chat_history: history })
             }).then(res => res.json());
 
             setCurrentDraft(preview);
