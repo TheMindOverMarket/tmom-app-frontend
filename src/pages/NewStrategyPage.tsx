@@ -5,7 +5,6 @@ import {
   Menu, 
   Plus, 
   MessageSquare, 
-  Clock,
   Send,
   Sparkles,
   Zap,
