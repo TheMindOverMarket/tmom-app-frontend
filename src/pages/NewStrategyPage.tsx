@@ -11,7 +11,8 @@ import {
   Zap,
   Shield,
   Target,
-  BarChart3
+  BarChart3,
+  ChevronRight
 } from 'lucide-react';
 
 const STRATEGY_TEMPLATES = [
@@ -106,12 +107,12 @@ export function NewStrategyPage() {
     backgroundColor: 'var(--auth-input-bg)',
     border: '1px solid var(--auth-border)',
     borderRadius: '4px',
-    padding: '20px',
+    padding: '16px',
     cursor: 'pointer',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     display: 'flex',
     flexDirection: 'column' as const,
-    gap: '10px',
+    gap: '8px',
     textAlign: 'left' as const,
     position: 'relative' as const,
     overflow: 'hidden' as const,
@@ -258,16 +259,17 @@ export function NewStrategyPage() {
           </button>
         </div>
 
-        {/* Scrolling Chat Content */}
-        {!isInitialView && (
-          <div style={{
-            flex: 1,
-            overflowY: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: '80px 20px 200px 20px'
-          }}>
+        {/* Unified Container for SCROLLING Chat and INITIAL Parser */}
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          position: 'relative',
+          padding: isInitialView ? '0' : '80px 20px 200px 20px'
+        }}>
+          {!isInitialView ? (
             <div style={{ width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', gap: '48px' }}>
               {chatHistory.map((msg, idx) => {
                 const isUser = msg.role === 'user';
@@ -337,124 +339,279 @@ export function NewStrategyPage() {
               )}
               <div ref={messagesEndRef} />
             </div>
-          </div>
-        )}
+          ) : (
+            /* INITIAL VIEW - Centered without scrolling */
+            <div style={{ 
+              width: '100%', 
+              height: '100%', 
+              maxWidth: '850px', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              justifyContent: 'center', 
+              padding: '40px 20px',
+              gap: '24px'
+            }}>
+              {/* 1. HERO HEADER */}
+              <div style={{ textAlign: 'center', marginBottom: '8px', animation: 'heroFade 0.8s ease-out' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '20px' }}>
+                   <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to right, transparent, var(--auth-border))' }}></div>
+                   <span style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '0.3em', color: 'var(--auth-text-muted)', textTransform: 'uppercase' }}>Universal Strategy Parser</span>
+                   <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to left, transparent, var(--auth-border))' }}></div>
+                </div>
+                <h1 style={{ 
+                  fontSize: '56px', 
+                  fontFamily: "'Cormorant Garamond', serif", 
+                  margin: '0 0 12px 0',
+                  fontWeight: 300,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  lineHeight: '1',
+                  color: '#ffffff'
+                }}>
+                  AI Strategy Parser
+                </h1>
+                <p style={{ 
+                  fontSize: '15px', 
+                  color: 'var(--auth-text-muted)', 
+                  margin: 0,
+                  fontFamily: "'Inter', sans-serif",
+                  letterSpacing: '0.05em',
+                  fontWeight: 400
+                }}>
+                  Translate natural language into precise deterministic execution rules.
+                </p>
+              </div>
 
-        {/* Initial View (Parser Hero) */}
-        {isInitialView && (
+              {/* 2. RECENT DERIVATIONS (Lines above text box) */}
+              {playbooks.length > 0 && (
+                <div style={{ animation: 'heroFade 0.9s ease-out' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                    <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Recent Derivations</span>
+                    <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to right, var(--auth-border), transparent)' }}></div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    {playbooks.slice(0, 3).map(pb => (
+                      <button
+                        key={pb.id}
+                        onClick={() => setSelectedPlaybook(pb)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '16px',
+                          padding: '10px 16px',
+                          backgroundColor: 'rgba(255,255,255,0.02)',
+                          border: '1px solid var(--auth-border)',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          transition: 'all 0.2s',
+                          width: '100%'
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                          e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.borderColor = 'var(--auth-border)';
+                          e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
+                        }}
+                      >
+                         <div style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.1em', width: '80px' }}>
+                            {new Date(pb.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                         </div>
+                         <div style={{ fontSize: '14px', fontWeight: 600, color: '#ffffff', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {pb.name}
+                         </div>
+                         <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)', fontWeight: 800, letterSpacing: '0.1em' }}>
+                            {pb.market}
+                         </div>
+                         <ChevronRight size={12} style={{ color: 'var(--auth-text-muted)', opacity: 0.5 }} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 3. PARSER BOX */}
+              <div style={{ 
+                backgroundColor: 'rgba(5, 5, 5, 0.8)', 
+                backdropFilter: 'blur(20px)',
+                borderRadius: '4px', 
+                border: `1px solid ${playbookInput ? 'rgba(255, 255, 255, 0.2)' : 'var(--auth-border)'}`,
+                padding: '20px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+                transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                boxShadow: playbookInput ? '0 40px 100px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.02)' : '0 20px 50px rgba(0,0,0,0.5)',
+                animation: 'heroFade 1s ease-out'
+              }}>
+                {isInitialTurn && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--auth-border)', paddingBottom: '16px', marginBottom: '2px' }}>
+                     <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.2em' }}>ASSET_PROFILE</span>
+                     <select
+                       value={selectedMarket}
+                       onChange={(e) => setSelectedMarket(e.target.value)}
+                       disabled={isLoadingMarkets}
+                       style={{
+                         padding: '4px 12px',
+                         borderRadius: '2px',
+                         border: '1px solid var(--auth-border)',
+                         backgroundColor: 'rgba(255,255,255,0.03)',
+                         fontSize: '11px',
+                         fontWeight: 900,
+                         color: '#ffffff',
+                         outline: 'none',
+                         cursor: 'pointer',
+                         fontFamily: "'Space Mono', monospace",
+                         appearance: 'none',
+                         letterSpacing: '0.1em'
+                       }}
+                     >
+                       {availableMarkets.length === 0 && <option value="">No markets</option>}
+                       {availableMarkets.map((market) => (
+                         <option key={market.symbol} value={market.symbol}>{market.symbol}</option>
+                       ))}
+                     </select>
+                     <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--auth-accent)', animation: 'pulse 2s infinite' }}></div>
+                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.1)' }}></div>
+                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)' }}></div>
+                     </div>
+                  </div>
+                )}
+                
+                <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+                   <span style={{ color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace", fontSize: '20px', marginTop: '4px', opacity: 0.5 }}>&gt;</span>
+                   <textarea 
+                     placeholder={isInitialTurn ? "Describe your strategy constraints..." : "Input refinement logic..."}
+                     value={playbookInput}
+                     onChange={(e) => setPlaybookInput(e.target.value)}
+                     onKeyDown={(e) => {
+                       if (e.key === 'Enter' && !e.shiftKey) {
+                         e.preventDefault();
+                         handleSubmit();
+                       }
+                     }}
+                     style={{ 
+                         flex: 1,
+                         border: 'none', 
+                         fontSize: '15px',
+                         outline: 'none',
+                         resize: 'none',
+                         minHeight: '28px',
+                         maxHeight: '200px',
+                         fontFamily: "'Space Mono', monospace",
+                         lineHeight: '1.7',
+                         padding: '4px 0',
+                         backgroundColor: 'transparent',
+                         color: '#ffffff',
+                         letterSpacing: '-0.02em'
+                     }} 
+                   />
+                   <button
+                     onClick={handleSubmit}
+                     disabled={isSubmitting || !playbookInput.trim() || (isInitialTurn && !selectedMarket)}
+                     style={{
+                       padding: '10px 20px',
+                       borderRadius: '2px',
+                       backgroundColor: (isSubmitting || !playbookInput.trim() || (isInitialTurn && !selectedMarket)) ? 'rgba(255,255,255,0.03)' : '#ffffff',
+                       color: (isSubmitting || !playbookInput.trim() || (isInitialTurn && !selectedMarket)) ? 'rgba(255,255,255,0.2)' : 'black',
+                       border: 'none',
+                       display: 'flex',
+                       alignItems: 'center',
+                       justifyContent: 'center',
+                       gap: '10px',
+                       cursor: (isSubmitting || !playbookInput.trim()) ? 'not-allowed' : 'pointer',
+                       transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                       flexShrink: 0,
+                       fontSize: '10px',
+                       fontWeight: 900,
+                       letterSpacing: '0.15em',
+                       textTransform: 'uppercase'
+                     }}
+                   >
+                     {isSubmitting ? <div className="loading-spinner" /> : <Send size={15} strokeWidth={2.5} />}
+                     {isSubmitting ? 'Parsing' : (isInitialTurn ? 'Initialize' : 'Transmit')}
+                   </button>
+                </div>
+              </div>
+
+              {/* 4. TEMPLATES (Blueprints) */}
+              <div style={{ animation: 'heroFade 1.1s ease-out' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                  <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.25em', textTransform: 'uppercase' }}>Available Blueprints</span>
+                  <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to right, var(--auth-border), transparent)' }}></div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+                  {STRATEGY_TEMPLATES.map((template, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleSelectTemplate(template.content)}
+                      style={{
+                        ...cardStyle,
+                        ...(playbookInput === template.content ? { 
+                          borderColor: 'white', 
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        } : {})
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)';
+                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                      }}
+                      onMouseLeave={e => {
+                        if (playbookInput !== template.content) {
+                          e.currentTarget.style.borderColor = 'var(--auth-border)';
+                          e.currentTarget.style.backgroundColor = 'var(--auth-input-bg)';
+                        } else {
+                          e.currentTarget.style.borderColor = 'white';
+                          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                        }
+                      }}
+                    >
+                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+                          <span style={{ fontSize: '8px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.1em' }}>{template.category}</span>
+                          <template.icon size={11} style={{ color: playbookInput === template.content ? 'white' : 'var(--auth-text-muted)', opacity: 0.5 }} />
+                       </div>
+                       <div style={{ fontSize: '13px', fontWeight: 600, color: '#ffffff', letterSpacing: '0.01em' }}>{template.title}</div>
+                       <div style={{ fontSize: '11px', color: 'var(--auth-text-muted)', lineHeight: '1.4', fontWeight: 400 }}>{template.description}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Input Area (only fixed for chat mode) */}
+        {!isInitialView && (
           <div style={{
-            flex: 1,
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            padding: '60px 24px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px',
-            marginTop: '-60px'
+            background: 'linear-gradient(to top, var(--auth-black) 60%, transparent)',
+            zIndex: 100
           }}>
-            <div style={{ textAlign: 'center', maxWidth: '800px', width: '100%', animation: 'heroFade 1s ease-out' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '32px' }}>
-                 <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to right, transparent, var(--auth-border))' }}></div>
-                 <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.3em', color: 'var(--auth-text-muted)', textTransform: 'uppercase' }}>Universal Strategy Parser</span>
-                 <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to left, transparent, var(--auth-border))' }}></div>
-              </div>
-              
-              <h1 style={{ 
-                fontSize: '72px', 
-                fontFamily: "'Cormorant Garamond', serif", 
-                margin: '0 0 20px 0',
-                fontWeight: 300,
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                lineHeight: '1',
-                color: '#ffffff'
+            <div style={{ width: '100%', maxWidth: '800px' }}>
+              <div style={{ 
+                backgroundColor: 'rgba(5, 5, 5, 0.9)', 
+                backdropFilter: 'blur(20px)',
+                borderRadius: '4px', 
+                border: `1px solid ${playbookInput ? 'rgba(255, 255, 255, 0.3)' : 'var(--auth-border)'}`,
+                padding: '20px',
+                display: 'flex',
+                gap: '20px',
+                alignItems: 'flex-start',
+                boxShadow: '0 40px 100px rgba(0,0,0,0.8)'
               }}>
-                AI Strategy Parser
-              </h1>
-              
-              <p style={{ 
-                fontSize: '18px', 
-                color: 'var(--auth-text-muted)', 
-                marginBottom: '60px',
-                fontFamily: "'Inter', sans-serif",
-                letterSpacing: '0.05em',
-                fontWeight: 300
-              }}>
-                Translate natural language into precise deterministic execution rules.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Unified Input Area */}
-        <div style={{
-          position: isInitialView ? 'relative' : 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          padding: isInitialView ? '0 24px 80px 24px' : '60px 24px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          background: isInitialView ? 'transparent' : 'linear-gradient(to top, var(--auth-black) 60%, transparent)',
-          zIndex: 100,
-          transition: 'all 0.5s ease'
-        }}>
-          <div style={{ width: '100%', maxWidth: '800px' }}>
-            {/* Parser Box */}
-            <div style={{ 
-              backgroundColor: 'rgba(5, 5, 5, 0.8)', 
-              backdropFilter: 'blur(20px)',
-              borderRadius: '4px', 
-              border: `1px solid ${playbookInput ? 'rgba(255, 255, 255, 0.2)' : 'var(--auth-border)'}`,
-              padding: '24px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '20px',
-              transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-              boxShadow: playbookInput ? '0 40px 100px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.02)' : '0 20px 50px rgba(0,0,0,0.5)',
-              position: 'relative'
-            }}>
-              {isInitialTurn && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--auth-border)', paddingBottom: '20px', marginBottom: '4px' }}>
-                   <span style={{ fontSize: '10px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.2em' }}>ASSET_PROFILE</span>
-                   <div style={{ position: 'relative' }}>
-                    <select
-                      value={selectedMarket}
-                      onChange={(e) => setSelectedMarket(e.target.value)}
-                      disabled={isLoadingMarkets}
-                      style={{
-                        padding: '6px 14px',
-                        borderRadius: '2px',
-                        border: '1px solid var(--auth-border)',
-                        backgroundColor: 'rgba(255,255,255,0.03)',
-                        fontSize: '11px',
-                        fontWeight: 900,
-                        color: '#ffffff',
-                        outline: 'none',
-                        cursor: 'pointer',
-                        fontFamily: "'Space Mono', monospace",
-                        appearance: 'none',
-                        letterSpacing: '0.1em'
-                      }}
-                    >
-                      {availableMarkets.length === 0 && <option value="">No markets</option>}
-                      {availableMarkets.map((market) => (
-                        <option key={market.symbol} value={market.symbol}>{market.symbol}</option>
-                      ))}
-                    </select>
-                   </div>
-                   <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
-                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--auth-accent)', animation: 'pulse 2s infinite' }}></div>
-                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.1)' }}></div>
-                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)' }}></div>
-                   </div>
-                </div>
-              )}
-              
-              <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-                 <span style={{ color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace", fontSize: '20px', marginTop: '4px', opacity: 0.5 }}>&gt;</span>
+                <span style={{ color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace", fontSize: '20px', marginTop: '4px', opacity: 0.5 }}>&gt;</span>
                  <textarea 
-                   placeholder={isInitialTurn ? "Describe your strategy constraints..." : "Input refinement logic..."}
+                   placeholder="Input refinement logic..."
                    value={playbookInput}
                    onChange={(e) => setPlaybookInput(e.target.value)}
                    onKeyDown={(e) => {
@@ -466,27 +623,26 @@ export function NewStrategyPage() {
                    style={{ 
                        flex: 1,
                        border: 'none', 
-                       fontSize: '16px',
+                       fontSize: '15px',
                        outline: 'none',
                        resize: 'none',
-                       minHeight: '32px',
-                       maxHeight: '400px',
+                       minHeight: '28px',
+                       maxHeight: '200px',
                        fontFamily: "'Space Mono', monospace",
                        lineHeight: '1.7',
                        padding: '4px 0',
                        backgroundColor: 'transparent',
-                       color: '#ffffff',
-                       letterSpacing: '-0.02em'
+                       color: '#ffffff'
                    }} 
                  />
                  <button
                    onClick={handleSubmit}
-                   disabled={isSubmitting || !playbookInput.trim() || (isInitialTurn && !selectedMarket)}
+                   disabled={isSubmitting || !playbookInput.trim()}
                    style={{
                      padding: '10px 20px',
                      borderRadius: '2px',
-                     backgroundColor: (isSubmitting || !playbookInput.trim() || (isInitialTurn && !selectedMarket)) ? 'rgba(255,255,255,0.03)' : '#ffffff',
-                     color: (isSubmitting || !playbookInput.trim() || (isInitialTurn && !selectedMarket)) ? 'rgba(255,255,255,0.2)' : 'black',
+                     backgroundColor: (isSubmitting || !playbookInput.trim()) ? 'rgba(255,255,255,0.03)' : '#ffffff',
+                     color: (isSubmitting || !playbookInput.trim()) ? 'rgba(255,255,255,0.2)' : 'black',
                      border: 'none',
                      display: 'flex',
                      alignItems: 'center',
@@ -495,117 +651,19 @@ export function NewStrategyPage() {
                      cursor: (isSubmitting || !playbookInput.trim()) ? 'not-allowed' : 'pointer',
                      transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                      flexShrink: 0,
-                     fontSize: '11px',
+                     fontSize: '10px',
                      fontWeight: 900,
                      letterSpacing: '0.15em',
                      textTransform: 'uppercase'
                    }}
                  >
                    {isSubmitting ? <div className="loading-spinner" /> : <Send size={15} strokeWidth={2.5} />}
-                   {isSubmitting ? 'Processing' : (isInitialTurn ? 'Initialize' : 'Transmit')}
+                   {isSubmitting ? 'Parsing' : 'Transmit'}
                  </button>
               </div>
             </div>
-
-            {/* Templates & History (ONLY ON INITIAL VIEW) */}
-            {isInitialView && (
-              <div style={{ marginTop: '56px', display: 'flex', flexDirection: 'column', gap: '48px', animation: 'heroFade 1.2s ease-out' }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px' }}>
-                    <span style={{ fontSize: '10px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.25em', textTransform: 'uppercase' }}>Available Blueprints</span>
-                    <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to right, var(--auth-border), transparent)' }}></div>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
-                    {STRATEGY_TEMPLATES.map((template, i) => (
-                      <button
-                        key={i}
-                        onClick={() => handleSelectTemplate(template.content)}
-                        style={{
-                          ...cardStyle,
-                          ...(playbookInput === template.content ? { 
-                            borderColor: 'white', 
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            transform: 'translateY(-2px)'
-                          } : {})
-                        }}
-                        onMouseEnter={e => {
-                          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)';
-                          e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-                          e.currentTarget.style.transform = 'translateY(-2px)';
-                        }}
-                        onMouseLeave={e => {
-                          if (playbookInput !== template.content) {
-                            e.currentTarget.style.borderColor = 'var(--auth-border)';
-                            e.currentTarget.style.backgroundColor = 'var(--auth-input-bg)';
-                            e.currentTarget.style.transform = 'translateY(0)';
-                          } else {
-                            e.currentTarget.style.borderColor = 'white';
-                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                          }
-                        }}
-                      >
-                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                            <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.15em' }}>{template.category}</span>
-                            <template.icon size={12} style={{ color: playbookInput === template.content ? 'white' : 'var(--auth-text-muted)', opacity: 0.5 }} />
-                         </div>
-                         <div style={{ fontSize: '15px', fontWeight: 600, color: '#ffffff', letterSpacing: '0.01em' }}>{template.title}</div>
-                         <div style={{ fontSize: '12px', color: 'var(--auth-text-muted)', lineHeight: '1.5', fontWeight: 400 }}>{template.description}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {playbooks.length > 0 && (
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px' }}>
-                      <span style={{ fontSize: '10px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.25em', textTransform: 'uppercase' }}>Recent Derivations</span>
-                      <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to right, var(--auth-border), transparent)' }}></div>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
-                      {playbooks.slice(0, 4).map(pb => (
-                        <button
-                          key={pb.id}
-                          onClick={() => setSelectedPlaybook(pb)}
-                          style={cardStyle}
-                          onMouseEnter={e => {
-                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)';
-                            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                          }}
-                          onMouseLeave={e => {
-                            e.currentTarget.style.borderColor = 'var(--auth-border)';
-                            e.currentTarget.style.backgroundColor = 'var(--auth-input-bg)';
-                            e.currentTarget.style.transform = 'translateY(0)';
-                          }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                             <Clock size={11} color="var(--auth-text-muted)" style={{ opacity: 0.6 }} />
-                             <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.05em' }}>{new Date(pb.created_at).toLocaleDateString()}</span>
-                          </div>
-                          <div style={{ fontSize: '15px', fontWeight: 600, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pb.name}</div>
-                          <div style={{ 
-                            fontSize: '9px', 
-                            padding: '3px 8px', 
-                            borderRadius: '2px', 
-                            backgroundColor: 'rgba(255,255,255,0.05)', 
-                            color: 'rgba(255,255,255,0.6)',
-                            fontWeight: 900,
-                            width: 'fit-content',
-                            letterSpacing: '0.15em',
-                            border: '1px solid var(--auth-border)'
-                          }}>
-                            {pb.market}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
-        </div>
+        )}
       </div>
       
       <style dangerouslySetInnerHTML={{ __html: `
