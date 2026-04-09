@@ -4,6 +4,7 @@ import { MarketOption, Playbook } from '../domain/playbook/types';
 import { sessionApi } from '../domain/session/api';
 import { Session, SessionStatus } from '../domain/session/types';
 import { useUserSession } from './UserSessionContext';
+import { CONFIG } from '../config/constants';
 
 interface PlaybookContextType {
   playbookInput: string;
@@ -25,6 +26,7 @@ interface PlaybookContextType {
   activatePlaybook: (pb: Playbook) => Promise<void>;
   activeSession: Session | null;
   isStreaming: boolean;
+  streamingMessage: string;
   isStartingStream: boolean;
   isStoppingStream: boolean;
   startStream: (playbookId: string) => Promise<Session | undefined>;
@@ -36,7 +38,27 @@ interface PlaybookContextType {
 
 const PlaybookContext = createContext<PlaybookContextType | undefined>(undefined);
 
-const buildSamplePlaybook = (market: string) => `I’m using ${market.split('/')[0]}.
+export function PlaybookProvider({ children }: { children: ReactNode }) {
+  const { currentUser } = useUserSession();
+  const [selectedMarket, setSelectedMarket] = useState('');
+  const [availableMarkets, setAvailableMarkets] = useState<MarketOption[]>([]);
+  const [isLoadingMarkets, setIsLoadingMarkets] = useState(false);
+  const [playbookInput, setPlaybookInput] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  
+  const [playbooks, setPlaybooks] = useState<Playbook[]>([]);
+  const [selectedPlaybook, setSelectedPlaybook] = useState<Playbook | null>(null);
+  const [streamingMessage, setStreamingMessage] = useState('');
+  const [rules, setRules] = useState<any[]>([]); 
+  const [isLoadingPlaybooks, setIsLoadingPlaybooks] = useState(false);
+
+  const [activeSession, setActiveSession] = useState<Session | null>(null);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [isStartingStream, setIsStartingStream] = useState(false);
+  const [isStoppingStream, setIsStoppingStream] = useState(false);
+
+  const buildSamplePlaybook = useCallback((market: string) => `I’m using ${market.split('/')[0]}.
 1. Setup Logic (Deterministic Inputs)
 
 Derived State:
@@ -99,21 +121,76 @@ Soft Guardrails:
 
 Cooldown:
 	•	10 minutes after stop loss
-	•	30 minutes after 2 consecutive losses`;
+	•	30 minutes after 2 consecutive losses`, []);
 
-export function PlaybookProvider({ children }: { children: ReactNode }) {
-  const { currentUser } = useUserSession();
-  const [selectedMarket, setSelectedMarket] = useState('');
-  const [availableMarkets, setAvailableMarkets] = useState<MarketOption[]>([]);
-  const [isLoadingMarkets, setIsLoadingMarkets] = useState(false);
-  const [playbookInput, setPlaybookInput] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-  
-  const [playbooks, setPlaybooks] = useState<Playbook[]>([]);
-  const [selectedPlaybook, setSelectedPlaybook] = useState<Playbook | null>(null);
-  const [rules, setRules] = useState<any[]>([]); // Added rule state
-  const [isLoadingPlaybooks, setIsLoadingPlaybooks] = useState(false);
+  const fetchPlaybooks = useCallback(async () => {
+    if (!currentUser) {
+      setPlaybooks([]);
+      setSelectedPlaybook(null);
+      setRules([]);
+      setIsLoadingPlaybooks(false);
+      return;
+    }
+
+    setIsLoadingPlaybooks(true);
+    try {
+      const data = await playbookApi.listUserPlaybooks(currentUser.id);
+      const sorted = [...data].sort((a, b) => {
+        if (a.is_active) return -1;
+        if (b.is_active) return 1;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+
+      const filtered = sorted.filter(pb => pb.generation_status !== 'INITIALIZING');
+      setPlaybooks(filtered);
+      
+      const activeInDb = sorted.find(pb => pb.is_active);
+      setSelectedPlaybook(prev => prev ?? activeInDb ?? null);
+    } catch (error: unknown) {
+      console.error('Failed to fetch playbooks:', error);
+      setNotification({
+        type: 'error',
+        message: `Failed to load playbooks: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      });
+    } finally {
+      setIsLoadingPlaybooks(false);
+    }
+  }, [currentUser]);
+
+  const handleStream = useCallback(async (playbookId: string) => {
+    setStreamingMessage('');
+    try {
+      const response = await fetch(`${CONFIG.BACKEND_BASE_URL}/playbooks/${playbookId}/stream`);
+      
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        console.error('Stream start failed:', errData);
+        return;
+      }
+
+      if (!response.body) return;
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        accumulated += chunk;
+        setStreamingMessage(accumulated);
+      }
+      
+      await fetchPlaybooks();
+      const updated = await playbookApi.getPlaybook(playbookId);
+      setSelectedPlaybook(updated);
+    } catch (e) {
+      console.error('Streaming failed:', e);
+    } finally {
+      setStreamingMessage('');
+    }
+  }, [fetchPlaybooks]);
 
   useEffect(() => {
     let cancelled = false;
@@ -158,9 +235,8 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
         !current.trim() || availableMarkets.some((market) => current === buildSamplePlaybook(market.symbol));
       return matchesExistingTemplate ? nextTemplate : current;
     });
-  }, [selectedMarket, availableMarkets]);
+  }, [selectedMarket, availableMarkets, buildSamplePlaybook]);
 
-  // Polling logic for pending playbooks
   useEffect(() => {
     let pollInterval: number | null = null;
 
@@ -170,8 +246,6 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // If we don't even have the field in our domain yet (legacy backend), 
-      // we should eventually stop polling to avoid infinite loops.
       if (selectedPlaybook.generation_status === undefined) {
           if (pollInterval) clearInterval(pollInterval);
           return;
@@ -184,8 +258,6 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
 
       try {
         const updated = await playbookApi.getPlaybook(selectedPlaybook.id);
-        
-        // Resilience: If backend hasn't deployed the field yet, but we are in a pending state locally
         const status = updated.generation_status || 'COMPLETED'; 
 
         if (status === 'COMPLETED' || status === 'FAILED' || status === 'INCOMPLETE' || status === 'INITIALIZING') {
@@ -211,9 +283,8 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     return () => {
       if (pollInterval) clearInterval(pollInterval);
     };
-  }, [selectedPlaybook]);
+  }, [selectedPlaybook, fetchPlaybooks]);
 
-  // Load rules when selected playbook changes and is already completed
   useEffect(() => {
     if (selectedPlaybook && selectedPlaybook.generation_status === 'COMPLETED') {
       playbookApi.listPlaybookRules(selectedPlaybook.id)
@@ -223,51 +294,6 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       setRules([]);
     }
   }, [selectedPlaybook]);
-
-  const [activeSession, setActiveSession] = useState<Session | null>(null);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [isStartingStream, setIsStartingStream] = useState(false);
-  const [isStoppingStream, setIsStoppingStream] = useState(false);
-
-  // Fetch Playbooks
-  const fetchPlaybooks = useCallback(async () => {
-    if (!currentUser) {
-      setPlaybooks([]);
-      setSelectedPlaybook(null);
-      setRules([]);
-      setIsLoadingPlaybooks(false);
-      return;
-    }
-
-    setIsLoadingPlaybooks(true);
-    try {
-      const data = await playbookApi.listUserPlaybooks(currentUser.id);
-      
-      // Sort: Active first, then by date descending
-      const sorted = [...data].sort((a, b) => {
-        if (a.is_active) return -1;
-        if (b.is_active) return 1;
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      });
-
-      console.log(`Fetched and sorted ${sorted.length} playbooks.`);
-      // Filter out playbooks that are only in the INITIALIZING (greeting) state
-      const filtered = sorted.filter(pb => pb.generation_status !== 'INITIALIZING');
-      setPlaybooks(filtered);
-      
-      // Only auto-select the one active in the DB if we don't have a selection yet
-      const activeInDb = sorted.find(pb => pb.is_active);
-      setSelectedPlaybook(prev => prev ?? activeInDb ?? null);
-    } catch (error: unknown) {
-      console.error('Failed to fetch playbooks:', error);
-      setNotification({
-        type: 'error',
-        message: `Failed to load playbooks: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      });
-    } finally {
-      setIsLoadingPlaybooks(false);
-    }
-  }, [currentUser]);
 
   useEffect(() => {
     void fetchPlaybooks();
@@ -286,7 +312,6 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     setIsStartingStream(true);
     setNotification(null);
     try {
-      // Setup backend session and UI
       const session = await sessionApi.startSession({
         user_id: currentUser.id,
         playbook_id: playbookId
@@ -294,7 +319,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       
       setActiveSession(session);
       setIsStreaming(true);
-      setNotification({ type: 'success', message: 'New session started. Previous session (if any) has been finalized.' });
+      setNotification({ type: 'success', message: 'New session started.' });
       return session;
     } catch (error: unknown) {
       console.error('Failed to start session:', error);
@@ -308,12 +333,10 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     if (!activeSession) return;
     setIsStoppingStream(true);
     try {
-      // Update session status in the DB
       await sessionApi.endSession(activeSession.id, { status: SessionStatus.COMPLETED });
-      
       setActiveSession(null);
       setIsStreaming(false);
-      setNotification({ type: 'success', message: 'Session completed and saved.' });
+      setNotification({ type: 'success', message: 'Session completed.' });
     } catch (error: unknown) {
       setNotification({ type: 'error', message: `Failed to stop session: ${error instanceof Error ? error.message : 'Unknown error'}` });
     } finally {
@@ -339,11 +362,8 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
 
         await fetchPlaybooks();
         setSelectedPlaybook(playbook);
-        
-        setPlaybookInput(buildSamplePlaybook(selectedMarket));
-        setNotification({ type: 'success', message: 'Playbook successfully created and activated!' });
-        
-        setTimeout(() => setNotification(null), 5000);
+        setPlaybookInput('');
+        void handleStream(playbook.id);
         return playbook;
     } catch (error: unknown) {
         console.error('Failed to create playbook:', error);
@@ -362,6 +382,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
         const updated = await playbookApi.chatPlaybook(selectedPlaybook.id, message);
         setSelectedPlaybook(updated);
         await fetchPlaybooks();
+        void handleStream(selectedPlaybook.id);
         return updated;
     } catch (error: unknown) {
         console.error('Failed to send message:', error);
@@ -373,18 +394,13 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
 
   const activatePlaybook = async (pb: Playbook) => {
     try {
-      // The backend now handles atomic deactivation of other playbooks 
-      // when a new one is set to active. We only need one single call.
       await playbookApi.updatePlaybook(pb.id, { is_active: true });
-      
-      // Update local state and refresh the library list to sync with backend
       setSelectedPlaybook(pb);
       await fetchPlaybooks();
-      
-      setNotification({ type: 'success', message: `Playbook "${pb.name}" is now the active playbook.` });
+      setNotification({ type: 'success', message: `Playbook "${pb.name}" is now active.` });
     } catch (error: unknown) {
       console.error('Failed to activate playbook:', error);
-      setNotification({ type: 'error', message: `Failed to activate playbook: ${error instanceof Error ? error.message : 'Unknown error'}` });
+      setNotification({ type: 'error', message: `Failed to activate: ${error instanceof Error ? error.message : 'Unknown error'}` });
     }
   };
 
@@ -393,9 +409,9 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       await playbookApi.deletePlaybook(id);
       if (selectedPlaybook?.id === id) setSelectedPlaybook(null);
       await fetchPlaybooks();
-      setNotification({ type: 'success', message: 'Playbook deleted successfully.' });
+      setNotification({ type: 'success', message: 'Playbook deleted.' });
     } catch (error: unknown) {
-      console.error('Failed to delet playbook:', error);
+      console.error('Failed to delete playbook:', error);
       setNotification({ type: 'error', message: `Failed to delete: ${error instanceof Error ? error.message : 'Unknown error'}` });
     }
   };
@@ -407,7 +423,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
       await playbookApi.deleteAllPlaybooks(currentUser.id);
       setSelectedPlaybook(null);
       await fetchPlaybooks();
-      setNotification({ type: 'success', message: 'All playbooks have been deleted.' });
+      setNotification({ type: 'success', message: 'All playbooks deleted.' });
     } catch (error: unknown) {
       console.error('Failed to delete all playbooks:', error);
       setNotification({ type: 'error', message: `Failed to delete: ${error instanceof Error ? error.message : 'Unknown error'}` });
@@ -421,7 +437,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
     isSubmitting, notification, setNotification,
     createPlaybookFromNL, chatWithSystem, playbooks, selectedPlaybook, setSelectedPlaybook,
     isLoadingPlaybooks, fetchPlaybooks, activatePlaybook,
-    activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream,
+    activeSession, isStreaming, streamingMessage, isStartingStream, isStoppingStream, startStream, stopStream,
     rules,
     deletePlaybook,
     deleteAllPlaybooks

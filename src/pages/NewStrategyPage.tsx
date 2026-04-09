@@ -59,7 +59,8 @@ export function NewStrategyPage() {
     selectedPlaybook,
     setSelectedPlaybook,
     playbooks,
-    isSubmitting
+    isSubmitting,
+    streamingMessage
   } = usePlaybookContext();
 
   const navigate = useNavigate();
@@ -79,9 +80,15 @@ export function NewStrategyPage() {
     prevStatusRef.current = selectedPlaybook?.generation_status;
   }, [selectedPlaybook?.generation_status, navigate]);
 
+  // Navigation Reset: Always show Hero View when navigating to New Strategy
+  useEffect(() => {
+    setSelectedPlaybook(null);
+    setPlaybookInput('');
+  }, []);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [selectedPlaybook?.chat_history, isSubmitting]);
+  }, [selectedPlaybook?.chat_history, isSubmitting, streamingMessage]);
 
   const handleSubmit = async () => {
     if (!playbookInput.trim() || isSubmitting) return;
@@ -312,8 +319,54 @@ export function NewStrategyPage() {
                   </div>
                 );
               })}
+
+              {/* Streaming Content */}
+              {streamingMessage && (
+                <div style={{ 
+                  display: 'flex', 
+                  gap: '24px',
+                  alignItems: 'flex-start',
+                  animation: 'fadeIn 0.3s ease-out'
+                }}>
+                  <div style={{ 
+                    width: '32px', 
+                    height: '32px', 
+                    borderRadius: '4px', 
+                    backgroundColor: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    marginTop: '4px'
+                  }}>
+                    <Sparkles size={16} color="black" />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', marginBottom: '12px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                      Transmitting Signal...
+                    </div>
+                    <div style={{ 
+                        fontSize: '15px',
+                        color: '#ffffff',
+                        lineHeight: '1.7',
+                        whiteSpace: 'pre-wrap'
+                    }}>
+                        {streamingMessage}
+                        <span style={{ 
+                          display: 'inline-block', 
+                          width: '8px', 
+                          height: '16px', 
+                          backgroundColor: '#00ff88', 
+                          marginLeft: '4px',
+                          verticalAlign: 'middle',
+                          animation: 'blink 0.8s infinite'
+                        }}></span>
+                    </div>
+                  </div>
+                </div>
+              )}
               
-              {isSubmitting && (
+              {isSubmitting && !streamingMessage && (
                  <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
                    <div style={{ 
                       width: '32px', 
@@ -329,9 +382,33 @@ export function NewStrategyPage() {
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', marginBottom: '12px', letterSpacing: '0.2em' }}>SYSTEM_CORE</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div className="thinking-dots" style={{ color: 'var(--auth-text-muted)', fontSize: '20px' }}>
-                          <span>.</span><span>.</span><span>.</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{ fontSize: '14px', color: '#ffffff', fontWeight: 500 }}>
+                            {selectedPlaybook?.generation_status === 'PENDING' ? 'Compiling deterministic logic...' : 'Core thinking...'}
+                          </span>
+                          <div className="thinking-dots" style={{ color: 'var(--auth-text-muted)', fontSize: '20px', lineHeight: 1 }}>
+                            <span>.</span><span>.</span><span>.</span>
+                          </div>
+                        </div>
+                        {/* Core logic pulse indicator */}
+                        <div style={{ 
+                          width: '100%', 
+                          height: '2px', 
+                          backgroundColor: 'rgba(255,255,255,0.05)', 
+                          borderRadius: '1px',
+                          overflow: 'hidden',
+                          position: 'relative'
+                        }}>
+                          <div style={{ 
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            height: '100%',
+                            width: '40%',
+                            background: 'linear-gradient(to right, transparent, #00ff88, transparent)',
+                            animation: 'logicPulse 1.5s infinite linear'
+                          }}></div>
                         </div>
                       </div>
                     </div>
@@ -702,6 +779,10 @@ export function NewStrategyPage() {
           0% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.5; transform: scale(1.2); }
           100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes logicPulse {
+          0% { left: -40%; }
+          100% { left: 100%; }
         }
         textarea::-webkit-scrollbar {
           width: 4px;
