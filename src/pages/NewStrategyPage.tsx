@@ -67,7 +67,8 @@ export function NewStrategyPage() {
     currentDraft,
     finalizePlaybook,
     resetDraft,
-    deletePlaybook
+    deletePlaybook,
+    setIsSubmitting
   } = usePlaybookContext();
 
   const navigate = useNavigate();
@@ -78,6 +79,8 @@ export function NewStrategyPage() {
   const startNewChat = () => {
     setSelectedPlaybook(null);
     setPlaybookInput('');
+    setIsSubmitting(false);
+    resetDraft();
   };
 
   useEffect(() => {
@@ -87,10 +90,13 @@ export function NewStrategyPage() {
     prevStatusRef.current = selectedPlaybook?.generation_status;
   }, [selectedPlaybook?.generation_status, navigate]);
 
-  // Navigation Reset: Always show Hero View when navigating to New Strategy
+  // Navigation Reset: Always show Hero View when navigating to New Strategy initially
   useEffect(() => {
     setSelectedPlaybook(null);
     setPlaybookInput('');
+    resetDraft();
+    setIsSubmitting(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

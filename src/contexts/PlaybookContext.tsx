@@ -34,6 +34,7 @@ interface PlaybookContextType {
   rules: any[]; 
   deletePlaybook: (id: string) => Promise<void>;
   deleteAllPlaybooks: () => Promise<void>;
+  setIsSubmitting: (val: boolean) => void;
   
   // Draft / Stateless Management
   draftChatHistory: any[];
@@ -355,6 +356,7 @@ Cooldown:
     setDraftChatHistory([]);
     setCurrentDraft(null);
     setStreamingMessage('');
+    setIsSubmitting(false);
   }, []);
 
   const startStream = async (playbookId: string) => {
@@ -560,6 +562,7 @@ Cooldown:
     rules,
     deletePlaybook,
     deleteAllPlaybooks,
+    setIsSubmitting,
     draftChatHistory,
     currentDraft,
     setDraftChatHistory,
