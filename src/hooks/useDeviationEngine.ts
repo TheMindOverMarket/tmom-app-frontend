@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { CONFIG } from '../config/constants';
 
 
 // ─── Types ───────────────────────────────────────────────────────────
@@ -59,9 +60,8 @@ export interface DeviationResult {
 
 // ─── Hook ────────────────────────────────────────────────────────────
 
-// NOTE: Hardcoded to localhost:8100 temporarily. Will need config update in production.
-const DEVIATION_ENGINE_API = 'http://localhost:8100';
-const DEVIATION_ENGINE_WS = 'ws://localhost:8100/ws/deviation-output';
+const DEVIATION_ENGINE_API = CONFIG.DEVIATION_ENGINE_BASE_URL;
+const DEVIATION_ENGINE_WS = CONFIG.DEVIATION_ENGINE_WS_URL;
 
 export function useDeviationEngine(sessionId: string | null | undefined) {
   const [summary, setSummary] = useState<DeviationSummary | null>(null);
@@ -72,7 +72,7 @@ export function useDeviationEngine(sessionId: string | null | undefined) {
   const wsRef = useRef<WebSocket | null>(null);
 
   const fetchSummary = useCallback(async () => {
-    if (!sessionId) return;
+    if (!sessionId || !DEVIATION_ENGINE_API) return;
     try {
       const res = await fetch(`${DEVIATION_ENGINE_API}/deviations/session/${sessionId}/summary`);
       if (res.ok) {
@@ -86,7 +86,7 @@ export function useDeviationEngine(sessionId: string | null | undefined) {
   }, [sessionId]);
 
   const fetchRecords = useCallback(async () => {
-    if (!sessionId) return;
+    if (!sessionId || !DEVIATION_ENGINE_API) return;
     try {
       const res = await fetch(`${DEVIATION_ENGINE_API}/deviations/session/${sessionId}/records`);
       if (res.ok) {
@@ -123,6 +123,11 @@ export function useDeviationEngine(sessionId: string | null | undefined) {
         wsRef.current.close();
         wsRef.current = null;
       }
+      return;
+    }
+
+    if (!DEVIATION_ENGINE_API || !DEVIATION_ENGINE_WS) {
+      setError('Deviation engine is not configured. Set VITE_DEVIATION_ENGINE_BASE_URL in the frontend environment.');
       return;
     }
 
