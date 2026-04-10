@@ -6,15 +6,11 @@ export interface OrderCreate {
   side: Side;
   type: 'market' | 'limit';
   session_id?: string;
+  time_in_force?: 'gtc' | 'day' | 'ioc' | 'fok';
 }
 
-export interface Order {
-  id: string;
-  client_order_id: string;
+export interface TradeOrderResponse {
   status: string;
-  symbol: string;
-  qty: string;
-  side: Side;
-  filled_avg_price?: string;
-  created_at: string;
+  order_id?: string;
+  error?: string;
 }

@@ -1,5 +1,5 @@
 import { CONFIG } from '../../config/constants';
-import { Order, OrderCreate } from './types';
+import { OrderCreate, TradeOrderResponse } from './types';
 
 const API_BASE = CONFIG.BACKEND_BASE_URL;
 
@@ -11,11 +11,17 @@ export const tradingApi = {
    * If session_id is provided, the backend can automatically associate this trade 
    * with the active supervision session for replay auditing.
    */
-  placeOrder: async (data: OrderCreate): Promise<Order> => {
-    const response = await fetch(`${API_BASE}/orders/`, {
+  placeOrder: async (data: OrderCreate): Promise<TradeOrderResponse> => {
+    const response = await fetch(`${API_BASE}/trade`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        symbol: data.symbol,
+        qty: String(data.qty),
+        side: data.side.toLowerCase(),
+        type: data.type,
+        time_in_force: data.time_in_force ?? 'gtc',
+      }),
     });
 
     if (!response.ok) {
