@@ -27,6 +27,7 @@ export default defineConfig({
       '/api/engine': {
         target: 'https://rule-engine-rcg9.onrender.com',
         changeOrigin: true,
+        ws: true,
         rewrite: (path) => path.replace(/^\/api\/engine/, ''),
       },
     },

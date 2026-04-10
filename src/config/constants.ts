@@ -19,11 +19,18 @@ const deviationEngineWsUrl = normalizeBaseUrl(
       ? `${toWebSocketBaseUrl(deviationEngineBaseUrl)}/ws/deviation-output`
       : ''),
 );
+const ruleEngineBaseUrl = normalizeBaseUrl(import.meta.env.VITE_RULE_ENGINE_BASE_URL);
+const ruleEngineWsUrl = normalizeBaseUrl(
+  import.meta.env.VITE_RULE_ENGINE_WS_URL ??
+    (ruleEngineBaseUrl
+      ? `${toWebSocketBaseUrl(ruleEngineBaseUrl)}/ws/engine-output`
+      : 'wss://rule-engine-rcg9.onrender.com/ws/engine-output'),
+);
 
 export const CONFIG = {
   BACKEND_BASE_URL: '/api/backend',
   ENGINE_BASE_URL: '/api/engine',
-  WS_ENGINE_URL: 'wss://rule-engine-rcg9.onrender.com/ws/engine-output',
+  WS_ENGINE_URL: ruleEngineWsUrl,
   DEVIATION_ENGINE_BASE_URL: deviationEngineBaseUrl,
   DEVIATION_ENGINE_WS_URL: deviationEngineWsUrl,
 };
