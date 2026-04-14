@@ -116,7 +116,7 @@ export function PlaybooksPage() {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--auth-accent)' }} />
-                <span style={labelStyle}>Logic Inspection Mode</span>
+                <span style={labelStyle}>Playbook Inspection Mode</span>
               </div>
               <div style={{ fontSize: '28px', fontFamily: "'Cormorant Garamond', serif", color: '#ffffff', display: 'flex', alignItems: 'center', gap: '16px' }}>
                 {selectedPlaybook.name}
@@ -197,7 +197,7 @@ export function PlaybooksPage() {
           <div style={{ flex: '0 0 380px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
              <div style={{ ...glassStyle, flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--auth-border)' }}>
-                  <span style={labelStyle}>Source Specification</span>
+                  <span style={labelStyle}>Playbook Source</span>
                   <button
                     onClick={() => handleCopy(selectedPlaybook.original_nl_input)}
                     style={{
@@ -237,7 +237,7 @@ export function PlaybooksPage() {
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ ...glassStyle, padding: '24px', flex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                 <span style={labelStyle}>Deterministic Execution Graphs</span>
+                 <span style={labelStyle}>Playbook Structure</span>
                  <div style={{ height: '1px', flex: 1, backgroundColor: 'var(--auth-border)' }} />
               </div>
 
@@ -252,7 +252,7 @@ export function PlaybooksPage() {
                       animation: 'spin 1.5s linear infinite',
                       marginBottom: '20px' 
                     }} />
-                    <div style={{ fontSize: '18px', fontFamily: "'Cormorant Garamond', serif" }}>Compiling Logic Primitives...</div>
+                    <div style={{ fontSize: '18px', fontFamily: "'Cormorant Garamond', serif" }}>Compiling Playbook...</div>
                     <div style={{ fontSize: '11px', color: 'var(--auth-text-muted)', marginTop: '8px', fontFamily: "'Space Mono', monospace" }}>TRANSLATING NATURAL LANGUAGE TO EXECUTION NODES</div>
                   </div>
                 ) : selectedPlaybook.generation_status === 'FAILED' ? (
@@ -266,7 +266,7 @@ export function PlaybooksPage() {
                   <div style={{ flex: 1, overflowY: 'auto', paddingRight: '8px' }}>
                     {rules.length === 0 ? (
                        <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--auth-text-muted)', fontSize: '12px', fontStyle: 'italic', border: '1px dashed var(--auth-border)', borderRadius: '4px' }}>
-                          NO EXTRACTABLE RULES DETECTED IN THIS SPECIFICATION
+                          NO PLAYBOOK RULES DETECTED IN THIS VERSION
                        </div>
                     ) : (
                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -286,12 +286,12 @@ export function PlaybooksPage() {
           onClose={() => setIsConfirmOpen(false)}
           onConfirm={handleConfirmDelete}
           isDark={true}
-          title={confirmConfig.id === 'all' ? 'Purge System Library' : 'Delete Logic Specification'}
+          title={confirmConfig.id === 'all' ? 'Purge Playbook Library' : 'Delete Playbook'}
           message={confirmConfig.id === 'all' 
-            ? 'Are you certain you want to purge the entire library? Metadata and logic graphs will be permanently erased.' 
-            : `Are you certain you want to delete "${confirmConfig.name}"? This will terminate the associated logic graph permanently.`
+            ? 'Are you certain you want to purge the entire library? Playbook metadata and structure will be permanently erased.' 
+            : `Are you certain you want to delete "${confirmConfig.name}"? This playbook will be permanently removed.`
           }
-          confirmText={confirmConfig.id === 'all' ? 'Purge All' : 'Delete Specification'}
+          confirmText={confirmConfig.id === 'all' ? 'Purge All' : 'Delete Playbook'}
         />
 
         <style dangerouslySetInnerHTML={{ __html: `
@@ -487,12 +487,12 @@ export function PlaybooksPage() {
         onClose={() => setIsConfirmOpen(false)}
         onConfirm={handleConfirmDelete}
         isDark={true}
-        title={confirmConfig.id === 'all' ? 'Purge System Library' : 'Delete Logic Specification'}
+        title={confirmConfig.id === 'all' ? 'Purge Playbook Library' : 'Delete Playbook'}
         message={confirmConfig.id === 'all' 
-          ? 'Are you certain you want to purge the entire library? Metadata and logic graphs will be permanently erased.' 
-          : `Are you certain you want to delete "${confirmConfig.name}"? This will terminate the associated logic graph permanently.`
+          ? 'Are you certain you want to purge the entire library? Playbook metadata and structure will be permanently erased.' 
+          : `Are you certain you want to delete "${confirmConfig.name}"? This playbook will be permanently removed.`
         }
-        confirmText={confirmConfig.id === 'all' ? 'Purge All' : 'Delete Specification'}
+        confirmText={confirmConfig.id === 'all' ? 'Purge All' : 'Delete Playbook'}
       />
     </div>
   );

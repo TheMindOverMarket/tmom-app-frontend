@@ -195,7 +195,7 @@ export function NewStrategyPage() {
             onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
           >
             <Plus size={14} strokeWidth={3} />
-            Initialize Logic
+            New Playbook
           </button>
 
           <div style={{ marginTop: '32px', flex: 1, overflowY: 'auto' }}>
@@ -448,7 +448,7 @@ export function NewStrategyPage() {
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           <span style={{ fontSize: '14px', color: '#ffffff', fontWeight: 500 }}>
-                            {selectedPlaybook?.generation_status === 'PENDING' ? 'Compiling deterministic logic...' : 'Core thinking...'}
+                            {selectedPlaybook?.generation_status === 'PENDING' ? 'Compiling playbook...' : 'Core thinking...'}
                           </span>
                           <div className="thinking-dots" style={{ color: 'var(--auth-text-muted)', fontSize: '20px', lineHeight: 1 }}>
                             <span>.</span><span>.</span><span>.</span>
@@ -828,7 +828,7 @@ export function NewStrategyPage() {
                         </span>
                       </button>
                       <p style={{ fontSize: '9px', color: 'var(--auth-text-muted)', textAlign: 'center', marginTop: '12px', lineHeight: '1.4' }}>
-                        Deployment will finalize the logic and move it to your historical archives.
+                        Deployment will finalize the playbook and move it to your historical archives.
                       </p>
                     </div>
                   </>

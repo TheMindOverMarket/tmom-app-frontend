@@ -436,7 +436,7 @@ Cooldown:
     try {
         let finalMessage = message;
         if (draftChatHistory.length === 0 && selectedMarket && !selectedPlaybook) {
-            finalMessage = `I want to trade ${selectedMarket}.\n\nMy strategy logic:\n${message}`;
+            finalMessage = `I want to trade ${selectedMarket}.\n\nMy playbook:\n${message}`;
         }
         const history = [...draftChatHistory, { role: 'user', content: finalMessage }];
         setDraftChatHistory(history);
@@ -468,7 +468,7 @@ Cooldown:
                 setStreamingMessage(accumulated);
             }
 
-            // Once stream ends, get the full parsed preview logic
+            // Once stream ends, get the full parsed playbook preview
             const preview = await fetch(`${CONFIG.BACKEND_BASE_URL}/playbooks/preview`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
