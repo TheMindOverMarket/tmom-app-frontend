@@ -747,66 +747,96 @@ export function NewStrategyPage() {
                 Strategy Progression
               </div>
               
-              {[
-                { label: 'Analyzing Intent', status: chatHistory.length > 0 ? 'COMPLETED' : 'PENDING' },
-                { label: 'Logic Extraction', status: currentDraft ? 'COMPLETED' : 'PENDING' },
-                { label: 'Indicator Mapping', status: (currentDraft?.context_skeleton?.ta_lib_metrics?.length > 0) ? 'COMPLETED' : 'PENDING' },
-                { label: 'Structural Validation', status: currentDraft?.status === 'ok' ? 'COMPLETED' : 'PENDING' }
-              ].map((step, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ 
-                    width: '16px', 
-                    height: '16px', 
-                    borderRadius: '50%', 
-                    border: `1px solid ${step.status === 'COMPLETED' ? '#00ff88' : 'var(--auth-border)'}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: step.status === 'COMPLETED' ? 'rgba(0, 255, 136, 0.1)' : 'transparent'
-                  }}>
-                    {step.status === 'COMPLETED' ? <CheckCircle2 size={10} color="#00ff88" /> : <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.1)' }} />}
-                  </div>
-                  <span style={{ 
-                    fontSize: '11px', 
-                    fontWeight: 600, 
-                    color: step.status === 'COMPLETED' ? '#ffffff' : 'var(--auth-text-muted)',
-                    letterSpacing: '0.05em'
-                  }}>
-                    {step.label}
-                  </span>
-                </div>
-              ))}
+              {(() => {
+                const progressionSteps = [
+                  { label: 'Analyzing Intent', status: chatHistory.length > 0 ? 'COMPLETED' : 'PENDING' },
+                  { label: 'Logic Extraction', status: currentDraft ? 'COMPLETED' : 'PENDING' },
+                  { label: 'Indicator Mapping', status: (currentDraft?.context_skeleton?.ta_lib_metrics?.length > 0) ? 'COMPLETED' : 'PENDING' },
+                  { label: 'Structural Validation', status: currentDraft?.status === 'ok' ? 'COMPLETED' : 'PENDING' }
+                ];
+                const completedStages = progressionSteps.filter(s => s.status === 'COMPLETED').length;
+                const progressPercentage = (completedStages / progressionSteps.length) * 100;
 
-              {currentDraft?.status === 'ok' && (
-                <div style={{ marginTop: '12px', paddingTop: '20px', borderTop: '1px solid var(--auth-border)' }}>
-                  <button
-                    onClick={() => finalizePlaybook()}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      borderRadius: '4px',
-                      backgroundColor: '#00ff88',
-                      color: 'black',
-                      border: 'none',
-                      fontSize: '10px',
-                      fontWeight: 900,
-                      letterSpacing: '0.15em',
-                      textTransform: 'uppercase',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      boxShadow: '0 10px 30px rgba(0, 255, 136, 0.2)'
-                    }}
-                  >
-                    Commit & Deploy
-                  </button>
-                  <p style={{ fontSize: '9px', color: 'var(--auth-text-muted)', textAlign: 'center', marginTop: '12px', lineHeight: '1.4' }}>
-                    Deployment will finalize the logic and move it to your historical archives.
-                  </p>
-                </div>
-              )}
+                return (
+                  <>
+                    {progressionSteps.map((step, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ 
+                          width: '16px', 
+                          height: '16px', 
+                          borderRadius: '50%', 
+                          border: `1px solid ${step.status === 'COMPLETED' ? '#00ff88' : 'var(--auth-border)'}`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: step.status === 'COMPLETED' ? 'rgba(0, 255, 136, 0.1)' : 'transparent'
+                        }}>
+                          {step.status === 'COMPLETED' ? <CheckCircle2 size={10} color="#00ff88" /> : <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.1)' }} />}
+                        </div>
+                        <span style={{ 
+                          fontSize: '11px', 
+                          fontWeight: 600, 
+                          color: step.status === 'COMPLETED' ? '#ffffff' : 'var(--auth-text-muted)',
+                          letterSpacing: '0.05em'
+                        }}>
+                          {step.label}
+                        </span>
+                      </div>
+                    ))}
+
+                    <div style={{ marginTop: '12px', paddingTop: '20px', borderTop: '1px solid var(--auth-border)' }}>
+                      <button
+                        onClick={() => {
+                          if (progressPercentage === 100) {
+                            finalizePlaybook();
+                          }
+                        }}
+                        disabled={progressPercentage < 100}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          borderRadius: '4px',
+                          backgroundColor: progressPercentage === 100 ? '#00ff88' : 'rgba(255,255,255,0.05)',
+                          color: progressPercentage === 100 ? 'black' : 'rgba(255,255,255,0.4)',
+                          border: 'none',
+                          fontSize: '10px',
+                          fontWeight: 900,
+                          letterSpacing: '0.15em',
+                          textTransform: 'uppercase',
+                          cursor: progressPercentage === 100 ? 'pointer' : 'not-allowed',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          boxShadow: progressPercentage === 100 ? '0 10px 30px rgba(0, 255, 136, 0.2)' : 'none',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          transition: 'all 0.3s'
+                        }}
+                      >
+                        {progressPercentage < 100 && (
+                          <div style={{
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: `${progressPercentage}%`,
+                            backgroundColor: 'rgba(0, 255, 136, 0.2)',
+                            transition: 'width 0.5s ease-out'
+                          }} />
+                        )}
+                        <span style={{ zIndex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Zap size={12} color={progressPercentage === 100 ? "black" : "rgba(255,255,255,0.4)"} />
+                          Generate Playbook
+                        </span>
+                      </button>
+                      <p style={{ fontSize: '9px', color: 'var(--auth-text-muted)', textAlign: 'center', marginTop: '12px', lineHeight: '1.4' }}>
+                        Deployment will finalize the logic and move it to your historical archives.
+                      </p>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           )}
         </div>
