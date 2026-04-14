@@ -349,7 +349,7 @@ export function PlaybooksPage() {
               onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <Trash2 size={14} />
-              PURGE LIBRARY
+              DELETE ALL
             </button>
           )}
           <button 
@@ -477,7 +477,7 @@ export function PlaybooksPage() {
                       letterSpacing: '0.1em',
                       border: '1px solid rgba(0, 255, 136, 0.2)'
                     }}>
-                      ALIVE
+                      ACTIVE
                     </div>
                   )}
                 </div>
