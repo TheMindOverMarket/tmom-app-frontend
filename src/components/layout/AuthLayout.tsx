@@ -70,7 +70,7 @@ export function AuthLayout() {
               color: 'var(--auth-text-muted)',
               maxWidth: '480px'
             }}>
-              TMOM observes live trading behavior against a predefined playbook and records deviations in real time.
+              TMOM observes live trading behavior against your pre-determined playbook and records deviations in real time.
             </p>
           </div>
         </div>
