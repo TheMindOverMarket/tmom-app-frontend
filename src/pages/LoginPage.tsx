@@ -58,21 +58,6 @@ export function LoginPage() {
       borderRadius: '8px',
       overflow: 'hidden',
     }}>
-      {/* Form Header */}
-      <div style={{ 
-        padding: '20px 32px', 
-        borderBottom: '1px solid var(--auth-border)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      }}>
-        <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', color: 'var(--auth-text-muted)' }}>USER AUTHORIZATION</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--auth-accent)' }}></div>
-          <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--auth-accent)' }}>COMPLIANT</span>
-        </div>
-      </div>
-
       <div style={{ padding: '32px 32px 40px 32px' }}>
         <h2 style={{ 
           fontSize: '32px', 
