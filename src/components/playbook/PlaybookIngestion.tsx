@@ -128,7 +128,7 @@ export function PlaybookIngestion({
         overflow: 'hidden'
       }}>
         <textarea 
-          placeholder="Describe your strategy logic..."
+          placeholder="Describe your playbook logic..."
           value={value}
           onChange={(e) => onChange(e.target.value)}
           style={{ 
@@ -199,7 +199,7 @@ export function PlaybookIngestion({
               : (!hideMarket && !selectedMarket)
                 ? "Select a market before ingesting a playbook."
                 : !value.trim()
-                  ? "Input descriptive logic or an answer to enable strategy ingestion."
+                  ? "Input descriptive logic or an answer to enable playbook ingestion."
                   : "Submit logic for deterministic derivation"
           }
           style={{

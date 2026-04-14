@@ -491,7 +491,7 @@ Cooldown:
     setIsSubmitting(true);
     try {
         const playbook = await playbookApi.ingestPlaybook({
-          name: `${selectedMarket.split('/')[0]} Strategy ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+          name: `${selectedMarket.split('/')[0]} Playbook ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
           user_id: currentUser.id,
           symbol: selectedMarket,
           market: selectedMarket,
@@ -503,11 +503,11 @@ Cooldown:
         await fetchPlaybooks();
         setSelectedPlaybook(playbook);
         resetDraft();
-        setNotification({ type: 'success', message: 'Strategy deployed and archived.' });
+        setNotification({ type: 'success', message: 'Playbook deployed and archived.' });
         return playbook;
     } catch (error: unknown) {
         console.error('Failed to finalize playbook:', error);
-        setNotification({ type: 'error', message: 'Failed to deploy strategy.' });
+        setNotification({ type: 'error', message: 'Failed to deploy playbook.' });
     } finally {
         setIsSubmitting(false);
     }

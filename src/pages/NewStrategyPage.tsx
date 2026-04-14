@@ -233,7 +233,7 @@ export function NewStrategyPage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (confirm('Permanently delete this strategy archive?')) {
+                      if (confirm('Permanently delete this playbook archive?')) {
                         deletePlaybook(pb.id);
                       }
                     }}
@@ -369,7 +369,7 @@ export function NewStrategyPage() {
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', marginBottom: '12px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-                        {isUser ? 'Strategy Ingestor' : 'Core Intelligence Signal'}
+                        {isUser ? 'Playbook Ingestor' : 'Core Intelligence Signal'}
                       </div>
                       <div style={{ 
                           fontSize: '15px',
@@ -498,7 +498,7 @@ export function NewStrategyPage() {
               <div style={{ textAlign: 'center', marginBottom: '8px', animation: 'heroFade 0.8s ease-out' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '20px' }}>
                    <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to right, transparent, var(--auth-border))' }}></div>
-                   <span style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '0.3em', color: 'var(--auth-text-muted)', textTransform: 'uppercase' }}>Universal Strategy Parser</span>
+                   <span style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '0.3em', color: 'var(--auth-text-muted)', textTransform: 'uppercase' }}>Universal Playbook Parser</span>
                    <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to left, transparent, var(--auth-border))' }}></div>
                 </div>
                 <h1 style={{ 
@@ -511,7 +511,7 @@ export function NewStrategyPage() {
                   lineHeight: '1',
                   color: '#ffffff'
                 }}>
-                  AI Strategy Parser
+                  AI Playbook Parser
                 </h1>
                 <p style={{ 
                   fontSize: '15px', 
@@ -521,7 +521,7 @@ export function NewStrategyPage() {
                   letterSpacing: '0.05em',
                   fontWeight: 400
                 }}>
-                  Translate natural language into precise deterministic execution rules.
+                  Translate natural language into a precise deterministic playbook.
                 </p>
               </div>
 
@@ -627,7 +627,7 @@ export function NewStrategyPage() {
                 <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
                    <span style={{ color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace", fontSize: '20px', marginTop: '4px', opacity: 0.5 }}>&gt;</span>
                    <textarea 
-                     placeholder={isInitialTurn ? "Describe your strategy constraints..." : "Input refinement logic..."}
+                     placeholder={isInitialTurn ? "Describe your playbook constraints..." : "Input playbook refinements..."}
                      value={playbookInput}
                      onChange={(e) => setPlaybookInput(e.target.value)}
                      onKeyDown={(e) => {
@@ -725,7 +725,7 @@ export function NewStrategyPage() {
             </div>
           )}
           
-          {/* Strategy Progression Model (Fixed Right) */}
+          {/* Playbook Progression Model (Fixed Right) */}
           {!isInitialView && !selectedPlaybook && (
             <div style={{
               position: 'fixed',
@@ -744,7 +744,7 @@ export function NewStrategyPage() {
               zIndex: 30
             }}>
               <div style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-                Strategy Progression
+                Playbook Progression
               </div>
               
               {(() => {
@@ -892,7 +892,7 @@ export function NewStrategyPage() {
               }}>
                 <span style={{ color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace", fontSize: '20px', marginTop: '4px', opacity: 0.5 }}>&gt;</span>
                  <textarea 
-                   placeholder={selectedPlaybook ? "Refine this strategy..." : "Describe your strategy constraints..."}
+                   placeholder={selectedPlaybook ? "Refine this playbook..." : "Describe your playbook constraints..."}
                    value={playbookInput}
                    onChange={(e) => setPlaybookInput(e.target.value)}
                    onKeyDown={(e) => {

@@ -314,10 +314,10 @@ export function PlaybooksPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexShrink: 0 }}>
         <div>
           <h2 style={{ fontSize: '36px', fontFamily: "'Cormorant Garamond', serif", margin: '0 0 4px 0', fontWeight: 400, letterSpacing: '0.02em' }}>
-            Strategy Library
+            Playbook Library
           </h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-             <span style={labelStyle}>Active Supervison Profiles</span>
+             <span style={labelStyle}>Active Playbooks</span>
              <div style={{ width: '40px', height: '1px', backgroundColor: 'var(--auth-border)' }} />
              <span style={{ fontSize: '10px', color: 'var(--auth-accent)', fontFamily: "'Space Mono', monospace" }}>{playbooks.length} TOTAL</span>
           </div>
@@ -396,7 +396,7 @@ export function PlaybooksPage() {
         ) : playbooks.length === 0 ? (
            <div style={{ gridColumn: '1/-1', height: '300px', border: '1px dashed var(--auth-border)', borderRadius: '4px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
               <div style={labelStyle}>Library Is Empty</div>
-              <p style={{ fontSize: '13px', color: 'var(--auth-text-muted)', textAlign: 'center', maxWidth: '300px' }}>Initialize your first strategy to see it archived in the system library.</p>
+              <p style={{ fontSize: '13px', color: 'var(--auth-text-muted)', textAlign: 'center', maxWidth: '300px' }}>Create your first playbook to see it archived in the system library.</p>
            </div>
         ) : (
           playbooks.map(pb => {

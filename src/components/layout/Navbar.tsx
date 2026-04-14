@@ -5,7 +5,7 @@ import { useUserSession } from '../../contexts/UserSessionContext';
 
 const NAV_ITEMS = [
   { path: '/playbooks', label: 'PLAYBOOKS', icon: Database },
-  { path: '/new-strategy', label: 'NEW STRATEGY', icon: PlusCircle },
+  { path: '/new-strategy', label: 'NEW PLAYBOOK', icon: PlusCircle },
   { path: '/supervision', label: 'LIVE SUPERVISION', icon: Activity, requiresPlaybook: true },
   { path: '/analytics', label: 'SESSION ANALYTICS', icon: ShieldCheck },
 ];
