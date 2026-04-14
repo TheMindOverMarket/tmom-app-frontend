@@ -5,7 +5,6 @@ import { useUserSession } from '../contexts/UserSessionContext';
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'TRADER' | 'MANAGER'>('TRADER');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useUserSession();
@@ -138,25 +137,6 @@ export function LoginPage() {
               {error}
             </div>
           )}
-
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '4px' }}>
-            <button 
-              type="button"
-              onClick={() => setRole(role === 'TRADER' ? 'MANAGER' : 'TRADER')}
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: 'var(--auth-text-muted)',
-                fontSize: '10px',
-                fontWeight: 700,
-                letterSpacing: '0.1em',
-                cursor: 'pointer',
-                textDecoration: 'underline'
-              }}
-            >
-              SWITCH TO {role === 'TRADER' ? 'MANAGER' : 'TRADER'} LOGIN
-            </button>
-          </div>
 
           <p style={{ textAlign: 'center', fontSize: '13px', color: 'var(--auth-text-muted)', margin: 0 }}>
             No account?{' '}
