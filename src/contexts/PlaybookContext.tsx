@@ -450,25 +450,7 @@ Cooldown:
             return updated;
         } else {
             // New strategy draft chat (Stateless)
-            const response = await fetch(`${CONFIG.BACKEND_BASE_URL}/playbooks/stream-preview`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_history: history })
-            });
-
-            if (!response.body) throw new Error('No stream body');
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let accumulated = '';
-
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
-                accumulated += decoder.decode(value);
-                setStreamingMessage(accumulated);
-            }
-
-            // Once stream ends, get the full parsed playbook preview
+            // Get the full parsed playbook preview immediately (bypassing JSON-based stream tokenization)
             const preview = await fetch(`${CONFIG.BACKEND_BASE_URL}/playbooks/preview`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
