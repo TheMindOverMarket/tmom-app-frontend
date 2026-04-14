@@ -1,6 +1,8 @@
 import { Session, SessionStatus } from '../../domain/session/types';
 import { useNavigate } from 'react-router-dom';
 import { Layers, Trash2 } from 'lucide-react';
+import { ActionButton } from '../common/ActionButton';
+import { IconButton } from '../common/IconButton';
 
 interface SessionListProps {
   sessions: Session[];
@@ -36,23 +38,14 @@ export function SessionList({ sessions, onSelect, onDelete, selectedId, isDark =
           No historical session records found. Ingest and activate a <strong style={{ color: isDark ? '#ffffff' : 'inherit' }}>Playbook</strong> to begin automated supervision.
         </div>
         
-        <button 
+        <ActionButton
           onClick={() => navigate('/playbooks')}
-          style={{
-            padding: '10px 24px',
-            backgroundColor: isDark ? '#ffffff' : '#0f172a',
-            color: isDark ? '#000000' : 'white',
-            border: 'none',
-            borderRadius: '4px',
-            fontSize: '11px',
-            fontWeight: 800,
-            cursor: 'pointer',
-            letterSpacing: '0.05em',
-            fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
-          }}
+          variant="primary"
+          isDark={isDark}
+          size="md"
         >
-          GO TO PLAYBOOKS
-        </button>
+          Go To Playbooks
+        </ActionButton>
       </div>
     );
   }
@@ -126,29 +119,20 @@ export function SessionList({ sessions, onSelect, onDelete, selectedId, isDark =
                 {new Date(session.start_time).toLocaleDateString()}
               </div>
               {onDelete && (
-                <button
+                <IconButton
                   onClick={(e) => {
                     e.stopPropagation();
                     if (window.confirm(`Permanently delete session log "${session.id.slice(0, 8)}"?`)) {
                       onDelete(session.id);
                     }
                   }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: '2px',
-                    cursor: 'pointer',
-                    color: isDark ? 'rgba(255, 255, 255, 0.2)' : '#cbd5e1',
-                    display: 'flex',
-                    alignItems: 'center',
-                    transition: 'all 0.2s ease'
-                  }}
-                  title="Purge session from logs"
-                  onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
-                  onMouseLeave={e => e.currentTarget.style.color = isDark ? 'rgba(255, 255, 255, 0.2)' : '#cbd5e1'}
-                >
-                  <Trash2 size={12} />
-                </button>
+                  icon={Trash2}
+                  label="Delete session"
+                  variant="danger"
+                  isDark={isDark}
+                  size={12}
+                  style={{ width: '28px', height: '28px' }}
+                />
               )}
             </div>
           </div>

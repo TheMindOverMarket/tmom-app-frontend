@@ -17,6 +17,7 @@ import {
   Activity,
   FileCode
 } from 'lucide-react';
+import { IconButton } from '../components/common/IconButton';
 
 const STRATEGY_TEMPLATES = [
   {
@@ -230,26 +231,22 @@ export function NewStrategyPage() {
                     <MessageSquare size={13} style={{ flexShrink: 0, opacity: 0.6 }} />
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: selectedPlaybook?.id === pb.id ? 600 : 400 }}>{pb.name}</span>
                   </button>
-                  <button
+                  <div className="history-delete-button">
+                    <IconButton
                     onClick={(e) => {
                       e.stopPropagation();
                       if (confirm('Permanently delete this playbook archive?')) {
-                        deletePlaybook(pb.id);
+                        void deletePlaybook(pb.id);
                       }
                     }}
-                    className="delete-btn"
-                    style={{
-                      padding: '8px',
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      color: 'rgba(255, 99, 71, 0.4)',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      opacity: 0
-                    }}
-                  >
-                    <Trash2 size={13} />
-                  </button>
+                    icon={Trash2}
+                    label={`Delete ${pb.name}`}
+                    variant="danger"
+                    isDark={true}
+                    size={13}
+                    style={{ opacity: 0, width: '30px', height: '30px' }}
+                  />
+                  </div>
                 </div>
               ))}
             </div>
@@ -988,11 +985,10 @@ export function NewStrategyPage() {
           0% { left: -40%; }
           100% { left: 100%; }
         }
-        .history-item-container:hover .delete-btn {
+        .history-item-container:hover .history-delete-button button {
           opacity: 1 !important;
         }
-        .delete-btn:hover {
-          color: #ff6347 !important;
+        .history-delete-button button:hover {
           transform: scale(1.1);
         }
         textarea::-webkit-scrollbar {

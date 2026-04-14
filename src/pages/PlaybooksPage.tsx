@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { Playbook } from '../domain/playbook/types';
-import { Trash2, Copy, Check, ArrowLeft, RefreshCw, Clock } from 'lucide-react';
+import { Trash2, Copy, Check, ArrowLeft, Clock } from 'lucide-react';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { resolvePlaybookSymbol } from '../domain/playbook/utils';
 import { RuleLogicTree } from '../components/playbook/RuleLogicTree';
+import { RefreshButton } from '../components/common/RefreshButton';
+import { ActionButton } from '../components/common/ActionButton';
+import { IconButton } from '../components/common/IconButton';
 
 export function PlaybooksPage() {
   const { 
@@ -174,28 +177,18 @@ export function PlaybooksPage() {
                   DEPLOYED & ACTIVE
                 </div>
               )}
-             <button
+             <IconButton
                 onClick={() => {
                   setConfirmConfig({ id: selectedPlaybook.id, name: selectedPlaybook.name });
                   setIsConfirmOpen(true);
                 }}
-                style={{
-                  background: 'none',
-                  border: '1px solid rgba(239, 68, 68, 0.2)',
-                  backgroundColor: 'rgba(239, 68, 68, 0.05)',
-                  padding: '10px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  color: '#ef4444',
-                  display: 'flex',
-                  alignItems: 'center',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.05)'}
-              >
-                <Trash2 size={16} />
-              </button>
+                icon={Trash2}
+                label="Delete playbook"
+                variant="danger"
+                isDark={true}
+                size={16}
+                style={{ width: '40px', height: '40px' }}
+              />
           </div>
         </div>
 
@@ -325,57 +318,25 @@ export function PlaybooksPage() {
         
         <div style={{ display: 'flex', gap: '12px' }}>
           {playbooks.length > 0 && (
-            <button
+            <ActionButton
               onClick={() => {
                 setConfirmConfig({ id: 'all', name: 'all playbooks' });
                 setIsConfirmOpen(true);
               }}
-              style={{
-                background: 'none',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
-                padding: '10px 16px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                color: '#ef4444',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                fontSize: '11px',
-                fontWeight: 700,
-                fontFamily: "'Space Mono', monospace",
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.05)'}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+              variant="danger"
+              isDark={true}
+              size="md"
+              icon={<Trash2 size={14} />}
             >
-              <Trash2 size={14} />
-              DELETE ALL
-            </button>
+              Delete All
+            </ActionButton>
           )}
-          <button 
-            onClick={fetchPlaybooks}
-            disabled={isLoadingPlaybooks}
-            style={{
-              background: 'none',
-              border: '1px solid var(--auth-border)',
-              padding: '10px 16px',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '11px',
-              fontWeight: 700,
-              fontFamily: "'Space Mono', monospace",
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-          >
-            <RefreshCw size={14} className={isLoadingPlaybooks ? 'animate-spin' : ''} style={{ animation: isLoadingPlaybooks ? 'spin 1s linear infinite' : 'none' }} />
-            SYNCHRONIZE
-          </button>
+          <RefreshButton
+            onRefresh={fetchPlaybooks}
+            isLoading={isLoadingPlaybooks}
+            isDark={true}
+            label="Refresh"
+          />
         </div>
       </div>
       
@@ -501,25 +462,19 @@ export function PlaybooksPage() {
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '4px' }}>
-                   <button
+                   <IconButton
                         onClick={(e) => {
                           e.stopPropagation();
                           setConfirmConfig({ id: pb.id, name: pb.name });
                           setIsConfirmOpen(true);
                         }}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          padding: '4px',
-                          cursor: 'pointer',
-                          color: 'rgba(255, 255, 255, 0.15)',
-                          transition: 'all 0.2s ease'
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
-                        onMouseLeave={e => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.15)'}
-                      >
-                        <Trash2 size={12} />
-                   </button>
+                        icon={Trash2}
+                        label={`Delete ${pb.name}`}
+                        variant="danger"
+                        isDark={true}
+                        size={12}
+                        style={{ width: '28px', height: '28px' }}
+                      />
                 </div>
               </div>
             );

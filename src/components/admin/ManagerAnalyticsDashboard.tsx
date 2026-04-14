@@ -71,7 +71,7 @@ export function ManagerAnalyticsDashboard() {
               Consolidated audit trail for all active and completed sessions. Monitor deviation drift, process leakage, and intervenable patterns in real-time.
             </p>
           </div>
-          <RefreshButton onRefresh={() => void refresh()} isLoading={loading} label="REFRESH INTELLIGENCE" isDark={true} />
+          <RefreshButton onRefresh={() => void refresh()} isLoading={loading} isDark={true} />
         </div>
       </div>
 
