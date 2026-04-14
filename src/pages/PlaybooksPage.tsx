@@ -461,7 +461,7 @@ export function PlaybooksPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                        <Clock size={10} style={{ color: 'var(--auth-text-muted)' }} />
                        <span style={{ ...labelStyle, fontSize: '9px', letterSpacing: '0.05em' }}>
-                          Registered {new Date(pb.created_at).toLocaleDateString()}
+                          Created {new Date(pb.created_at).toLocaleDateString()}
                        </span>
                     </div>
                   </div>
