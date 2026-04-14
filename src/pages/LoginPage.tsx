@@ -61,21 +61,13 @@ export function LoginPage() {
         <h2 style={{ 
           fontSize: '32px', 
           fontFamily: "'Cormorant Garamond', serif", 
-          margin: '0 0 8px 0',
+          margin: '0 0 24px 0',
           fontWeight: 400,
           textTransform: 'uppercase',
           letterSpacing: '0.05em'
         }}>
-          Authenticate Session
+          Sign in
         </h2>
-        <p style={{ 
-          fontSize: '14px', 
-          color: 'var(--auth-text-muted)', 
-          margin: '0 0 24px 0',
-          lineHeight: '1.5'
-        }}>
-          Sign in to access your playbooks.
-        </p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
