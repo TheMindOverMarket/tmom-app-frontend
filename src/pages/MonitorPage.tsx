@@ -10,28 +10,43 @@ import { DeviationPanel } from '../components/deviation/DeviationPanel';
 import { resolvePlaybookSymbol } from '../domain/playbook/utils';
 
 export function MonitorPage() {
-  const { selectedPlaybook, rules, activeSession, isStreaming, isStartingStream, isStoppingStream, startStream, stopStream } = usePlaybookContext();
+  const {
+    selectedPlaybook,
+    playbooks,
+    rules,
+    activeSession,
+    isStreaming,
+    isStartingStream,
+    isStoppingStream,
+    startStream,
+    stopStream,
+    notification,
+  } = usePlaybookContext();
   const { events, lastEvent, isMockMode, toggleMockMode } = useRuleEngineEvents(isStreaming, activeSession?.id);
   const { summary: deviationSummary, records: deviationRecords } = useDeviationEngine(activeSession?.id);
   const navigate = useNavigate();
 
   const [focusedView, setFocusedView] = useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);
   const isLoading = isStartingStream || isStoppingStream;
-  const { notification } = usePlaybookContext();
+  const supervisionPlaybook =
+    selectedPlaybook ??
+    playbooks.find((playbook) => playbook.id === activeSession?.playbook_id) ??
+    playbooks.find((playbook) => playbook.is_active) ??
+    null;
 
   // Guard: Redirect if no playbook selected
   useEffect(() => {
-    if (!selectedPlaybook) {
+    if (playbooks.length === 0 && !activeSession) {
       navigate('/playbooks');
     }
-  }, [selectedPlaybook, navigate]);
+  }, [activeSession, navigate, playbooks.length]);
 
   const handleMarkerClick = (timestamp: number, type?: 'adherence' | 'deviation') => {
     setFocusedView({ timestamp, filter: type || null });
   };
 
-  if (!selectedPlaybook) return null;
-  const playbookSymbol = resolvePlaybookSymbol(selectedPlaybook);
+  if (!supervisionPlaybook) return null;
+  const playbookSymbol = resolvePlaybookSymbol(supervisionPlaybook);
 
   return (
     <div style={{ 
@@ -79,7 +94,7 @@ export function MonitorPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Activity size={12} color="var(--brand)" />
               <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--slate-400)', letterSpacing: '0.05em' }}>PLAYBOOK SUPERVISION:</div>
-              <div style={{ fontSize: '11px', color: '#0f172a', fontWeight: 800 }}>{selectedPlaybook.name}</div>
+              <div style={{ fontSize: '11px', color: '#0f172a', fontWeight: 800 }}>{supervisionPlaybook.name}</div>
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -112,34 +127,34 @@ export function MonitorPage() {
             </button>
 
             <button
-              onClick={isStreaming ? stopStream : () => startStream(selectedPlaybook.id)}
-              disabled={isLoading || (!isStreaming && selectedPlaybook.generation_status !== 'COMPLETED')}
+              onClick={isStreaming ? stopStream : () => startStream(supervisionPlaybook.id)}
+              disabled={isLoading || (!isStreaming && supervisionPlaybook.generation_status !== 'COMPLETED')}
               style={{
                   height: '32px',
                   padding: '0 16px',
-                  backgroundColor: isLoading ? 'var(--slate-50)' : (isStreaming ? 'var(--danger-alpha)' : (selectedPlaybook.generation_status === 'COMPLETED' ? '#0f172a' : 'var(--slate-50)')),
-                  color: (isLoading || (selectedPlaybook.generation_status !== 'COMPLETED' && !isStreaming)) ? 'var(--slate-400)' : (isStreaming ? 'var(--danger)' : 'white'),
+                  backgroundColor: isLoading ? '#e2e8f0' : (isStreaming ? 'var(--danger-alpha)' : (supervisionPlaybook.generation_status === 'COMPLETED' ? '#0f172a' : '#e2e8f0')),
+                  color: (isLoading || (supervisionPlaybook.generation_status !== 'COMPLETED' && !isStreaming)) ? '#64748b' : (isStreaming ? 'var(--danger)' : 'white'),
                   border: isStreaming ? '1px solid var(--danger)' : 'none',
                   borderRadius: '4px',
                   fontSize: '11px',
                   fontWeight: 900,
-                  cursor: (isLoading || (!isStreaming && selectedPlaybook.generation_status !== 'COMPLETED')) ? 'not-allowed' : 'pointer',
+                  cursor: (isLoading || (!isStreaming && supervisionPlaybook.generation_status !== 'COMPLETED')) ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  opacity: (isLoading || (selectedPlaybook.generation_status !== 'COMPLETED' && !isStreaming)) ? 0.6 : 1,
+                  opacity: 1,
                   transition: 'all 0.2s ease'
               }}
-              title={selectedPlaybook.generation_status !== 'COMPLETED' ? "Playbook analysis in progress. Monitoring restricted." : "Initialize real-time supervision orchestration"}
+              title={supervisionPlaybook.generation_status !== 'COMPLETED' ? "Playbook analysis in progress. Monitoring restricted." : "Initialize real-time supervision orchestration"}
             >
               <div style={{ 
                 width: '6px', 
                 height: '6px', 
                 borderRadius: '50%', 
-                backgroundColor: isStreaming ? 'var(--danger)' : 'white', 
+                backgroundColor: isStreaming ? 'var(--danger)' : (supervisionPlaybook.generation_status === 'COMPLETED' ? 'white' : '#64748b'), 
                 animation: (isStreaming || isLoading) ? 'pulse 1.5s infinite' : 'none' 
               }} />
-              {isStartingStream ? 'WARMING UP...' : (isStoppingStream ? 'CLOSING...' : (isStreaming ? 'STOP STREAM' : (selectedPlaybook.generation_status === 'COMPLETED' ? 'START LIVE SESSION' : 'ANALYZING...')))}
+              {isStartingStream ? 'WARMING UP...' : (isStoppingStream ? 'CLOSING...' : (isStreaming ? 'STOP STREAM' : (supervisionPlaybook.generation_status === 'COMPLETED' ? 'START LIVE SESSION' : 'ANALYZING...')))}
             </button>
           </div>
         </div>

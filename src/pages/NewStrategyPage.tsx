@@ -11,11 +11,11 @@ import {
   Shield,
   Target,
   BarChart3,
-  ChevronRight,
   Trash2,
   CheckCircle2,
   Activity,
-  FileCode
+  FileCode,
+  ChevronDown
 } from 'lucide-react';
 import { IconButton } from '../components/common/IconButton';
 
@@ -522,57 +522,7 @@ export function NewStrategyPage() {
                 </p>
               </div>
 
-              {/* 2. RECENT DERIVATIONS (Lines above text box) */}
-              {playbooks.length > 0 && (
-                <div style={{ animation: 'heroFade 0.9s ease-out' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Recent Derivations</span>
-                    <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to right, var(--auth-border), transparent)' }}></div>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    {playbooks.slice(0, 3).map(pb => (
-                      <button
-                        key={pb.id}
-                        onClick={() => setSelectedPlaybook(pb)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '16px',
-                          padding: '10px 16px',
-                          backgroundColor: 'rgba(255,255,255,0.02)',
-                          border: '1px solid var(--auth-border)',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          textAlign: 'left',
-                          transition: 'all 0.2s',
-                          width: '100%'
-                        }}
-                        onMouseEnter={e => {
-                          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
-                          e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-                        }}
-                        onMouseLeave={e => {
-                          e.currentTarget.style.borderColor = 'var(--auth-border)';
-                          e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
-                        }}
-                      >
-                         <div style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.1em', width: '80px' }}>
-                            {new Date(pb.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                         </div>
-                         <div style={{ fontSize: '14px', fontWeight: 600, color: '#ffffff', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {pb.name}
-                         </div>
-                         <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)', fontWeight: 800, letterSpacing: '0.1em' }}>
-                            {pb.market}
-                         </div>
-                         <ChevronRight size={12} style={{ color: 'var(--auth-text-muted)', opacity: 0.5 }} />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 3. PARSER BOX */}
+              {/* 2. PARSER BOX */}
               <div style={{ 
                 backgroundColor: 'rgba(5, 5, 5, 0.8)', 
                 backdropFilter: 'blur(20px)',
@@ -589,30 +539,45 @@ export function NewStrategyPage() {
                 {isInitialTurn && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--auth-border)', paddingBottom: '16px', marginBottom: '2px' }}>
                      <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.2em' }}>ASSET_PROFILE</span>
-                     <select
-                       value={selectedMarket}
-                       onChange={(e) => setSelectedMarket(e.target.value)}
-                       disabled={isLoadingMarkets}
-                       style={{
-                         padding: '4px 12px',
-                         borderRadius: '2px',
-                         border: '1px solid var(--auth-border)',
-                         backgroundColor: 'rgba(255,255,255,0.03)',
-                         fontSize: '11px',
-                         fontWeight: 900,
-                         color: '#ffffff',
-                         outline: 'none',
-                         cursor: 'pointer',
-                         fontFamily: "'Space Mono', monospace",
-                         appearance: 'none',
-                         letterSpacing: '0.1em'
-                       }}
-                     >
-                       {availableMarkets.length === 0 && <option value="">No markets</option>}
-                       {availableMarkets.map((market) => (
-                         <option key={market.symbol} value={market.symbol}>{market.symbol}</option>
-                       ))}
-                     </select>
+                     <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                       <select
+                         className="tmom-select tmom-select-dark"
+                         value={selectedMarket}
+                         onChange={(e) => setSelectedMarket(e.target.value)}
+                         disabled={isLoadingMarkets}
+                         style={{
+                           padding: '4px 34px 4px 12px',
+                           borderRadius: '2px',
+                           border: '1px solid var(--auth-border)',
+                           backgroundColor: 'rgba(255,255,255,0.03)',
+                           fontSize: '11px',
+                           fontWeight: 900,
+                           color: '#ffffff',
+                           outline: 'none',
+                           cursor: 'pointer',
+                           fontFamily: "'Space Mono', monospace",
+                           appearance: 'none',
+                           WebkitAppearance: 'none',
+                           MozAppearance: 'none',
+                           letterSpacing: '0.1em',
+                           minHeight: '30px'
+                         }}
+                       >
+                         {availableMarkets.length === 0 && <option value="">No markets</option>}
+                         {availableMarkets.map((market) => (
+                           <option key={market.symbol} value={market.symbol}>{market.symbol}</option>
+                         ))}
+                       </select>
+                       <ChevronDown
+                         size={12}
+                         style={{
+                           position: 'absolute',
+                           right: '12px',
+                           pointerEvents: 'none',
+                           color: 'rgba(255, 255, 255, 0.7)'
+                         }}
+                       />
+                     </div>
                      <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
                         <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--auth-accent)', animation: 'pulse 2s infinite' }}></div>
                         <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.1)' }}></div>

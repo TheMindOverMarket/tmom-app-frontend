@@ -158,7 +158,14 @@ Cooldown:
       setPlaybooks(filtered);
       
       const activeInDb = sorted.find(pb => pb.is_active);
-      setSelectedPlaybook(prev => prev ?? activeInDb ?? null);
+      setSelectedPlaybook(prev => {
+        if (!prev) {
+          return activeInDb ?? null;
+        }
+
+        const updatedSelection = filtered.find((pb) => pb.id === prev.id);
+        return updatedSelection ?? activeInDb ?? null;
+      });
     } catch (error: unknown) {
       console.error('Failed to fetch playbooks:', error);
       setNotification({
@@ -313,6 +320,38 @@ Cooldown:
   }, [fetchPlaybooks]);
 
   useEffect(() => {
+    let cancelled = false;
+
+    const restoreActiveSession = async () => {
+      if (!currentUser) {
+        return;
+      }
+
+      try {
+        const sessions = await sessionApi.listSessions(currentUser.id);
+        if (cancelled) {
+          return;
+        }
+
+        const liveSession = sessions
+          .filter((session) => session.status === SessionStatus.STARTED)
+          .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())[0];
+
+        setActiveSession(liveSession ?? null);
+        setIsStreaming(Boolean(liveSession));
+      } catch (error) {
+        console.error('Failed to restore active session:', error);
+      }
+    };
+
+    void restoreActiveSession();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser]);
+
+  useEffect(() => {
     setSelectedPlaybook(null);
     setActiveSession(null);
     setIsStreaming(false);
@@ -351,6 +390,17 @@ Cooldown:
       localStorage.removeItem(key);
     }
   }, [draftChatHistory, currentDraft, selectedMarket, currentUser]);
+
+  useEffect(() => {
+    if (!activeSession) {
+      return;
+    }
+
+    const activePlaybook = playbooks.find((pb) => pb.id === activeSession.playbook_id);
+    if (activePlaybook && selectedPlaybook?.id !== activePlaybook.id) {
+      setSelectedPlaybook(activePlaybook);
+    }
+  }, [activeSession, playbooks, selectedPlaybook]);
 
   const resetDraft = useCallback(() => {
     setDraftChatHistory([]);

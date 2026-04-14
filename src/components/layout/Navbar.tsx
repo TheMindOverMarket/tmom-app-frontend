@@ -11,7 +11,7 @@ const NAV_ITEMS = [
 ];
 
 export function Navbar() {
-  const { selectedPlaybook } = usePlaybookContext();
+  const { selectedPlaybook, playbooks, activeSession } = usePlaybookContext();
   const { currentUser } = useUserSession();
 
   const isAdmin = currentUser?.role === 'MANAGER';
@@ -31,7 +31,12 @@ export function Navbar() {
       alignItems: 'center'
     }}>
       {navItems.map(({ path, label, icon: Icon, requiresPlaybook }) => {
-        const isDisabled = requiresPlaybook && !selectedPlaybook;
+        const hasSupervisionContext = Boolean(
+          selectedPlaybook ||
+          activeSession ||
+          playbooks.some((playbook) => playbook.is_active)
+        );
+        const isDisabled = requiresPlaybook && !hasSupervisionContext;
         
         return (
           <NavLink

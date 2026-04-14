@@ -56,3 +56,31 @@ body {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+.tmom-select {
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.tmom-select:focus {
+  box-shadow: none;
+}
+
+.tmom-select-dark {
+  color-scheme: dark;
+}
+
+.tmom-select-dark option,
+.tmom-select-dark optgroup {
+  background-color: #0f172a;
+  color: #ffffff;
+}
+
+.tmom-select-light {
+  color-scheme: light;
+}
+
+.tmom-select-light option,
+.tmom-select-light optgroup {
+  background-color: #ffffff;
+  color: #0f172a;
+}

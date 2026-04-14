@@ -1,3 +1,4 @@
+import { ChevronDown } from 'lucide-react';
 import { MarketOption } from '../../domain/playbook/types';
 
 interface PlaybookIngestionProps {
@@ -43,31 +44,47 @@ export function PlaybookIngestion({
           <label style={{ fontSize: '10px', fontWeight: 900, color: '#64748b', letterSpacing: '0.06em' }}>
             MARKET
           </label>
-          <select
-            value={selectedMarket}
-            onChange={(e) => onMarketChange(e.target.value)}
-            disabled={isSubmitting || isLoadingMarkets || availableMarkets.length === 0}
-            style={{
-              height: '38px',
-              borderRadius: '4px',
-              border: '1px solid var(--slate-200)',
-              backgroundColor: 'white',
-              color: 'var(--slate-900)',
-              padding: '0 12px',
-              fontSize: '13px',
-              fontWeight: 700,
-              outline: 'none',
-            }}
-          >
-            {availableMarkets.length === 0 && (
-              <option value="">No markets available</option>
-            )}
-            {availableMarkets.map((market) => (
-              <option key={market.symbol} value={market.symbol}>
-                {market.symbol}
-              </option>
-            ))}
-          </select>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <select
+              className="tmom-select tmom-select-light"
+              value={selectedMarket}
+              onChange={(e) => onMarketChange(e.target.value)}
+              disabled={isSubmitting || isLoadingMarkets || availableMarkets.length === 0}
+              style={{
+                height: '38px',
+                width: '100%',
+                borderRadius: '4px',
+                border: '1px solid var(--slate-200)',
+                backgroundColor: 'white',
+                color: 'var(--slate-900)',
+                padding: '0 38px 0 12px',
+                fontSize: '13px',
+                fontWeight: 700,
+                outline: 'none',
+                appearance: 'none',
+                WebkitAppearance: 'none',
+                MozAppearance: 'none',
+              }}
+            >
+              {availableMarkets.length === 0 && (
+                <option value="">No markets available</option>
+              )}
+              {availableMarkets.map((market) => (
+                <option key={market.symbol} value={market.symbol}>
+                  {market.symbol}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              size={14}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                pointerEvents: 'none',
+                color: '#64748b'
+              }}
+            />
+          </div>
         </div>
         <div
           style={{
