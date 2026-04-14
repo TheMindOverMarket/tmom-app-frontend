@@ -118,7 +118,7 @@ export function LoginPage() {
             />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '4px' }}>
+          <div style={{ marginTop: '4px' }}>
             <button
               type="submit"
               disabled={!email || isLoading}
@@ -138,25 +138,6 @@ export function LoginPage() {
               }}
             >
               {isLoading ? 'Processing...' : 'Enter System'}
-            </button>
-            <button
-              type="button"
-              style={{
-                width: '100%',
-                padding: '16px',
-                backgroundColor: 'transparent',
-                color: '#ffffff',
-                border: '1px solid var(--auth-border)',
-                borderRadius: '4px',
-                fontSize: '13px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                letterSpacing: '0.15em',
-                textTransform: 'uppercase',
-                transition: 'background-color 0.2s',
-              }}
-            >
-              Continue With Google
             </button>
           </div>
 
