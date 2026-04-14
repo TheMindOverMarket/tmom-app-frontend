@@ -74,7 +74,7 @@ export function LoginPage() {
           margin: '0 0 24px 0',
           lineHeight: '1.5'
         }}>
-          Sign in to continue under your active supervision profile.
+          Sign in to access your playbooks.
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
