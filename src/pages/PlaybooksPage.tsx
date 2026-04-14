@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { Playbook } from '../domain/playbook/types';
-import { Trash2, Copy, Check, ArrowLeft, RefreshCw, Layers, Zap, Clock } from 'lucide-react';
+import { Trash2, Copy, Check, ArrowLeft, RefreshCw, Clock } from 'lucide-react';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { resolvePlaybookSymbol } from '../domain/playbook/utils';
 import { RuleLogicTree } from '../components/playbook/RuleLogicTree';
@@ -500,18 +500,7 @@ export function PlaybooksPage() {
                   {pb.original_nl_input}
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
-                   <div style={{ display: 'flex', gap: '16px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                         <Layers size={12} style={{ color: 'var(--auth-accent)' }} />
-                         <span style={{ fontSize: '10px', fontWeight: 700, color: '#ffffff' }}>4 NODES</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                         <Zap size={12} style={{ color: 'var(--brand)' }} />
-                         <span style={{ fontSize: '10px', fontWeight: 700, color: '#ffffff' }}>DETERMINISTIC</span>
-                      </div>
-                   </div>
-
+                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '4px' }}>
                    <button
                         onClick={(e) => {
                           e.stopPropagation();
