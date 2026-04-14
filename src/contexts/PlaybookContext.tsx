@@ -434,7 +434,11 @@ Cooldown:
     setStreamingMessage('');
 
     try {
-        const history = [...draftChatHistory, { role: 'user', content: message }];
+        let finalMessage = message;
+        if (draftChatHistory.length === 0 && selectedMarket && !selectedPlaybook) {
+            finalMessage = `I want to trade ${selectedMarket}.\n\nMy strategy logic:\n${message}`;
+        }
+        const history = [...draftChatHistory, { role: 'user', content: finalMessage }];
         setDraftChatHistory(history);
 
         if (selectedPlaybook) {
