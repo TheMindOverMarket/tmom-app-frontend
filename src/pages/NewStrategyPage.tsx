@@ -18,6 +18,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { IconButton } from '../components/common/IconButton';
+import { DraftPreviewModal } from '../components/playbook/DraftPreviewModal';
 
 const STRATEGY_TEMPLATES = [
   {
@@ -74,6 +75,7 @@ export function NewStrategyPage() {
 
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef(selectedPlaybook?.generation_status);
 
@@ -746,7 +748,33 @@ export function NewStrategyPage() {
                       </div>
                     ))}
 
-                    <div style={{ marginTop: '12px', paddingTop: '20px', borderTop: '1px solid var(--auth-border)' }}>
+                    <div style={{ marginTop: '12px', paddingTop: '20px', borderTop: '1px solid var(--auth-border)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <button
+                        onClick={() => setIsPreviewModalOpen(true)}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          borderRadius: '4px',
+                          backgroundColor: 'rgba(255,255,255,0.05)',
+                          color: '#ffffff',
+                          border: '1px solid var(--auth-border)',
+                          fontSize: '10px',
+                          fontWeight: 900,
+                          letterSpacing: '0.15em',
+                          textTransform: 'uppercase',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          transition: 'all 0.3s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
+                      >
+                        <Target size={12} />
+                        Preview Draft
+                      </button>
                       <button
                         onClick={() => {
                           if (progressPercentage === 100) {
@@ -964,6 +992,7 @@ export function NewStrategyPage() {
           border-radius: 2px;
         }
       ` }} />
+      <DraftPreviewModal isOpen={isPreviewModalOpen} onClose={() => setIsPreviewModalOpen(false)} draft={currentDraft} />
     </div>
   );
 }
