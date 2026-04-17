@@ -78,5 +78,23 @@ export const sessionApi = {
       }
       throw new Error(detail);
     }
+  },
+
+  explainDeviation: async (sessionId: string, eventData: any): Promise<{status: string, reasoning: string}> => {
+    const response = await fetch(`${API_BASE}/sessions/${sessionId}/explain_deviation`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(eventData),
+    });
+    if (!response.ok) {
+      let detail = 'Failed to fetch reasoning';
+      try {
+        const err = await response.json();
+        detail = err.detail || detail;
+      } catch (e) {
+      }
+      throw new Error(detail);
+    }
+    return response.json();
   }
 };
