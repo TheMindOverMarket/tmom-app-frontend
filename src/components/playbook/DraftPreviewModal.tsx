@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { X, CheckCircle2, ShieldAlert, Target, Zap, Activity } from 'lucide-react';
 
 interface DraftPreviewModalProps {
