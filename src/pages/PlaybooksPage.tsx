@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { Playbook } from '../domain/playbook/types';
-import { Trash2, Copy, Check, ArrowLeft, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Trash2, Copy, Check, ArrowLeft, Clock, Plus } from 'lucide-react';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { resolvePlaybookSymbol } from '../domain/playbook/utils';
 import { RuleLogicTree } from '../components/playbook/RuleLogicTree';
@@ -21,6 +22,8 @@ export function PlaybooksPage() {
     fetchPlaybooks,
     deleteAllPlaybooks
   } = usePlaybookContext();
+  
+  const navigate = useNavigate();
 
   const [showDetailView, setShowDetailView] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -358,6 +361,31 @@ export function PlaybooksPage() {
            <div style={{ gridColumn: '1/-1', height: '300px', border: '1px dashed var(--auth-border)', borderRadius: '4px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
               <div style={labelStyle}>Library Is Empty</div>
               <p style={{ fontSize: '13px', color: 'var(--auth-text-muted)', textAlign: 'center', maxWidth: '300px' }}>Create your first playbook to see it archived in the system library.</p>
+              <button 
+                onClick={() => navigate('/new-strategy')}
+                style={{
+                  marginTop: '8px',
+                  padding: '10px 24px',
+                  borderRadius: '4px',
+                  backgroundColor: '#ffffff',
+                  color: '#000000',
+                  border: 'none',
+                  fontSize: '11px',
+                  fontWeight: 900,
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  transition: 'transform 0.2s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+              >
+                <Plus size={14} strokeWidth={3} />
+                Create New Playbook
+              </button>
            </div>
         ) : (
           playbooks.map(pb => {
