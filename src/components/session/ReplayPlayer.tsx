@@ -489,6 +489,7 @@ export function ReplayPlayer({ session, events, loading, onClose, isDark = false
                    events={visibleEvents} 
                    onMarkerClick={handleMarkerClick} 
                    isDark={isDark}
+                   selectedEventId={selectedEventId}
                  />
               </div>
 

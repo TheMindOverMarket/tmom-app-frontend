@@ -210,11 +210,35 @@ export function usePriceChart(
     updateMarkersOverlay();
   }, [events, candles, currentCandle, deduplicateEvents]);
 
+  const scrollToTime = (timestamp: number) => {
+    if (!chartRef.current) return;
+    const timeScale = chartRef.current.timeScale();
+    const width = chartContainerRef.current?.clientWidth || 800;
+    const barsToDisplay = Math.floor(width / 15);
+    
+    // Convert timestamp to coordinate to check if it's already visible
+    const x = timeScale.timeToCoordinate(timestamp as Time);
+    
+    if (x === null || x < 20 || x > width - 20) {
+      // Not visible or too close to edges, center it
+      // We use setVisibleRange if we want exact bounds, but setVisibleLogicalRange is more stable with bars
+      // Finding the index of the candle with this timestamp
+      const candleIndex = dataRef.current.candles.findIndex(c => Number(c.time) === timestamp);
+      if (candleIndex !== -1) {
+        timeScale.setVisibleLogicalRange({
+          from: candleIndex - Math.floor(barsToDisplay / 2),
+          to: candleIndex + Math.floor(barsToDisplay / 2),
+        });
+      }
+    }
+  };
+
   return {
     chartContainerRef,
     isMockData,
     deduplicateEvents,
     setDeduplicateEvents,
-    markers
+    markers,
+    scrollToTime
   };
 }

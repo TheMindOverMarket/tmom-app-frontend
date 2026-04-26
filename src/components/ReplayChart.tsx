@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Session, SessionEvent, SessionEventType } from '../domain/session/types';
 import { RuleEngineEvent } from '../domain/ruleEngine/types';
 import { usePriceChart } from '../hooks/usePriceChart';
@@ -18,6 +18,7 @@ interface ReplayChartProps {
   events: SessionEvent[];
   onMarkerClick: (timestamp: number, type?: 'adherence' | 'deviation') => void;
   isDark?: boolean;
+  selectedEventId?: string | null;
 }
 
 /**
@@ -26,7 +27,7 @@ interface ReplayChartProps {
  * Specifically designed to recreate the historical market state for a session.
  * Fetches the exact price action range and overlays rule events from the replay stream.
  */
-export function ReplayChart({ session, events, onMarkerClick, isDark = false }: ReplayChartProps) {
+export function ReplayChart({ session, events, onMarkerClick, isDark = false, selectedEventId }: ReplayChartProps) {
   const [candles, setCandles] = useState<Candle[]>([]);
   const [loading, setLoading] = useState(true);
   const [resolvedSymbol, setResolvedSymbol] = useState('');
@@ -173,8 +174,20 @@ export function ReplayChart({ session, events, onMarkerClick, isDark = false }: 
     chartContainerRef,
     deduplicateEvents,
     setDeduplicateEvents,
-    markers
+    markers,
+    scrollToTime
   } = usePriceChart(ruleEvents, candles, null, ema9, null, false);
+
+  const selectedTimestamp = useMemo(() => {
+    const evt = events.find(e => e.id === selectedEventId);
+    return evt ? new Date(evt.timestamp).getTime() / 1000 : null;
+  }, [events, selectedEventId]);
+
+  useEffect(() => {
+    if (selectedTimestamp) {
+        scrollToTime(Math.floor(selectedTimestamp / 60) * 60);
+    }
+  }, [selectedTimestamp]);
 
   if (loading) return (
     <div style={{ 
@@ -225,7 +238,11 @@ export function ReplayChart({ session, events, onMarkerClick, isDark = false }: 
         ref={chartContainerRef} 
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} 
       />
-      <MarkerLayer markers={markers} onMarkerClick={onMarkerClick} />
+      <MarkerLayer 
+        markers={markers} 
+        onMarkerClick={onMarkerClick} 
+        selectedTimestamp={selectedTimestamp}
+      />
       <ChartControls
         deduplicateEvents={deduplicateEvents}
         onToggle={() => setDeduplicateEvents(!deduplicateEvents)}
