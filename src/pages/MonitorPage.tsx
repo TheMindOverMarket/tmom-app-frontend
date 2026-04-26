@@ -277,7 +277,7 @@ export function MonitorPage() {
       </div>
 
       {/* Right Column: Rule Engine Feed + Deviation Panel */}
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, gap: '16px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, gap: '16px', height: '100%' }}>
         <RuleEventInspector 
           events={events} 
           focusedTimestamp={focusedView?.timestamp || null}

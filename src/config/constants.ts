@@ -13,22 +13,23 @@ const toWebSocketBaseUrl = (value: string) => {
 };
 
 const ruleEngineBaseUrl = normalizeBaseUrl(import.meta.env.VITE_RULE_ENGINE_BASE_URL);
-const ruleEngineWsUrl = normalizeBaseUrl(
-  import.meta.env.VITE_RULE_ENGINE_WS_URL ??
-    (ruleEngineBaseUrl
-      ? `${toWebSocketBaseUrl(ruleEngineBaseUrl)}/ws/engine-output`
-      : ''),
-);
+
+// Standard WebSocket derivation
+const getWsUrl = (baseUrl: string, path: string) => {
+  if (import.meta.env.DEV) {
+    // In local development, we use the Vite proxy to avoid CORS/Origin issues.
+    // This points to ws://localhost:5173/api/engine/ws/engine-output
+    return `ws://${window.location.host}/api/engine${path}`;
+  }
+  return `${toWebSocketBaseUrl(baseUrl)}${path}`;
+};
+
+const ruleEngineWsUrl = import.meta.env.VITE_RULE_ENGINE_WS_URL || getWsUrl(ruleEngineBaseUrl, '/ws/engine-output');
 
 const deviationEngineBaseUrl = normalizeBaseUrl(
   import.meta.env.VITE_DEVIATION_ENGINE_BASE_URL || ruleEngineBaseUrl
 );
-const deviationEngineWsUrl = normalizeBaseUrl(
-  import.meta.env.VITE_DEVIATION_ENGINE_WS_URL ??
-    (deviationEngineBaseUrl
-      ? `${toWebSocketBaseUrl(deviationEngineBaseUrl)}/ws/deviation-output`
-      : ''),
-);
+const deviationEngineWsUrl = import.meta.env.VITE_DEVIATION_ENGINE_WS_URL || getWsUrl(deviationEngineBaseUrl, '/ws/deviation-output');
 
 export const CONFIG = {
   BACKEND_BASE_URL: '/api/backend',

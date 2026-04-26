@@ -43,6 +43,8 @@ export const RuleEventInspector: FC<RuleEventInspectorProps> = ({
     <div style={{ 
       display: 'flex',
       flexDirection: 'column',
+      flex: 1.5,
+      minHeight: 0,
       height: '100%',
       backgroundColor: '#ffffff',
       border: '1px solid #e5e7eb',

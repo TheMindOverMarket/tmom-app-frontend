@@ -69,7 +69,7 @@ export function DeviationPanel({ summary, records, isActive }: DeviationPanelPro
       flexDirection: 'column',
       overflow: 'hidden',
       flex: 1,
-      minHeight: '400px', // ensure panel stands out visually
+      minHeight: 0,
     }}>
       {/* ── Header ─── */}
       <div
