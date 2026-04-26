@@ -29,8 +29,8 @@ export function MonitorPage() {
   const [focusedView, setFocusedView] = useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);
   const isLoading = isStartingStream || isStoppingStream;
   const supervisionPlaybook =
+    (activeSession ? playbooks.find((playbook) => playbook.id === activeSession.playbook_id) : selectedPlaybook) ??
     selectedPlaybook ??
-    playbooks.find((playbook) => playbook.id === activeSession?.playbook_id) ??
     playbooks.find((playbook) => playbook.is_active) ??
     null;
 

@@ -87,7 +87,7 @@ export function NewStrategyPage() {
   };
 
   useEffect(() => {
-    if (prevStatusRef.current !== 'COMPLETED' && selectedPlaybook?.generation_status === 'COMPLETED') {
+    if (prevStatusRef.current === 'PENDING' && selectedPlaybook?.generation_status === 'COMPLETED') {
       navigate('/playbooks');
     }
     prevStatusRef.current = selectedPlaybook?.generation_status;

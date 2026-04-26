@@ -391,16 +391,7 @@ Cooldown:
     }
   }, [draftChatHistory, currentDraft, selectedMarket, currentUser]);
 
-  useEffect(() => {
-    if (!activeSession) {
-      return;
-    }
 
-    const activePlaybook = playbooks.find((pb) => pb.id === activeSession.playbook_id);
-    if (activePlaybook && selectedPlaybook?.id !== activePlaybook.id) {
-      setSelectedPlaybook(activePlaybook);
-    }
-  }, [activeSession, playbooks, selectedPlaybook]);
 
   const resetDraft = useCallback(() => {
     setDraftChatHistory([]);
