@@ -7,7 +7,9 @@ import {
   UTCTimestamp,
   ColorType,
   CrosshairMode,
-  LineStyle
+  LineStyle,
+  CandlestickSeries,
+  LineSeries
 } from 'lightweight-charts';
 import { RuleEngineEvent } from '../domain/ruleEngine/types';
 import { Candle } from '../marketdata/types';
@@ -81,7 +83,7 @@ export function usePriceChart(
       handleScroll: true,
     });
 
-    const series = chart.addCandlestickSeries({
+    const series = chart.addSeries(CandlestickSeries, {
       upColor: '#10b981',
       downColor: '#ef4444',
       borderVisible: false,
@@ -89,7 +91,7 @@ export function usePriceChart(
       wickDownColor: '#ef4444',
     });
 
-    const emaSeries = chart.addLineSeries({
+    const emaSeries = chart.addSeries(LineSeries, {
         color: '#6366f1',
         lineWidth: 1,
         priceLineVisible: false,
