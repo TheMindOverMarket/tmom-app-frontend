@@ -102,6 +102,7 @@ export function MonitorPage() {
             <button
               onClick={toggleMockMode}
               style={{
+                display: 'none', // HIDDEN for now until requested for a demo
                 padding: '0 12px',
                 height: '32px',
                 backgroundColor: isMockMode ? '#0f172a' : 'white',
@@ -112,7 +113,6 @@ export function MonitorPage() {
                 fontWeight: 800,
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                display: 'flex',
                 alignItems: 'center',
                 gap: '6px'
               }}

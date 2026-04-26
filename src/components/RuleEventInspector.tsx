@@ -32,7 +32,7 @@ export const RuleEventInspector: FC<RuleEventInspectorProps> = ({
   filterType,
   onClearFocus 
 }) => {
-  const [activeTab, setActiveTab] = useState<'feed' | 'deviations'>('feed');
+  const [activeTab, setActiveTab] = useState<'feed' | 'deviations'>('deviations');
   const visibleEvents = useRuleEventFilter(events, focusedTimestamp, filterType);
 
   const renderedEvents = activeTab === 'deviations' 
