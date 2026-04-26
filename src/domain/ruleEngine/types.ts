@@ -19,6 +19,8 @@ export interface RuleEngineRawMessage {
   deviation_false?: string[];
   ai_reasoning?: string;
   order_id?: string;
+  deviation_type?: string;
+  is_new_event?: boolean;
 }
 
 export interface RuleEngineEvent extends Omit<RuleEngineRawMessage, 'timestamp'> {

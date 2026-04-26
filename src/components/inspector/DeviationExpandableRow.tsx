@@ -90,7 +90,7 @@ export const DeviationExpandableRow: FC<DeviationExpandableRowProps> = memo(({ e
                textTransform: 'uppercase',
                letterSpacing: '0.02em'
              }}>
-               Deviation
+               {event.deviation_type || 'Deviation'}
              </span>
              <span style={{ color: '#6B7280', fontSize: '12px' }}>
                {event.action ? 'ACT' : 'NO-OP'}
