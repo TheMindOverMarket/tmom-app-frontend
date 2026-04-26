@@ -4,6 +4,7 @@ import { Activity } from 'lucide-react';
 import { ReplayChart } from '../ReplayChart';
 import { playbookApi } from '../../domain/playbook/api';
 import { Playbook, Rule } from '../../domain/playbook/types';
+import { RuleLogicTree } from '../playbook/RuleLogicTree';
 
 interface ReplayPlayerProps {
   session: Session;
@@ -198,7 +199,7 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
           {/* Event Timeline Sidebar (Left) */}
           <div style={{ 
-            width: '280px', 
+            width: '240px', 
             borderRight: `1px solid ${isDark ? 'var(--auth-border)' : '#f1f5f9'}`, 
             overflowY: 'auto',
             backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : '#fcfdfe',
@@ -259,7 +260,7 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
           {/* Event Inspector Sidebar (Right) */}
           {selectedEvent && (
             <div style={{ 
-              width: '360px', 
+              width: '320px', 
               backgroundColor: isDark ? 'rgba(0, 0, 0, 0.3)' : '#ffffff', 
               borderLeft: `1px solid ${isDark ? 'var(--auth-border)' : '#e2e8f0'}`,
               display: 'flex',
@@ -297,21 +298,29 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
                             borderRadius: '8px',
                             border: `1px solid ${isDark ? (isTrue ? 'rgba(0, 255, 136, 0.2)' : 'rgba(239, 68, 68, 0.2)') : (isTrue ? '#bcf1d3' : '#fee2e2')}`,
                           }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                              <div style={{ fontSize: '13px', fontWeight: 700, color: isDark ? '#ffffff' : '#0f172a' }}>
-                                {rule?.name || ruleId}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: rule ? '12px' : '0' }}>
+                              <div style={{ fontSize: '11px', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '0.05em', fontFamily: "'Space Mono', monospace" }}>
+                                {rule ? 'RULE EVALUATED' : (ruleId.length > 20 ? `ID: ${ruleId.slice(0, 8)}` : ruleId)}
                               </div>
                               <div style={{ 
                                 padding: '2px 6px', borderRadius: '4px', fontSize: '9px', fontWeight: 900, fontFamily: "'Space Mono', monospace",
                                 backgroundColor: isTrue ? (isDark ? 'var(--auth-accent)' : '#10b981') : '#ef4444',
-                                color: isDark ? 'var(--auth-black)' : '#ffffff'
+                                color: isDark ? 'var(--auth-black)' : '#ffffff',
+                                boxShadow: isTrue && isDark ? '0 0 10px rgba(0,255,136,0.2)' : 'none'
                               }}>
                                 {isTrue ? 'PASS' : 'FAIL'}
                               </div>
                             </div>
-                            <div style={{ fontSize: '11px', color: 'var(--auth-text-muted)' }}>
-                              ID: {ruleId.slice(0, 8)}
-                            </div>
+                            {rule && (
+                                <div style={{ 
+                                    transform: 'scale(0.95)', 
+                                    transformOrigin: 'top left', 
+                                    width: '105.26%',
+                                    margin: '-8px 0 -16px 0'
+                                }}>
+                                   <RuleLogicTree rule={rule} isDark={isDark} />
+                                </div>
+                            )}
                           </div>
                         );
                       })

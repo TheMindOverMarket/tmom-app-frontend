@@ -7,8 +7,11 @@ import { InspectorHeader } from './inspector/InspectorHeader';
 import { StatusPlaceholder } from './common/StatusPlaceholder';
 import { Shield, Activity, Search } from 'lucide-react';
 
+import { Rule } from '../domain/playbook/types';
+
 interface RuleEventInspectorProps {
   events: RuleEngineEvent[];
+  rules?: Rule[];
   focusedTimestamp: number | null; 
   isActive: boolean;
   filterType?: 'adherence' | 'deviation' | null;
@@ -27,6 +30,7 @@ const formatHeaderDate = (ts: number) => {
 
 export const RuleEventInspector: FC<RuleEventInspectorProps> = ({ 
   events, 
+  rules = [],
   focusedTimestamp,
   isActive,
   filterType,
@@ -106,14 +110,14 @@ export const RuleEventInspector: FC<RuleEventInspectorProps> = ({
             />
           )
         ) : (
-           renderedEvents.map(evt => 
-             activeTab === 'deviations' 
-              ? <DeviationExpandableRow key={evt.id} event={evt} /> 
-              : <EventRow key={evt.id} event={evt} />
-           )
+          renderedEvents.map(e => {
+            if (activeTab === 'deviations') {
+              return <DeviationExpandableRow key={e.id} event={e} rules={rules} />;
+            }
+            return <EventRow key={e.id} event={e} rules={rules} />;
+          })
         )}
       </div>
     </div>
   );
 };
-

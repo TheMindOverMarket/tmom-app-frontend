@@ -1,8 +1,11 @@
 import { FC, memo } from 'react';
 import { RuleEngineEvent } from '../../domain/ruleEngine/types';
+import { Rule } from '../../domain/playbook/types';
+import { RuleLogicTree } from '../playbook/RuleLogicTree';
 
 interface EventRowProps {
   event: RuleEngineEvent;
+  rules?: Rule[];
 }
 
 const formatDate = (date: Date) => {
@@ -18,7 +21,8 @@ const formatMs = (date: Date) => {
   return String(date.getMilliseconds()).padStart(3, '0');
 };
 
-export const EventRow: FC<EventRowProps> = memo(({ event }) => {
+export const EventRow: FC<EventRowProps> = memo(({ event, rules = [] }) => {
+  const matchedRule = rules.find(r => r.name === event.rule || r.id === event.rule || r.id === (event.rawRule as any)?.rule_id || r.name === (event.rawRule as any)?.rule_name);
   const date = new Date(event.msTimestamp);
   
   const bgColor = event.deviation ? '#FFF7ED' : '#EFF6FF';
@@ -72,15 +76,21 @@ export const EventRow: FC<EventRowProps> = memo(({ event }) => {
              {event.action ? 'ACT' : 'NO-OP'}
            </span>
         </div>
-        <div style={{ 
-          fontSize: '11px', 
-          color: '#4B5563', 
-          whiteSpace: 'nowrap', 
-          overflow: 'hidden', 
-          textOverflow: 'ellipsis' 
-        }}>
-          {typeof event.rule === 'string' ? event.rule : JSON.stringify(event.rawRule || event.rule)}
-        </div>
+        {matchedRule ? (
+          <div style={{ transform: 'scale(0.85)', transformOrigin: 'top left', width: '117.6%', marginTop: '4px', marginBottom: '-16px' }}>
+            <RuleLogicTree rule={matchedRule} isDark={false} />
+          </div>
+        ) : (
+          <div style={{ 
+            fontSize: '11px', 
+            color: '#4B5563', 
+            whiteSpace: 'nowrap', 
+            overflow: 'hidden', 
+            textOverflow: 'ellipsis' 
+          }}>
+            {typeof event.rule === 'string' ? event.rule : JSON.stringify(event.rawRule || event.rule)}
+          </div>
+        )}
       </div>
 
       {/* Price */}

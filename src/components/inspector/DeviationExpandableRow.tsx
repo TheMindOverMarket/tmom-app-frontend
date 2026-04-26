@@ -1,9 +1,12 @@
 import { FC, useState, memo } from 'react';
 import { RuleEngineEvent } from '../../domain/ruleEngine/types';
 import { sessionApi } from '../../domain/session/api';
+import { Rule } from '../../domain/playbook/types';
+import { RuleLogicTree } from '../playbook/RuleLogicTree';
 
 interface DeviationExpandableRowProps {
   event: RuleEngineEvent;
+  rules?: Rule[];
 }
 
 const formatDate = (date: Date) => {
@@ -19,7 +22,8 @@ const formatMs = (date: Date) => {
   return String(date.getMilliseconds()).padStart(3, '0');
 };
 
-export const DeviationExpandableRow: FC<DeviationExpandableRowProps> = memo(({ event }) => {
+export const DeviationExpandableRow: FC<DeviationExpandableRowProps> = memo(({ event, rules = [] }) => {
+  const matchedRule = rules.find(r => r.name === event.rule || r.id === event.rule || r.id === (event.rawRule as any)?.rule_id || r.name === (event.rawRule as any)?.rule_name);
   const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [reasoning, setReasoning] = useState<string | null>(null);
@@ -92,6 +96,11 @@ export const DeviationExpandableRow: FC<DeviationExpandableRowProps> = memo(({ e
                {event.action ? 'ACT' : 'NO-OP'}
              </span>
           </div>
+        {matchedRule ? (
+          <div style={{ transform: 'scale(0.85)', transformOrigin: 'top left', width: '117.6%', marginTop: '4px', marginBottom: '-16px' }}>
+            <RuleLogicTree rule={matchedRule} isDark={false} />
+          </div>
+        ) : (
           <div style={{ 
             fontSize: '11px', 
             color: '#4B5563', 
@@ -101,6 +110,7 @@ export const DeviationExpandableRow: FC<DeviationExpandableRowProps> = memo(({ e
           }}>
             {typeof event.rule === 'string' ? event.rule : JSON.stringify(event.rawRule || event.rule)}
           </div>
+        )}
         </div>
 
         {/* Price */}

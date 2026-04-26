@@ -281,6 +281,7 @@ export function MonitorPage() {
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, gap: '16px', height: '100%' }}>
         <RuleEventInspector 
           events={events} 
+          rules={rules}
           focusedTimestamp={focusedView?.timestamp || null}
           isActive={isStreaming}
           filterType={focusedView?.filter || null}
