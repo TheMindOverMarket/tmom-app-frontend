@@ -537,7 +537,7 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
                   </div>
                   <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                      {Object.entries((selectedEvent.event_data as any)?.rule_evaluations || {}).map(([ruleId, passed]) => {
+                      {Object.entries(selectedEvent.event_data.rule_evaluations || {}).map(([ruleId, passed]) => {
                         const rule = (playbook?.rules || []).find((r: Rule) => r.id === ruleId);
                         const isTrue = passed === true;
                         
