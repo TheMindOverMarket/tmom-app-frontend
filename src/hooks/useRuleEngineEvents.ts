@@ -51,8 +51,27 @@ export function useRuleEngineEvents(isActive: boolean = false, sessionId?: strin
       ws.onmessage = (msg) => {
         try {
           const rawData: RuleEngineRawMessage = JSON.parse(msg.data);
-          const date = new Date(); // Define date here
+          const date = new Date(); 
+          
           setEvents(prev => {
+            // Check if this is an update to an existing manual action (via order_id)
+            if (rawData.order_id) {
+              const existingIdx = prev.findIndex(evt => evt.order_id === rawData.order_id);
+              if (existingIdx !== -1) {
+                const updatedEvents = [...prev];
+                const updatedEvent: RuleEngineEvent = {
+                  ...updatedEvents[existingIdx],
+                  ...rawData,
+                  // Keep the original event's timestamps for stability
+                  ai_reasoning: rawData.ai_reasoning || updatedEvents[existingIdx].ai_reasoning,
+                };
+                updatedEvents[existingIdx] = updatedEvent;
+                setLastEvent(updatedEvent);
+                return updatedEvents;
+              }
+            }
+
+            // Normal new event
             const newEvent: RuleEngineEvent = {
               ...rawData,
               id: crypto.randomUUID(),

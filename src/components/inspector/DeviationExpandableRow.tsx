@@ -118,17 +118,37 @@ export const DeviationExpandableRow: FC<DeviationExpandableRowProps> = memo(({ e
           color: '#431407',
           borderTop: '1px dashed #FDBA74'
         }}>
-          {loading ? (
+          { (loading || event.ai_reasoning === "GENERATING...") ? (
             <div style={{ color: '#9A3412', fontStyle: 'italic', display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <div style={{ width: '12px', height: '12px', border: '2px solid #EA580C', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-              Generating reasoning...
+              <div style={{ 
+                width: '12px', 
+                height: '12px', 
+                border: '2px solid #EA580C', 
+                borderTopColor: 'transparent', 
+                borderRadius: '50%', 
+                animation: 'spin 1.5s linear infinite' 
+              }} />
+              Analyzing deviation logic...
             </div>
           ) : error ? (
             <div style={{ color: '#DC2626' }}>{error}</div>
-          ) : reasoning ? (
+          ) : (event.ai_reasoning || reasoning) ? (
             <div style={{ lineHeight: '1.5' }}>
-              <div style={{ fontWeight: 600, marginBottom: '4px', color: '#9A3412', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.05em' }}>AI Reasoning</div>
-              {reasoning}
+              <div style={{ 
+                fontWeight: 600, 
+                marginBottom: '4px', 
+                color: '#9A3412', 
+                textTransform: 'uppercase', 
+                fontSize: '11px', 
+                letterSpacing: '0.05em',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                AI Reasoning
+                {event.ai_reasoning && <div style={{ fontSize: '9px', backgroundColor: '#9A3412', color: 'white', padding: '1px 4px', borderRadius: '4px' }}>LIVE</div>}
+              </div>
+              {event.ai_reasoning || reasoning}
             </div>
           ) : null}
         </div>
