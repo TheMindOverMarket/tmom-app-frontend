@@ -12,20 +12,10 @@ const toWebSocketBaseUrl = (value: string) => {
   return value;
 };
 
-const deviationEngineBaseUrl = normalizeBaseUrl(import.meta.env.VITE_DEVIATION_ENGINE_BASE_URL);
-const deviationEngineWsUrl = normalizeBaseUrl(
-  import.meta.env.VITE_DEVIATION_ENGINE_WS_URL ??
-    (deviationEngineBaseUrl
-      ? `${toWebSocketBaseUrl(deviationEngineBaseUrl)}/ws/deviation-output`
-      : ''),
-);
-const ruleEngineBaseUrl = normalizeBaseUrl(import.meta.env.VITE_RULE_ENGINE_BASE_URL || 'https://rule-engine-rcg9.onrender.com');
-const ruleEngineWsUrl = normalizeBaseUrl(
-  import.meta.env.VITE_RULE_ENGINE_WS_URL ??
-    (ruleEngineBaseUrl
-      ? `${toWebSocketBaseUrl(ruleEngineBaseUrl)}/ws/engine-output`
-      : 'wss://rule-engine-rcg9.onrender.com/ws/engine-output'),
-);
+const ruleEngineBaseUrl = 'https://rule-engine-rcg9.onrender.com';
+const ruleEngineWsUrl = 'wss://rule-engine-rcg9.onrender.com/ws/engine-output';
+const deviationEngineBaseUrl = 'https://rule-engine-rcg9.onrender.com'; // Using converged engine
+const deviationEngineWsUrl = 'wss://rule-engine-rcg9.onrender.com/ws/deviation-output';
 
 export const CONFIG = {
   BACKEND_BASE_URL: '/api/backend',

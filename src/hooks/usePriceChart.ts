@@ -54,68 +54,95 @@ export function usePriceChart(
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
-    const chart = createChart(chartContainerRef.current, {
-      layout: {
-        background: { type: ColorType.Solid, color: 'transparent' },
-        textColor: '#94a3b8',
-        fontSize: 10,
-        fontFamily: "'Inter', sans-serif",
-      },
-      grid: {
-        vertLines: { color: 'rgba(30, 41, 59, 0.5)', style: LineStyle.Dotted },
-        horzLines: { color: 'rgba(30, 41, 59, 0.5)', style: LineStyle.Dotted },
-      },
-      crosshair: {
-        mode: CrosshairMode.Normal,
-        vertLine: { labelBackgroundColor: 'var(--auth-black)' },
-        horzLine: { labelBackgroundColor: 'var(--auth-black)' },
-      },
-      timeScale: {
-        borderColor: 'rgba(30, 41, 59, 0.5)',
-        timeVisible: true,
-        secondsVisible: false,
-      },
-      rightPriceScale: {
-        borderColor: 'rgba(30, 41, 59, 0.5)',
-        autoScale: true,
-      },
-      handleScale: true,
-      handleScroll: true,
-    });
+    let chart: IChartApi | null = null;
+    let series: any = null;
+    let emaSeries: any = null;
 
-    const series = chart.addSeries(CandlestickSeries, {
-      upColor: '#10b981',
-      downColor: '#ef4444',
-      borderVisible: false,
-      wickUpColor: '#10b981',
-      wickDownColor: '#ef4444',
-    });
+    const init = () => {
+      if (!chartContainerRef.current || chartRef.current) return;
+      
+      if (chartContainerRef.current.clientWidth === 0 || chartContainerRef.current.clientHeight === 0) {
+        setTimeout(init, 100);
+        return;
+      }
 
-    const emaSeries = chart.addSeries(LineSeries, {
-        color: '#6366f1',
-        lineWidth: 1,
-        priceLineVisible: false,
-        lastValueVisible: false,
-        crosshairMarkerVisible: false,
-    });
+      chart = createChart(chartContainerRef.current, {
+        layout: {
+          background: { type: ColorType.Solid, color: 'transparent' },
+          textColor: '#94a3b8',
+          fontSize: 10,
+          fontFamily: "'Inter', sans-serif",
+        },
+        grid: {
+          vertLines: { color: 'rgba(30, 41, 59, 0.5)', style: LineStyle.Dotted },
+          horzLines: { color: 'rgba(30, 41, 59, 0.5)', style: LineStyle.Dotted },
+        },
+        crosshair: {
+          mode: CrosshairMode.Normal,
+          vertLine: { labelBackgroundColor: 'var(--auth-black)' },
+          horzLine: { labelBackgroundColor: 'var(--auth-black)' },
+        },
+        timeScale: {
+          borderColor: 'rgba(30, 41, 59, 0.5)',
+          timeVisible: true,
+          secondsVisible: false,
+        },
+        rightPriceScale: {
+          borderColor: 'rgba(30, 41, 59, 0.5)',
+          autoScale: true,
+        },
+        handleScale: true,
+        handleScroll: true,
+      });
 
-    chartRef.current = chart;
-    seriesRef.current = series;
-    emaSeriesRef.current = emaSeries;
+      series = chart.addSeries(CandlestickSeries, {
+        upColor: '#10b981',
+        downColor: '#ef4444',
+        borderVisible: false,
+        wickUpColor: '#10b981',
+        wickDownColor: '#ef4444',
+      });
+
+      emaSeries = chart.addSeries(LineSeries, {
+          color: '#6366f1',
+          lineWidth: 1,
+          priceLineVisible: false,
+          lastValueVisible: false,
+          crosshairMarkerVisible: false,
+      });
+
+      chartRef.current = chart;
+      seriesRef.current = series;
+      emaSeriesRef.current = emaSeries;
+
+      // Force immediate update if data is already available
+      if (dataRef.current.candles.length > 0) {
+        series.setData(dataRef.current.candles);
+      }
+    };
+
+    init();
 
     const handleResize = () => {
-      if (chartContainerRef.current) {
+      if (chart && chartContainerRef.current) {
         chart.applyOptions({
           width: chartContainerRef.current.clientWidth,
           height: chartContainerRef.current.clientHeight,
         });
       }
     };
-    window.addEventListener('resize', handleResize);
+
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(chartContainerRef.current);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      chart.remove();
+      resizeObserver.disconnect();
+      if (chart) {
+        chart.remove();
+        chartRef.current = null;
+        seriesRef.current = null;
+        emaSeriesRef.current = null;
+      }
     };
   }, []);
 
