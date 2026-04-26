@@ -180,7 +180,7 @@ export function ReplayPlayer({ session, events, loading, onClose, isDark = false
         </div>
 
         {/* Audit Report Card (Premium Section) */}
-        {session.is_audit_ready && session.session_metadata?.report_card && (
+        {session.is_audit_ready && (session.session_metadata as any)?.report_card && (
           <div style={{ 
             marginBottom: '32px',
             padding: '24px',
@@ -203,7 +203,7 @@ export function ReplayPlayer({ session, events, loading, onClose, isDark = false
               fontFamily: "'Space Mono', monospace",
               pointerEvents: 'none'
             }}>
-              {(session.session_metadata.report_card as any).consistency_grade}
+              {(session.session_metadata as any)?.report_card?.consistency_grade}
             </div>
 
             <div style={{ 
@@ -219,7 +219,7 @@ export function ReplayPlayer({ session, events, loading, onClose, isDark = false
               boxShadow: '0 8px 24px rgba(0,0,0,0.1)'
             }}>
               <div style={{ fontSize: '48px', fontWeight: 900, color: isDark ? 'var(--auth-accent)' : '#10b981', fontFamily: "'Space Mono', monospace" }}>
-                {(session.session_metadata.report_card as any).consistency_grade}
+                {(session.session_metadata as any)?.report_card?.consistency_grade}
               </div>
             </div>
 
@@ -234,21 +234,21 @@ export function ReplayPlayer({ session, events, loading, onClose, isDark = false
                 fontFamily: "'Space Mono', monospace"
               }}>AUDIT REPORT CARD</div>
               <h3 style={{ fontSize: '18px', margin: '0 0 12px 0', fontWeight: 600 }}>
-                {(session.session_metadata.report_card as any).summary}
+                {(session.session_metadata as any)?.report_card?.summary}
               </h3>
               
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
                 <div>
                   <div style={{ fontSize: '8px', fontWeight: 900, color: 'var(--auth-text-muted)', textTransform: 'uppercase', marginBottom: '4px', fontFamily: "'Space Mono', monospace" }}>BEHAVIORAL PATTERN</div>
-                  <div style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#ffffff' : '#065f46' }}>{(session.session_metadata.report_card as any).behavioral_pattern}</div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#ffffff' : '#065f46' }}>{(session.session_metadata as any)?.report_card?.behavioral_pattern}</div>
                 </div>
                 <div>
                   <div style={{ fontSize: '8px', fontWeight: 900, color: 'var(--auth-text-muted)', textTransform: 'uppercase', marginBottom: '4px', fontFamily: "'Space Mono', monospace" }}>TOP VIOLATION</div>
-                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#ef4444' }}>{(session.session_metadata.report_card as any).top_violation}</div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#ef4444' }}>{(session.session_metadata as any)?.report_card?.top_violation}</div>
                 </div>
                 <div>
                   <div style={{ fontSize: '8px', fontWeight: 900, color: 'var(--auth-text-muted)', textTransform: 'uppercase', marginBottom: '4px', fontFamily: "'Space Mono', monospace" }}>NEXT FOCUS</div>
-                  <div style={{ fontSize: '12px', fontWeight: 700, color: isDark ? 'var(--auth-accent)' : '#10b981' }}>{(session.session_metadata.report_card as any).actionable_feedback}</div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: isDark ? 'var(--auth-accent)' : '#10b981' }}>{(session.session_metadata as any)?.report_card?.actionable_feedback}</div>
                 </div>
               </div>
             </div>
