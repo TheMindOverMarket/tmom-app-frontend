@@ -8,7 +8,7 @@ export function AnalyticsPage() {
 
   return (
     <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, background: 'transparent' }}>
-      {isManager ? <ManagerAnalyticsDashboard /> : <SessionAnalytics />}
+      <SessionAnalytics />
     </div>
   );
 }
