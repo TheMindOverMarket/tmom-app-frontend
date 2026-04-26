@@ -12,10 +12,27 @@ interface ReplayPlayerProps {
   isDark?: boolean;
 }
 
-export function ReplayPlayer({ session, events, loading, onClose, isDark = false }: ReplayPlayerProps) {
+export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isDark = false }: ReplayPlayerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(events[0]?.id || null);
+  
+  // Filter out any stale events that occurred before the session actually started
+  // This solves the "Ghost Event" issue where old ticks are processed on session start.
+  const events = useMemo(() => {
+    const sessionStart = new Date(session.start_time).getTime();
+    return rawEvents
+      .filter(evt => new Date(evt.timestamp).getTime() >= sessionStart - 1000) // 1s buffer
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  }, [rawEvents, session.start_time]);
+
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (events.length > 0 && !selectedEventId) {
+      setSelectedEventId(events[0].id);
+    }
+  }, [events, selectedEventId]);
+
   const { summary: deviationSummary } = useDeviationEngine(session.id);
   const playbackRef = useRef<number | null>(null);
 
@@ -464,7 +481,9 @@ export function ReplayPlayer({ session, events, loading, onClose, isDark = false
                       color: (idx === currentIndex) ? '#ffffff' : 'var(--auth-text-muted)',
                       fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
                     }}>
-                        {evt.event_data?.summary as string || (evt.tick ? `Price Tick: $${evt.tick}` : 'System Event')}
+                        {evt.event_data?.summary as string || 
+                         (evt.event_data?.price ? `Price Action: $${Number(evt.event_data.price).toLocaleString()}` : 
+                          (evt.tick ? `Price Tick: #${evt.tick}` : 'System Event'))}
                     </div>
                   </div>
                 ))}
