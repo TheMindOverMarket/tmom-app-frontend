@@ -11,7 +11,7 @@ import { StatusPlaceholder } from './common/StatusPlaceholder';
 import { Candle } from '../marketdata/types';
 import { playbookApi } from '../domain/playbook/api';
 import { resolvePlaybookSymbol } from '../domain/playbook/utils';
-import { Activity, CandlestickChart } from 'lucide-react';
+import { CandlestickChart } from 'lucide-react';
 
 interface ReplayChartProps {
   session: Session;
