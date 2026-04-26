@@ -12,12 +12,12 @@ const toWebSocketBaseUrl = (value: string) => {
   return value;
 };
 
-const ruleEngineBaseUrl = normalizeBaseUrl(import.meta.env.VITE_RULE_ENGINE_BASE_URL || 'https://rule-engine-rcg9.onrender.com');
+const ruleEngineBaseUrl = normalizeBaseUrl(import.meta.env.VITE_RULE_ENGINE_BASE_URL);
 const ruleEngineWsUrl = normalizeBaseUrl(
   import.meta.env.VITE_RULE_ENGINE_WS_URL ??
     (ruleEngineBaseUrl
       ? `${toWebSocketBaseUrl(ruleEngineBaseUrl)}/ws/engine-output`
-      : 'wss://rule-engine-rcg9.onrender.com/ws/engine-output'),
+      : ''),
 );
 
 const deviationEngineBaseUrl = normalizeBaseUrl(
