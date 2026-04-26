@@ -110,44 +110,30 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
         flexShrink: 0
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
-          <div>
-            <div style={{ 
-              display: 'inline-flex', 
-              alignItems: 'center', 
-              gap: '8px', 
-              padding: '4px 12px', 
-              borderRadius: '4px', 
-              backgroundColor: session.status === 'COMPLETED' 
-                ? (isDark ? 'rgba(0, 255, 136, 0.1)' : 'rgba(16, 185, 129, 0.05)') 
-                : 'rgba(239, 68, 68, 0.05)',
-              color: session.status === 'COMPLETED' ? (isDark ? 'var(--auth-accent)' : '#10b981') : '#ef4444',
-              fontSize: '10px',
-              fontWeight: 900,
-              fontFamily: isDark ? "'Space Mono', monospace" : 'inherit',
-              textTransform: 'uppercase',
-              letterSpacing: '0.15em',
-              border: `1px solid ${session.status === 'COMPLETED' 
-                ? (isDark ? 'rgba(0, 255, 136, 0.2)' : 'rgba(16, 185, 129, 0.1)') 
-                : 'rgba(239, 68, 68, 0.1)'}`,
-              marginBottom: '16px'
-            }}>
-              <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'currentColor' }} />
-              {session.status}
-            </div>
-            <h2 style={{ 
-              fontSize: '28px', 
-              fontWeight: isDark ? 400 : 800, 
-              color: isDark ? '#ffffff' : 'var(--slate-900)', 
-              margin: 0, 
-              letterSpacing: isDark ? '0.02em' : '-0.025em',
-              fontFamily: isDark ? "'Cormorant Garamond', serif" : 'inherit',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px'
-            }}>
-              Archive: <span style={{ color: isDark ? 'var(--auth-accent)' : 'var(--brand)' }}>{session.id.slice(0, 8).toUpperCase()}</span>
-              
-              {/* Organic Config Guard Badge */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px', 
+                padding: '4px 10px', 
+                borderRadius: '6px', 
+                backgroundColor: session.status === 'COMPLETED' 
+                  ? (isDark ? 'rgba(0, 255, 136, 0.1)' : 'rgba(16, 185, 129, 0.05)') 
+                  : 'rgba(239, 68, 68, 0.05)',
+                color: session.status === 'COMPLETED' ? (isDark ? 'var(--auth-accent)' : '#10b981') : '#ef4444',
+                fontSize: '9px',
+                fontWeight: 900,
+                fontFamily: "'Space Mono', monospace",
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                border: `1px solid ${session.status === 'COMPLETED' 
+                  ? (isDark ? 'rgba(0, 255, 136, 0.2)' : 'rgba(16, 185, 129, 0.1)') 
+                  : 'rgba(239, 68, 68, 0.1)'}`
+              }}>
+                <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: 'currentColor' }} />
+                {session.status}
+              </div>
               <div style={{
                 fontSize: '8px',
                 padding: '4px 8px',
@@ -161,6 +147,16 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
               }}>
                 {CONFIG.WS_ENGINE_URL ? 'ENGINE: CONNECTED' : 'ENGINE: CONFIG MISSING'}
               </div>
+            </div>
+            <h2 style={{ 
+              fontSize: '24px', 
+              fontWeight: isDark ? 400 : 800, 
+              color: isDark ? '#ffffff' : 'var(--slate-900)', 
+              margin: 0, 
+              letterSpacing: isDark ? '0.02em' : '-0.025em',
+              fontFamily: isDark ? "'Cormorant Garamond', serif" : 'inherit'
+            }}>
+              Archive: <span style={{ color: isDark ? 'var(--auth-accent)' : 'var(--brand)' }}>{session.id.slice(0, 8).toUpperCase()}</span>
             </h2>
           </div>
           <button 
@@ -184,108 +180,60 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '32px' }}>
-          {[
-            { label: 'FULL UUID', value: session.id },
-            { label: 'USER CONTEXT', value: session.user_id.slice(0, 16).toUpperCase() + '...' },
-            { label: 'START TIME', value: new Date(session.start_time).toLocaleString().toUpperCase() },
-            { label: 'END TIME', value: session.end_time ? new Date(session.end_time).toLocaleString().toUpperCase() : 'LIVE / IN-PROGRESS' }
-          ].map(meta => (
-            <div key={meta.label}>
-              <div style={{ 
-                fontSize: '9px', 
-                fontWeight: 900, 
-                color: 'var(--auth-text-muted)', 
-                textTransform: 'uppercase', 
-                marginBottom: '6px', 
-                letterSpacing: '0.1em',
-                fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
-              }}>{meta.label}</div>
-              <div style={{ 
-                fontSize: '11px', 
-                fontWeight: 600, 
-                color: isDark ? '#ffffff' : '#0f172a', 
-                fontFamily: "'Space Mono', monospace" 
-              }}>{meta.value}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Audit Report Card (Premium Section) */}
-        {session.is_audit_ready && (session.session_metadata as any)?.report_card && (
-          <div style={{ 
-            marginBottom: '32px',
-            padding: '24px',
-            backgroundColor: isDark ? 'rgba(0, 255, 136, 0.03)' : '#f0fdf4',
-            borderRadius: '12px',
-            border: `1px solid ${isDark ? 'rgba(0, 255, 136, 0.2)' : '#bcf1d3'}`,
-            display: 'flex',
-            gap: '32px',
-            position: 'relative',
-            overflow: 'hidden'
-          }}>
-            {/* Watermark Grade */}
-            <div style={{
-              position: 'absolute',
-              right: '-10px',
-              bottom: '-20px',
-              fontSize: '120px',
-              fontWeight: 900,
-              color: isDark ? 'rgba(0, 255, 136, 0.05)' : 'rgba(16, 185, 129, 0.05)',
-              fontFamily: "'Space Mono', monospace",
-              pointerEvents: 'none'
-            }}>
-              {(session.session_metadata as any)?.report_card?.consistency_grade}
-            </div>
-
+        {/* Compact Metadata & Report Strip */}
+        <div style={{ 
+          display: 'flex', 
+          gap: '24px', 
+          marginBottom: '24px', 
+          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.02)' : '#f8fafc',
+          padding: '16px 20px',
+          borderRadius: '12px',
+          border: `1px solid ${isDark ? 'var(--auth-border)' : '#e2e8f0'}`,
+          alignItems: 'center'
+        }}>
+          {session.is_audit_ready && (session.session_metadata as any)?.report_card && (
             <div style={{ 
-              width: '100px', 
-              height: '100px', 
-              borderRadius: '50%', 
-              backgroundColor: isDark ? 'rgba(0, 255, 136, 0.1)' : '#ffffff',
-              border: `4px solid ${isDark ? 'var(--auth-accent)' : '#10b981'}`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.1)'
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '16px', 
+              paddingRight: '24px', 
+              borderRight: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'}`,
+              flex: 1 
             }}>
-              <div style={{ fontSize: '48px', fontWeight: 900, color: isDark ? 'var(--auth-accent)' : '#10b981', fontFamily: "'Space Mono', monospace" }}>
-                {(session.session_metadata as any)?.report_card?.consistency_grade}
-              </div>
-            </div>
-
-            <div style={{ flex: 1, zIndex: 1 }}>
               <div style={{ 
-                fontSize: '9px', 
-                fontWeight: 900, 
-                color: isDark ? 'var(--auth-accent)' : '#059669', 
-                textTransform: 'uppercase', 
-                letterSpacing: '0.2em',
-                marginBottom: '8px',
-                fontFamily: "'Space Mono', monospace"
-              }}>AUDIT REPORT CARD</div>
-              <h3 style={{ fontSize: '18px', margin: '0 0 12px 0', fontWeight: 600 }}>
-                {(session.session_metadata as any)?.report_card?.summary}
-              </h3>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
-                <div>
-                  <div style={{ fontSize: '8px', fontWeight: 900, color: 'var(--auth-text-muted)', textTransform: 'uppercase', marginBottom: '4px', fontFamily: "'Space Mono', monospace" }}>BEHAVIORAL PATTERN</div>
-                  <div style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#ffffff' : '#065f46' }}>{(session.session_metadata as any)?.report_card?.behavioral_pattern}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '8px', fontWeight: 900, color: 'var(--auth-text-muted)', textTransform: 'uppercase', marginBottom: '4px', fontFamily: "'Space Mono', monospace" }}>TOP VIOLATION</div>
-                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#ef4444' }}>{(session.session_metadata as any)?.report_card?.top_violation}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '8px', fontWeight: 900, color: 'var(--auth-text-muted)', textTransform: 'uppercase', marginBottom: '4px', fontFamily: "'Space Mono', monospace" }}>NEXT FOCUS</div>
-                  <div style={{ fontSize: '12px', fontWeight: 700, color: isDark ? 'var(--auth-accent)' : '#10b981' }}>{(session.session_metadata as any)?.report_card?.actionable_feedback}</div>
+                width: '40px', 
+                height: '40px', 
+                borderRadius: '50%', 
+                backgroundColor: isDark ? 'rgba(0, 255, 136, 0.1)' : '#ffffff',
+                border: `2px solid ${isDark ? 'var(--auth-accent)' : '#10b981'}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <div style={{ fontSize: '18px', fontWeight: 900, color: isDark ? 'var(--auth-accent)' : '#10b981', fontFamily: "'Space Mono', monospace" }}>
+                  {(session.session_metadata as any)?.report_card?.consistency_grade}
                 </div>
               </div>
+              <div>
+                <div style={{ fontSize: '8px', fontWeight: 900, color: isDark ? 'var(--auth-accent)' : '#059669', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: "'Space Mono', monospace" }}>AUDIT REPORT</div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: isDark ? '#ffffff' : '#0f172a' }}>{(session.session_metadata as any)?.report_card?.behavioral_pattern} • {(session.session_metadata as any)?.report_card?.summary.slice(0, 80)}...</div>
+              </div>
             </div>
+          )}
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px 32px' }}>
+            {[
+              { label: 'START', value: new Date(session.start_time).toLocaleTimeString() },
+              { label: 'USER', value: session.user_id.slice(0, 8).toUpperCase() }
+            ].map(meta => (
+              <div key={meta.label} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '8px', fontWeight: 900, color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace" }}>{meta.label}</span>
+                <span style={{ fontSize: '10px', fontWeight: 600, color: isDark ? '#ffffff' : '#0f172a', fontFamily: "'Space Mono', monospace" }}>{meta.value}</span>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
 
         {/* Cost of Deviation Impact */}
         {deviationSummary && (
@@ -445,26 +393,27 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
           <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
             {/* Event Timeline Sidebar */}
             <div style={{ 
-              width: '380px', 
+              width: '320px', 
               borderRight: `1px solid ${isDark ? 'var(--auth-border)' : '#f1f5f9'}`, 
               overflowY: 'auto',
               backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : '#fcfdfe',
               display: 'flex',
               flexDirection: 'column'
             }}>
-              <div style={{ padding: '20px 24px', borderBottom: `1px solid ${isDark ? 'var(--auth-border)' : '#f1f5f9'}`, backgroundColor: isDark ? 'rgba(255, 255, 255, 0.01)' : 'transparent' }}>
+              <div style={{ padding: '12px 20px', borderBottom: `1px solid ${isDark ? 'var(--auth-border)' : '#f1f5f9'}`, backgroundColor: isDark ? 'rgba(255, 255, 255, 0.01)' : 'transparent' }}>
                 <div style={{ 
-                  fontSize: '9px', 
+                  fontSize: '8px', 
                   fontWeight: 900, 
                   color: 'var(--auth-text-muted)', 
                   letterSpacing: '0.15em',
                   fontFamily: "'Space Mono', monospace"
-                }}>TIMELINE FEED ({events.length})</div>
+                }}>FEED ({events.length})</div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                 {events.map((evt, idx) => (
                   <div 
                     key={evt.id}
+                    id={`event-${evt.id}`}
                     onClick={() => { setSelectedEventId(evt.id); setCurrentIndex(idx); setIsPlaying(false); }}
                     style={{
                       padding: '16px 24px',
@@ -521,7 +470,23 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
                  <ReplayChart 
                    session={session} 
                    events={events} 
-                   onMarkerClick={handleMarkerClick} 
+                   onMarkerClick={(ts) => {
+                     // FLUID SYNC: Find matching event and scroll feed
+                     const matchingEvent = events.find(e => {
+                       const evtTs = Math.floor(new Date(e.timestamp).getTime() / 1000);
+                       return Math.abs(evtTs - ts) < 2;
+                     });
+                     if (matchingEvent) {
+                       setSelectedEventId(matchingEvent.id);
+                       const idx = events.findIndex(e => e.id === matchingEvent.id);
+                       if (idx !== -1) setCurrentIndex(idx);
+                       
+                       document.getElementById(`event-${matchingEvent.id}`)?.scrollIntoView({ 
+                         behavior: 'smooth', 
+                         block: 'center' 
+                       });
+                     }
+                   }} 
                    isDark={isDark}
                    selectedEventId={selectedEventId}
                  />
