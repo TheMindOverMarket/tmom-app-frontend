@@ -20,6 +20,7 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [playbook, setPlaybook] = useState<Playbook | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(true);
 
   // Filter out any stale events that occurred before the session actually started
   // This solves the "Ghost Event" issue where old ticks are processed on session start.
@@ -512,20 +513,26 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
               {/* Collapsible Details Drawer */}
               {selectedEvent && (
                 <div style={{ 
-                  height: '280px', 
+                  height: isDrawerOpen ? '280px' : '48px', 
                   backgroundColor: isDark ? 'var(--auth-black)' : '#ffffff', 
                   borderTop: `1px solid ${isDark ? 'var(--auth-border)' : '#e2e8f0'}`,
                   display: 'flex',
                   flexDirection: 'column',
-                  boxShadow: isDark ? '0 -10px 40px rgba(0,0,0,0.5)' : '0 -4px 12px rgba(0,0,0,0.05)'
+                  boxShadow: isDark ? '0 -10px 40px rgba(0,0,0,0.5)' : '0 -4px 12px rgba(0,0,0,0.05)',
+                  transition: 'height 0.3s ease',
+                  overflow: 'hidden',
+                  flexShrink: 0
                 }}>
-                  <div style={{ 
+                  <div 
+                    onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+                    style={{ 
                     padding: '14px 24px', 
                     borderBottom: `1px solid ${isDark ? 'var(--auth-border)' : '#f1f5f9'}`,
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.01)' : '#ffffff'
+                    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.01)' : '#ffffff',
+                    cursor: 'pointer'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Activity size={14} color={getEventColor(selectedEvent.type)} />
@@ -537,57 +544,69 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
                           fontFamily: "'Space Mono', monospace"
                         }}>EVENT INSPECTOR</span>
                     </div>
-                    <div style={{ 
-                      fontSize: '9px', 
-                      color: 'var(--auth-text-muted)', 
-                      fontWeight: 700,
-                      fontFamily: "'Space Mono', monospace"
-                    }}>{selectedEvent.id}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div style={{ 
+                          fontSize: '9px', 
+                          color: 'var(--auth-text-muted)', 
+                          fontWeight: 700,
+                          fontFamily: "'Space Mono', monospace"
+                        }}>{selectedEvent.id}</div>
+                        <div style={{
+                          color: 'var(--auth-text-muted)',
+                          transform: isDrawerOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                          transition: 'transform 0.3s ease'
+                        }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                    </div>
                   </div>
-                  <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                      {Object.entries(selectedEvent.event_data.rule_evaluations || {}).map(([ruleId, passed]) => {
-                        const rule = (playbook?.rules || []).find((r: Rule) => r.id === ruleId);
-                        const isTrue = passed === true;
-                        
-                        return (
-                          <div key={ruleId} style={{ 
-                            padding: '12px 16px', 
-                            backgroundColor: isDark ? (isTrue ? 'rgba(0, 255, 136, 0.05)' : 'rgba(239, 68, 68, 0.03)') : (isTrue ? '#f0fdf4' : '#fef2f2'),
-                            borderRadius: '8px',
-                            border: `1px solid ${isDark ? (isTrue ? 'rgba(0, 255, 136, 0.1)' : 'rgba(239, 68, 68, 0.1)') : (isTrue ? '#bcf1d3' : '#fee2e2')}`,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between'
-                          }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                              <div style={{ fontSize: '8px', fontWeight: 900, color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace" }}>RULE ID: {ruleId.slice(0, 8)}</div>
-                              <div style={{ fontSize: '13px', fontWeight: 600, color: isDark ? '#ffffff' : '#0f172a' }}>
-                                {rule?.name || 'Unknown Trading Rule'}
+                  
+                  {isDrawerOpen && (
+                    <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+                        {Object.entries(selectedEvent.event_data.rule_evaluations || {}).map(([ruleId, passed]) => {
+                          const rule = (playbook?.rules || []).find((r: Rule) => r.id === ruleId || r.name === ruleId);
+                          const isTrue = passed === true;
+                          
+                          return (
+                            <div key={ruleId} style={{ 
+                              padding: '12px 16px', 
+                              backgroundColor: isDark ? (isTrue ? 'rgba(0, 255, 136, 0.05)' : 'rgba(239, 68, 68, 0.03)') : (isTrue ? '#f0fdf4' : '#fef2f2'),
+                              borderRadius: '8px',
+                              border: `1px solid ${isDark ? (isTrue ? 'rgba(0, 255, 136, 0.1)' : 'rgba(239, 68, 68, 0.1)') : (isTrue ? '#bcf1d3' : '#fee2e2')}`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between'
+                            }}>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <div style={{ fontSize: '8px', fontWeight: 900, color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace", textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '200px' }}>RULE: {ruleId}</div>
+                                <div style={{ fontSize: '13px', fontWeight: 600, color: isDark ? '#ffffff' : '#0f172a' }}>
+                                  {rule?.name || ruleId}
+                                </div>
+                              </div>
+                              <div style={{ 
+                                padding: '4px 10px', 
+                                borderRadius: '4px', 
+                                fontSize: '10px', 
+                                fontWeight: 900, 
+                                fontFamily: "'Space Mono', monospace",
+                                backgroundColor: isTrue ? (isDark ? 'var(--auth-accent)' : '#10b981') : '#ef4444',
+                                color: isDark ? 'var(--auth-black)' : '#ffffff'
+                              }}>
+                                {isTrue ? 'PASS' : 'FAIL'}
                               </div>
                             </div>
-                            <div style={{ 
-                              padding: '4px 10px', 
-                              borderRadius: '4px', 
-                              fontSize: '10px', 
-                              fontWeight: 900, 
-                              fontFamily: "'Space Mono', monospace",
-                              backgroundColor: isTrue ? (isDark ? 'var(--auth-accent)' : '#10b981') : '#ef4444',
-                              color: isDark ? 'var(--auth-black)' : '#ffffff'
-                            }}>
-                              {isTrue ? 'PASS' : 'FAIL'}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {(!selectedEvent.event_data || !Object.keys((selectedEvent.event_data as any)?.rule_evaluations || {}).length) && (
-                      <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--auth-text-muted)', fontSize: '12px', fontFamily: "'Space Mono', monospace" }}>
-                        NO RULE EVALUATIONS CAPTURED FOR THIS TICK
+                          );
+                        })}
                       </div>
-                    )}
-                  </div>
+
+                      {(!selectedEvent.event_data || !Object.keys((selectedEvent.event_data as any)?.rule_evaluations || {}).length) && (
+                        <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--auth-text-muted)', fontSize: '12px', fontFamily: "'Space Mono', monospace" }}>
+                          NO RULE EVALUATIONS CAPTURED FOR THIS TICK
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
