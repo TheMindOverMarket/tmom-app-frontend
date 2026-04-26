@@ -84,9 +84,13 @@ export function MonitorPage() {
     <div style={{ 
       display: 'grid', 
       gridTemplateColumns: '1fr 340px', 
-      gap: '16px', 
+      gap: '12px', 
       flex: 1,
-      minHeight: 0
+      minHeight: 0,
+      backgroundColor: 'var(--auth-black)',
+      padding: '12px',
+      color: '#ffffff',
+      fontFamily: "'Inter', sans-serif"
     }}>
       {notification && (
         <div style={{
@@ -113,20 +117,27 @@ export function MonitorPage() {
       )}
 
       {/* Left Column: Chart & Controls */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minHeight: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', minHeight: 0 }}>
           <div style={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
             alignItems: 'center',
-            backgroundColor: 'white',
+            backgroundColor: 'rgba(255,255,255,0.03)',
             padding: '8px 16px',
             borderRadius: '4px',
-            border: '1px solid #e2e8f0'
+            border: '1px solid var(--auth-border)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Activity size={12} color="var(--brand)" />
-              <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--slate-400)', letterSpacing: '0.05em' }}>PLAYBOOK SUPERVISION:</div>
-              <div style={{ fontSize: '11px', color: '#0f172a', fontWeight: 800 }}>{supervisionPlaybook.name}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <Activity size={16} color="var(--auth-accent)" />
+              <span style={{ 
+                fontSize: '11px', 
+                fontWeight: 900, 
+                color: '#ffffff', 
+                letterSpacing: '0.15em', 
+                fontFamily: "'Space Mono', monospace" 
+              }}>
+                PLAYBOOK SUPERVISION: <span style={{ color: 'var(--auth-accent)' }}>{(supervisionPlaybook?.name || 'PLAYBOOK').toUpperCase()}</span>
+              </span>
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -162,31 +173,30 @@ export function MonitorPage() {
               onClick={isStreaming ? stopStream : () => startStream(supervisionPlaybook.id)}
               disabled={isLoading || (!isStreaming && supervisionPlaybook.generation_status !== 'COMPLETED')}
               style={{
-                  height: '32px',
+                  height: '28px',
                   padding: '0 16px',
-                  backgroundColor: isLoading ? '#e2e8f0' : (isStreaming ? 'var(--danger-alpha)' : (supervisionPlaybook.generation_status === 'COMPLETED' ? '#0f172a' : '#e2e8f0')),
-                  color: (isLoading || (supervisionPlaybook.generation_status !== 'COMPLETED' && !isStreaming)) ? '#64748b' : (isStreaming ? 'var(--danger)' : 'white'),
-                  border: isStreaming ? '1px solid var(--danger)' : 'none',
+                  backgroundColor: isStreaming ? 'rgba(239, 68, 68, 0.1)' : 'transparent',
+                  color: isStreaming ? '#ef4444' : 'var(--auth-accent)',
+                  border: `1px solid ${isStreaming ? '#ef4444' : 'var(--auth-accent)'}`,
                   borderRadius: '4px',
-                  fontSize: '11px',
+                  fontSize: '10px',
                   fontWeight: 900,
                   cursor: (isLoading || (!isStreaming && supervisionPlaybook.generation_status !== 'COMPLETED')) ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  opacity: 1,
+                  fontFamily: "'Space Mono', monospace",
                   transition: 'all 0.2s ease'
               }}
-              title={supervisionPlaybook.generation_status !== 'COMPLETED' ? "Playbook analysis in progress. Monitoring restricted." : "Initialize real-time supervision orchestration"}
             >
               <div style={{ 
                 width: '6px', 
                 height: '6px', 
                 borderRadius: '50%', 
-                backgroundColor: isStreaming ? 'var(--danger)' : (supervisionPlaybook.generation_status === 'COMPLETED' ? 'white' : '#64748b'), 
+                backgroundColor: isStreaming ? '#ef4444' : 'var(--auth-accent)', 
                 animation: (isStreaming || isLoading) ? 'pulse 1.5s infinite' : 'none' 
               }} />
-              {isStartingStream ? 'WARMING UP...' : (isStoppingStream ? 'CLOSING...' : (isStreaming ? 'STOP STREAM' : (supervisionPlaybook.generation_status === 'COMPLETED' ? 'START LIVE SESSION' : 'ANALYZING...')))}
+              {isStartingStream ? 'WARMING...' : (isStoppingStream ? 'CLOSING...' : (isStreaming ? 'STOP STREAM' : 'START LIVE'))}
             </button>
           </div>
         </div>
@@ -205,22 +215,22 @@ export function MonitorPage() {
         <div style={{ 
           display: 'flex', 
           flexDirection: 'column',
-          backgroundColor: 'white',
+          backgroundColor: 'rgba(255,255,255,0.02)',
           borderRadius: '4px',
-          border: '1px solid #e2e8f0',
+          border: '1px solid var(--auth-border)',
           maxHeight: '280px',
           flexShrink: 0
         }}>
           <div style={{ 
             padding: '8px 16px', 
-            backgroundColor: '#f8fafc', 
-            borderBottom: '1px solid #f1f5f9',
+            backgroundColor: 'transparent', 
+            borderBottom: '1px solid var(--auth-border)',
             display: 'flex',
             alignItems: 'center',
             gap: '8px'
           }}>
-            <Circle size={10} color="#94a3b8" />
-            <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', letterSpacing: '0.15em' }}>SESSION RULES</div>
+            <Circle size={10} color="var(--auth-accent)" />
+            <div style={{ fontSize: '9px', fontWeight: 900, color: '#ffffff', letterSpacing: '0.15em', fontFamily: "'Space Mono', monospace" }}>SESSION RULES</div>
           </div>
           
           <div style={{ 
@@ -238,16 +248,18 @@ export function MonitorPage() {
               rules.map((rule, idx) => (
                 <div key={rule.id || idx} style={{
                   border: `1px solid ${
-                    lastEvent?.rule_status?.[rule.id] === false ? '#fee2e2' : 
-                    lastEvent?.rule_status?.[rule.id] === true ? '#dcfce7' : 'transparent'
+                    lastEvent?.rule_status?.[rule.id] === false ? 'rgba(239, 68, 68, 0.2)' : 
+                    lastEvent?.rule_status?.[rule.id] === true ? 'rgba(0, 255, 136, 0.2)' : 'rgba(255,255,255,0.05)'
                   }`,
                   borderRadius: '6px',
-                  boxShadow: lastEvent?.rule_status?.[rule.id] === false ? '0 0 10px rgba(239, 68, 68, 0.1)' : 'none',
+                  backgroundColor: lastEvent?.rule_status?.[rule.id] === false ? 'rgba(239, 68, 68, 0.05)' : 
+                                   lastEvent?.rule_status?.[rule.id] === true ? 'rgba(0, 255, 136, 0.05)' : 'transparent',
+                  boxShadow: lastEvent?.rule_status?.[rule.id] === false ? '0 0 15px rgba(239, 68, 68, 0.1)' : 'none',
                   transition: 'all 0.3s ease',
                   overflow: 'hidden'
                 }}>
                   <div style={{ transform: 'scale(0.95)', transformOrigin: 'top center', width: '105.26%', marginBottom: '-10px' }}>
-                    <RuleLogicTree rule={rule} isDark={false} />
+                    <RuleLogicTree rule={rule} isDark={true} />
                   </div>
                 </div>
               ))

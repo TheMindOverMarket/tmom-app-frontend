@@ -63,8 +63,8 @@ export function DeviationPanel({ summary, records, isActive, onRecordClick }: De
 
   return (
     <div style={{
-      backgroundColor: 'white',
-      border: '1px solid #e2e8f0',
+      backgroundColor: 'rgba(255,255,255,0.03)',
+      border: '1px solid var(--auth-border)',
       borderRadius: '4px',
       display: 'flex',
       flexDirection: 'column',
@@ -211,16 +211,16 @@ export function DeviationPanel({ summary, records, isActive, onRecordClick }: De
 function SummaryCell({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div style={{
-      backgroundColor: 'white',
+      backgroundColor: 'transparent',
       padding: '10px 12px',
       display: 'flex',
       flexDirection: 'column',
       gap: '2px',
     }}>
-      <div style={{ fontSize: '9px', fontWeight: 800, color: '#64748b', letterSpacing: '0.05em' }}>
+      <div style={{ fontSize: '9px', fontWeight: 800, color: 'var(--auth-text-muted)', letterSpacing: '0.05em', fontFamily: "'Space Mono', monospace" }}>
         {label}
       </div>
-      <div style={{ fontSize: '16px', fontWeight: 900, color }}>
+      <div style={{ fontSize: '16px', fontWeight: 900, color, fontFamily: "'Space Mono', monospace" }}>
         {value}
       </div>
     </div>
@@ -243,10 +243,10 @@ function DeviationRow({ record, onClick }: { record: DeviationRecord; onClick: (
       }}
       style={{
         padding: '10px 16px',
-        borderBottom: '1px solid #f8fafc',
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
         cursor: 'pointer',
         transition: 'background-color 0.15s ease',
-        backgroundColor: expanded ? '#fafafa' : 'white',
+        backgroundColor: expanded ? 'rgba(255,255,255,0.05)' : 'transparent',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -256,6 +256,7 @@ function DeviationRow({ record, onClick }: { record: DeviationRecord; onClick: (
             fontSize: '11px',
             fontWeight: 800,
             color: severityColor,
+            fontFamily: "'Inter', sans-serif"
           }}>
             {typeLabel}
           </div>

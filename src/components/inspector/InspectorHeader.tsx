@@ -35,63 +35,74 @@ export function InspectorHeader({ focusedTimestamp, isActive, filterType, onClea
           {focusedTimestamp !== null ? (
              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ 
-                    fontSize: '11px', 
+                    fontSize: '9px', 
                     padding: '2px 6px', 
-                    backgroundColor: '#FEF3C7', 
-                    color: '#92400E', 
+                    backgroundColor: 'rgba(251, 191, 36, 0.1)', 
+                    color: '#fbbf24', 
                     borderRadius: '4px',
-                    fontWeight: 600,
-                    textTransform: 'uppercase'
+                    fontWeight: 900,
+                    textTransform: 'uppercase',
+                    fontFamily: "'Space Mono', monospace",
+                    letterSpacing: '0.05em',
+                    border: '1px solid rgba(251, 191, 36, 0.2)'
                 }}>
-                    History
+                    HISTORY
                 </span>
-                <span style={{ fontSize: '13px', fontWeight: 500, color: '#111827' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#e2e8f0', fontFamily: "'Space Mono', monospace" }}>
                   {formatHeaderDate(focusedTimestamp)}
                 </span>
                 
                 {filterType && (
                   <span style={{
-                    fontSize: '10px',
+                    fontSize: '9px',
                     padding: '2px 6px',
-                    backgroundColor: filterType === 'deviation' ? '#FFF7ED' : '#EFF6FF',
-                    color: filterType === 'deviation' ? '#C2410C' : '#1D4ED8',
-                    border: `1px solid ${filterType === 'deviation' ? '#FDBA74' : '#93C5FD'}`,
-                    borderRadius: '12px',
-                    fontWeight: 600,
+                    backgroundColor: filterType === 'deviation' ? 'rgba(234, 88, 12, 0.1)' : 'rgba(0, 255, 136, 0.1)',
+                    color: filterType === 'deviation' ? '#fb923c' : 'var(--auth-accent)',
+                    border: `1px solid ${filterType === 'deviation' ? 'rgba(234, 88, 12, 0.2)' : 'rgba(0, 255, 136, 0.2)'}`,
+                    borderRadius: '4px',
+                    fontWeight: 900,
                     textTransform: 'uppercase',
-                    marginLeft: '4px'
+                    marginLeft: '4px',
+                    fontFamily: "'Space Mono', monospace",
+                    letterSpacing: '0.05em'
                   }}>
-                    Viewing: {filterType}
+                    VIEWING: {filterType}
                   </span>
                 )}
              </div>
           ) : isActive ? (
               <span style={{ 
-                  fontSize: '11px', 
-                  padding: '2px 6px', 
-                  backgroundColor: '#D1FAE5', 
-                  color: '#065F46', 
+                  fontSize: '9px', 
+                  padding: '2px 8px', 
+                  backgroundColor: 'rgba(0, 255, 136, 0.1)', 
+                  color: 'var(--auth-accent)', 
                   borderRadius: '4px',
-                  fontWeight: 600,
+                  fontWeight: 900,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px',
-                  textTransform: 'uppercase'
+                  gap: '6px',
+                  textTransform: 'uppercase',
+                  fontFamily: "'Space Mono', monospace",
+                  letterSpacing: '0.1em',
+                  border: '1px solid rgba(0, 255, 136, 0.2)'
               }}>
-                 <span style={{ display: 'block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#059669' }}></span>
-                 Live Feed
+                 <span style={{ display: 'block', width: '4px', height: '4px', borderRadius: '50%', backgroundColor: 'var(--auth-accent)', animation: 'pulse 1.5s infinite' }}></span>
+                 LIVE FEED
               </span>
           ) : (
             <span style={{ 
-                fontSize: '11px', 
-                padding: '2px 6px', 
-                backgroundColor: '#f3f4f6', 
-                color: '#6b7280', 
+                fontSize: '9px', 
+                padding: '2px 8px', 
+                backgroundColor: 'rgba(255,255,255,0.05)', 
+                color: 'var(--auth-text-muted)', 
                 borderRadius: '4px',
-                fontWeight: 600,
-                textTransform: 'uppercase'
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                fontFamily: "'Space Mono', monospace",
+                letterSpacing: '0.1em',
+                border: '1px solid var(--auth-border)'
             }}>
-               Idle
+               IDLE
             </span>
           )}
       </div>
@@ -100,19 +111,27 @@ export function InspectorHeader({ focusedTimestamp, isActive, filterType, onClea
         <button 
           onClick={onClearFocus}
           style={{
-              fontSize: '12px',
-              color: '#2563EB',
+              fontSize: '10px',
+              color: 'var(--auth-accent)',
               backgroundColor: 'transparent',
-              border: '1px solid transparent',
+              border: '1px solid var(--auth-accent)',
               borderRadius: '4px',
-              padding: '2px 6px',
+              padding: '2px 8px',
               cursor: 'pointer',
-              fontWeight: 500
+              fontWeight: 900,
+              fontFamily: "'Space Mono', monospace",
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              transition: 'all 0.2s ease'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#EFF6FF'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(0, 255, 136, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
         >
-          ← Back to Live
+          ← LIVE VIEW
         </button>
       )}
     </div>
