@@ -213,7 +213,7 @@ export function usePriceChart(
         
         const getY = (isDeviation: boolean): number | null => {
             const evt = groupEvents.find(e => e.deviation === isDeviation);
-            if (evt) return series.priceToCoordinate(evt.price);
+            if (evt && evt.price && evt.price > 0) return series.priceToCoordinate(evt.price);
             if (candle) return series.priceToCoordinate(isDeviation ? candle.high : candle.low);
             return null;
         };
@@ -251,7 +251,15 @@ export function usePriceChart(
         const finalX = x !== null ? x : (width - 4);
         if (finalX < 0 || finalX > width + 50) return;
 
-        const y = series.priceToCoordinate(evt.price);
+        const candle = refCandles.find(c => Number(c.time) === snappedTime) || 
+                     (refCurrentCandle && Number(refCurrentCandle.time) === snappedTime ? refCurrentCandle : undefined);
+
+        let y: number | null = null;
+        if (evt.price && evt.price > 0) {
+            y = series.priceToCoordinate(evt.price);
+        } else if (candle) {
+            y = series.priceToCoordinate(evt.deviation ? candle.high : candle.low);
+        }
         if (y === null) return;
 
         newMarkers.push({ 
