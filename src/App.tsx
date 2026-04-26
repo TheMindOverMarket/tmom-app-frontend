@@ -20,7 +20,7 @@ function AppRoutes() {
   return (
     <PlaybookProvider>
       <Routes>
-        <Route path="/" element={<Navigate to="/playbooks" replace />} />
+        <Route path="/" element={<Navigate to={isAdmin ? "/admin" : "/playbooks"} replace />} />
         
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
