@@ -101,7 +101,18 @@ export function useDeviationEngine(sessionId: string | null | undefined) {
   const processDeviationMessage = useCallback((data: DeviationResult) => {
     setLatestResult(data);
     if (data.deviations && data.deviations.length > 0) {
-      setRecords(prev => [...prev, ...data.deviations]);
+      setRecords(prev => {
+        const next = [...prev];
+        data.deviations.forEach(dev => {
+          const idx = next.findIndex(r => r.id === dev.id);
+          if (idx > -1) {
+            next[idx] = dev;
+          } else {
+            next.push(dev);
+          }
+        });
+        return next;
+      });
     }
     if (data.session_totals) {
       setSummary(prev => prev ? {

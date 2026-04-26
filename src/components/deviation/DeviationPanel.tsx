@@ -278,7 +278,7 @@ function DeviationRow({ record }: { record: DeviationRecord }) {
         </div>
       </div>
 
-      {expanded && record.explainability_payload && (
+      {expanded && (
         <div style={{
           marginTop: '12px',
           padding: '12px',
@@ -287,8 +287,34 @@ function DeviationRow({ record }: { record: DeviationRecord }) {
           fontSize: '10px',
           lineHeight: '1.5',
         }}>
+          {record.ai_reasoning ? (
+            <div style={{ marginBottom: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                 <Zap size={10} color="#6366f1" />
+                 <span style={{ fontSize: '9px', fontWeight: 900, color: '#6366f1', letterSpacing: '0.05em' }}>AI REASONING</span>
+              </div>
+              {record.ai_reasoning === "GENERATING..." ? (
+                <div style={{ 
+                  color: '#6366f1', 
+                  fontWeight: 600, 
+                  fontStyle: 'italic',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#6366f1', animation: 'pulse 1s infinite' }} />
+                  Analyzing deviation logic...
+                </div>
+              ) : (
+                <div style={{ color: '#0f172a', fontWeight: 600 }}>
+                  {record.ai_reasoning}
+                </div>
+              )}
+            </div>
+          ) : null}
+
           <div style={{ color: '#475569', fontWeight: 600 }}>
-            {record.explainability_payload?.summary?.matched_vs_expected || 'No additional details.'}
+            {record.explainability_payload?.summary?.matched_vs_expected || 'No additional logic details.'}
           </div>
           {record.price_delta !== null && (
             <div style={{ marginTop: '6px', color: '#64748b' }}>
@@ -302,6 +328,7 @@ function DeviationRow({ record }: { record: DeviationRecord }) {
           )}
         </div>
       )}
+
     </div>
   );
 }
