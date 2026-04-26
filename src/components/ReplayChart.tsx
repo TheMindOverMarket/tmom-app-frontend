@@ -117,8 +117,8 @@ export function ReplayChart({ session, events, onMarkerClick, isDark = false, se
 
         return {
           id: event.id,
-          timestamp: Math.floor(msTimestamp / 1000),
-          msTimestamp,
+          timestamp: Math.floor(timestamp / 1000),
+          msTimestamp: timestamp,
           originalTimestamp: event.timestamp,
           price,
           playbook_id: session.playbook_id,
@@ -135,6 +135,7 @@ export function ReplayChart({ session, events, onMarkerClick, isDark = false, se
           deviation_false: deviation ? [] : [ruleId],
         };
       });
+  };
 
   useEffect(() => {
     const fetchData = async () => {
