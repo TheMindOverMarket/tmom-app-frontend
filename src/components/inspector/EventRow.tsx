@@ -78,7 +78,14 @@ export const EventRow: FC<EventRowProps> = memo(({ event, rules = [] }) => {
            </span>
         </div>
         {matchedRule ? (
-          <div style={{ transform: 'scale(0.85)', transformOrigin: 'top left', width: '117.6%', marginTop: '4px', marginBottom: '-16px' }}>
+          <div style={{ 
+            marginTop: '10px', 
+            marginBottom: '2px',
+            backgroundColor: 'rgba(0,0,0,0.2)',
+            borderRadius: '6px',
+            border: '1px solid rgba(255,255,255,0.05)',
+            padding: '4px'
+          }}>
             <RuleLogicTree rule={matchedRule} isDark={true} />
           </div>
         ) : (
@@ -88,7 +95,8 @@ export const EventRow: FC<EventRowProps> = memo(({ event, rules = [] }) => {
             fontWeight: 500,
             whiteSpace: 'nowrap', 
             overflow: 'hidden', 
-            textOverflow: 'ellipsis' 
+            textOverflow: 'ellipsis',
+            marginTop: '4px'
           }}>
             {typeof event.rule === 'string' ? event.rule : JSON.stringify(event.rawRule || event.rule)}
           </div>
