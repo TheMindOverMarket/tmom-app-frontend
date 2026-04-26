@@ -46,11 +46,10 @@ export const RuleEventInspector: FC<RuleEventInspectorProps> = ({
       flex: 1.5,
       minHeight: 0,
       height: '100%',
-      backgroundColor: '#ffffff',
-      border: '1px solid #e5e7eb',
-      borderRadius: '8px',
+      backgroundColor: 'var(--auth-black)',
+      border: '1px solid var(--auth-border)',
+      borderRadius: '4px',
       overflow: 'hidden',
-      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
     }}>
       <InspectorHeader 
         focusedTimestamp={focusedTimestamp}
@@ -60,13 +59,14 @@ export const RuleEventInspector: FC<RuleEventInspectorProps> = ({
       />
 
       {/* Tabs */}
-      <div style={{ display: 'flex', backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+      <div style={{ display: 'flex', backgroundColor: 'var(--auth-black)', borderBottom: '1px solid var(--auth-border)' }}>
         <button 
           onClick={() => setActiveTab('feed')}
           style={{ 
-            flex: 1, padding: '10px 0', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-            backgroundColor: 'transparent', border: 'none', borderBottom: activeTab === 'feed' ? '2px solid #2563EB' : '2px solid transparent',
-            color: activeTab === 'feed' ? '#2563EB' : '#6B7280'
+            flex: 1, padding: '12px 0', fontSize: '10px', fontWeight: 700, cursor: 'pointer',
+            fontFamily: "'Space Mono', monospace", letterSpacing: '0.1em',
+            backgroundColor: 'transparent', border: 'none', borderBottom: activeTab === 'feed' ? '2px solid var(--auth-accent)' : '2px solid transparent',
+            color: activeTab === 'feed' ? 'var(--auth-accent)' : 'var(--auth-text-muted)'
           }}
         >
           LIVE FEED
@@ -74,9 +74,10 @@ export const RuleEventInspector: FC<RuleEventInspectorProps> = ({
         <button 
           onClick={() => setActiveTab('deviations')}
           style={{ 
-            flex: 1, padding: '10px 0', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-            backgroundColor: 'transparent', border: 'none', borderBottom: activeTab === 'deviations' ? '2px solid #EA580C' : '2px solid transparent',
-            color: activeTab === 'deviations' ? '#EA580C' : '#6B7280'
+            flex: 1, padding: '12px 0', fontSize: '10px', fontWeight: 700, cursor: 'pointer',
+            fontFamily: "'Space Mono', monospace", letterSpacing: '0.1em',
+            backgroundColor: 'transparent', border: 'none', borderBottom: activeTab === 'deviations' ? '2px solid var(--auth-accent)' : '2px solid transparent',
+            color: activeTab === 'deviations' ? 'var(--auth-accent)' : 'var(--auth-text-muted)'
           }}
         >
           DEVIATIONS

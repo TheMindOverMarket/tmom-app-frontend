@@ -22,15 +22,15 @@ export function InspectorHeader({ focusedTimestamp, isActive, filterType, onClea
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '12px 16px',
-      borderBottom: '1px solid #e5e7eb',
-      backgroundColor: '#f9fafb',
+      borderBottom: '1px solid var(--auth-border)',
+      backgroundColor: 'var(--auth-black)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontWeight: 600, fontSize: '14px', color: '#374151' }}>
-              Rule Engine
+          <span style={{ fontWeight: 700, fontSize: '10px', color: '#ffffff', fontFamily: "'Space Mono', monospace", letterSpacing: '0.1em' }}>
+              RULE ENGINE
           </span>
           
-          <span style={{ color: '#D1D5DB' }}>|</span>
+          <span style={{ color: 'var(--auth-border)' }}>|</span>
 
           {focusedTimestamp !== null ? (
              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
