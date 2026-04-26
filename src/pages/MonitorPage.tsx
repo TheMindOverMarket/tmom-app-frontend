@@ -4,10 +4,11 @@ import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { useRuleEngineEvents } from '../hooks/useRuleEngineEvents';
 import { PriceChart } from '../components/PriceChart';
 import { RuleEventInspector } from '../components/RuleEventInspector';
-import { Activity, Circle, Check, X, Bell } from 'lucide-react';
+import { Activity, Circle, Bell } from 'lucide-react';
 import { useDeviationEngine } from '../hooks/useDeviationEngine';
 import { DeviationPanel } from '../components/deviation/DeviationPanel';
 import { resolvePlaybookSymbol } from '../domain/playbook/utils';
+import { RuleLogicTree } from '../components/playbook/RuleLogicTree';
 
 export function MonitorPage() {
   const {
@@ -192,83 +193,30 @@ export function MonitorPage() {
           </div>
           
           <div style={{ 
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-            gap: '4px',
-            padding: '8px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            padding: '12px',
             overflowY: 'auto'
           }}>
             {rules.length === 0 ? (
-              <div style={{ fontSize: '11px', color: '#94a3b8', textAlign: 'center', gridColumn: '1 / -1', padding: '12px' }}>
+              <div style={{ fontSize: '11px', color: '#94a3b8', textAlign: 'center', padding: '12px' }}>
                 Fetching active playbook parameters...
               </div>
             ) : (
               rules.map((rule, idx) => (
                 <div key={rule.id || idx} style={{
-                  padding: '8px',
-                  borderRadius: '4px',
                   border: `1px solid ${
                     lastEvent?.rule_status?.[rule.id] === false ? '#fee2e2' : 
-                    lastEvent?.rule_status?.[rule.id] === true ? '#dcfce7' : '#f1f5f9'
+                    lastEvent?.rule_status?.[rule.id] === true ? '#dcfce7' : 'transparent'
                   }`,
-                  backgroundColor: '#ffffff',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '4px',
+                  borderRadius: '6px',
+                  boxShadow: lastEvent?.rule_status?.[rule.id] === false ? '0 0 10px rgba(239, 68, 68, 0.1)' : 'none',
                   transition: 'all 0.3s ease',
-                  boxShadow: lastEvent?.rule_status?.[rule.id] === false ? '0 0 10px rgba(239, 68, 68, 0.1)' : 'none'
+                  overflow: 'hidden'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-                      <div style={{ 
-                        fontSize: '10px', 
-                        fontWeight: '900', 
-                        color: '#0f172a', 
-                        textTransform: 'uppercase', 
-                        letterSpacing: '0.01em',
-                        lineHeight: '1.2'
-                      }}>
-                        {rule.name}
-                      </div>
-                    </div>
-                    {lastEvent?.rule_status?.[rule.id] === false ? (
-                      <X size={12} color="#ef4444" strokeWidth={3} />
-                    ) : lastEvent?.rule_status?.[rule.id] === true ? (
-                      <Check size={12} color="#10b981" strokeWidth={3} />
-                    ) : (
-                      <Circle size={8} color="#cbd5e1" />
-                    )}
-                  </div>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                    {(rule.extensions || rule.conditions)?.map((cond: any, cIdx: number) => {
-                      const isCompiled = !!rule.extensions;
-                      return (
-                      <div key={cond.id || cIdx} style={{ 
-                        fontSize: '8.5px', 
-                        padding: '2px 6px', 
-                        backgroundColor: '#f8fafc', 
-                        borderRadius: '2px', 
-                        display: 'flex', 
-                        alignItems: 'center',
-                        gap: '4px',
-                        border: '1px solid #f1f5f9',
-                        flexWrap: 'wrap'
-                      }}>
-                        <Circle size={6} color="#e2e8f0" style={{ flexShrink: 0 }} />
-                        <span style={{ fontWeight: 800, color: 'var(--brand)' }}>{isCompiled ? cond.primitive : cond.metric}</span>
-                        {isCompiled ? (
-                            Object.entries(cond.params || {}).map(([k, v]) => (
-                                <span key={k} style={{ fontWeight: 900, color: '#0f172a' }}>{k}:{typeof v==='object'?JSON.stringify(v):String(v)}</span>
-                            ))
-                        ) : (
-                            <>
-                                <span style={{ color: '#94a3b8', fontWeight: 700 }}>{cond.comparator}</span>
-                                <span style={{ fontWeight: 900, color: '#0f172a' }}>{cond.value}</span>
-                            </>
-                        )}
-                      </div>
-                    )})}
+                  <div style={{ transform: 'scale(0.95)', transformOrigin: 'top center', width: '105.26%', marginBottom: '-10px' }}>
+                    <RuleLogicTree rule={rule} isDark={false} />
                   </div>
                 </div>
               ))
