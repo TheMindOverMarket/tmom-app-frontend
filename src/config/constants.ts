@@ -19,7 +19,7 @@ const deviationEngineWsUrl = normalizeBaseUrl(
       ? `${toWebSocketBaseUrl(deviationEngineBaseUrl)}/ws/deviation-output`
       : ''),
 );
-const ruleEngineBaseUrl = normalizeBaseUrl(import.meta.env.VITE_RULE_ENGINE_BASE_URL);
+const ruleEngineBaseUrl = normalizeBaseUrl(import.meta.env.VITE_RULE_ENGINE_BASE_URL || 'https://rule-engine-rcg9.onrender.com');
 const ruleEngineWsUrl = normalizeBaseUrl(
   import.meta.env.VITE_RULE_ENGINE_WS_URL ??
     (ruleEngineBaseUrl

@@ -245,23 +245,21 @@ export function ReplayChart({ session, events, onMarkerClick, isDark = false, se
     );
   }
 
-  if (candles.length === 0) {
-    return (
-      <StatusPlaceholder
-        icon={Activity}
-        title="No Replay Candles"
-        subtitle="No market history was returned for this session range, so the chart cannot be redrawn yet."
-        style={{ height: '100%' }}
-      />
-    );
-  }
-
+  // Ensure the chart container always renders even if candles are loading
+  // This prevents the "Black Screen" effect.
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 0, flex: 1 }}>
       <div 
         ref={chartContainerRef} 
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} 
       />
+      {candles.length === 0 && !loading && (
+          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10 }}>
+              <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace" }}>
+                  WAITING FOR MARKET DATA...
+              </div>
+          </div>
+      )}
       <MarkerLayer 
         markers={markers} 
         onMarkerClick={onMarkerClick} 
