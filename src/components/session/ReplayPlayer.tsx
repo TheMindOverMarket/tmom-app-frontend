@@ -5,6 +5,7 @@ import { AlertTriangle, DollarSign, Activity } from 'lucide-react';
 import { ReplayChart } from '../ReplayChart';
 import { CONFIG } from '../../config/constants';
 import { playbookApi } from '../../domain/playbook/api';
+import { Playbook } from '../../domain/playbook/types';
 
 interface ReplayPlayerProps {
   session: Session;
@@ -14,10 +15,12 @@ interface ReplayPlayerProps {
   isDark?: boolean;
 }
 
-export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isDark = false }: ReplayPlayerProps) {
+export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isDark = true }: ReplayPlayerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [playbook, setPlaybook] = useState<Playbook | null>(null);
+
   // Filter out any stale events that occurred before the session actually started
   // This solves the "Ghost Event" issue where old ticks are processed on session start.
   const events = useMemo(() => {
@@ -27,17 +30,26 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
       .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   }, [rawEvents, session.start_time]);
 
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-
   useEffect(() => {
     if (events.length > 0 && !selectedEventId) {
       setSelectedEventId(events[0].id);
     }
   }, [events, selectedEventId]);
 
+  useEffect(() => {
+    const fetchPlaybook = async () => {
+      if (!session.playbook_id) return;
+      try {
+        const data = await playbookApi.getPlaybook(session.playbook_id);
+        setPlaybook(data);
+      } catch (err) {
+        console.error("Failed to fetch playbook for replay:", err);
+      }
+    };
+    fetchPlaybook();
+  }, [session.playbook_id]);
+
   const { summary: deviationSummary } = useDeviationEngine(session.id);
-  const playbackRef = useRef<number | null>(null);
-  const { data: playbook } = playbookApi.useGetPlaybookQuery(session.playbook_id);
 
   const selectedEvent = useMemo(() => 
     events.find(e => e.id === selectedEventId), 
@@ -526,7 +538,7 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
                   <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
                       {Object.entries((selectedEvent.event_data as any)?.rule_evaluations || {}).map(([ruleId, passed]) => {
-                        const rule = playbook?.rules.find(r => r.id === ruleId);
+                        const rule = playbook?.rules.find((r: Rule) => r.id === ruleId);
                         const isTrue = passed === true;
                         
                         return (
