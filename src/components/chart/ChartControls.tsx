@@ -9,21 +9,21 @@ export function ChartControls({ deduplicateEvents, onToggle }: ChartControlsProp
       <button 
         onClick={onToggle}
         style={{ 
-          backgroundColor: 'rgba(255,255,255,0.9)', 
+          backgroundColor: 'rgba(15, 23, 42, 0.8)', 
           backdropFilter: 'blur(4px)', 
-          border: '1px solid #E5E7EB', 
-          boxShadow: '0 1px 2px rgba(0,0,0,0.05)', 
+          border: '1px solid var(--auth-border)', 
           padding: '6px 12px', 
           borderRadius: '4px', 
           fontSize: '12px', 
-          fontWeight: 600, 
-          color: '#374151', 
-          cursor: 'pointer' 
+          fontWeight: 700, 
+          color: '#ffffff', 
+          cursor: 'pointer',
+          fontFamily: "'Space Mono', monospace"
         }}
       >
         {deduplicateEvents ? 'Mode: Grouped' : 'Mode: Debug Stream'}
       </button>
-      <span style={{ fontSize: '10px', color: '#6B7280', backgroundColor: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(4px)', padding: '0 4px', borderRadius: '4px' }}>
+      <span style={{ fontSize: '10px', color: 'var(--auth-text-muted)', backgroundColor: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(4px)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--auth-border)', fontFamily: "'Space Mono', monospace" }}>
         {deduplicateEvents 
           ? 'Showing 1 marker per minute (clean)' 
           : 'Showing all raw events (stacked)'}

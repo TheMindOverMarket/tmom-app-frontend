@@ -11,7 +11,7 @@ export function MarkerLayer({ markers, onMarkerClick, selectedTimestamp }: Marke
     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 100 }}>
       {markers.map(m => {
           const isDeviation = m.type === 'deviation';
-          const color = isDeviation ? 'var(--danger)' : 'var(--success)';
+          const color = isDeviation ? 'var(--danger)' : 'var(--auth-accent)';
           const icon = isDeviation ? '▼' : '▲';
           const isSelected = selectedTimestamp && Math.floor(m.timestamp / 60) * 60 === Math.floor(selectedTimestamp / 60) * 60;
           const yTransform = isDeviation ? 'calc(-100% - 14px)' : '14px';
