@@ -63,6 +63,7 @@ export function useRuleEngineEvents(isActive: boolean = false, sessionId?: strin
                   ...updatedEvents[existingIdx],
                   ...rawData,
                   // Keep the original event's timestamps for stability
+                  timestamp: updatedEvents[existingIdx].timestamp,
                   ai_reasoning: rawData.ai_reasoning || updatedEvents[existingIdx].ai_reasoning,
                 };
                 updatedEvents[existingIdx] = updatedEvent;

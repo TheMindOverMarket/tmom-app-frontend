@@ -20,6 +20,7 @@ export interface DeviationRecord {
   detected_at: number;
   finalized_at: number | null;
   explainability_payload: any | null;
+  ai_reasoning?: string;
 }
 
 export interface DeviationSummary {
