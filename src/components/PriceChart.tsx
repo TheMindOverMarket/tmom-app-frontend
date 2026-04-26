@@ -12,9 +12,10 @@ interface PriceChartProps {
   events: RuleEngineEvent[];
   symbol: string;
   onMarkerClick: (timestamp: number, type?: 'adherence' | 'deviation') => void;
+  isDark?: boolean;
 }
 
-export function PriceChart({ events, symbol, onMarkerClick }: PriceChartProps) {
+export function PriceChart({ events, symbol, onMarkerClick, isDark = true }: PriceChartProps) {
   const { candles, currentCandle, isMockData } = useMarketData(symbol, 60);
   const { ema9, currentEMA9 } = useDerivedSignals(candles, currentCandle);
 
@@ -23,7 +24,7 @@ export function PriceChart({ events, symbol, onMarkerClick }: PriceChartProps) {
     deduplicateEvents,
     setDeduplicateEvents,
     markers
-  } = usePriceChart(events, candles, currentCandle, ema9, currentEMA9, isMockData);
+  } = usePriceChart(events, candles, currentCandle, ema9, currentEMA9, isMockData, isDark);
 
   if (!symbol) {
     return (

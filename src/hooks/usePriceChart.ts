@@ -34,7 +34,8 @@ export function usePriceChart(
   currentCandle: Candle | null,
   ema9: { time: Time; value: number }[],
   currentEMA9: { time: Time; value: number } | null,
-  isMockData: boolean = false
+  isMockData: boolean = false,
+  isDark: boolean = true
 ) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -69,26 +70,26 @@ export function usePriceChart(
       chart = createChart(chartContainerRef.current, {
         layout: {
           background: { type: ColorType.Solid, color: 'transparent' },
-          textColor: '#94a3b8',
+          textColor: isDark ? '#94a3b8' : '#64748b',
           fontSize: 10,
           fontFamily: "'Inter', sans-serif",
         },
         grid: {
-          vertLines: { color: 'rgba(30, 41, 59, 0.5)', style: LineStyle.Dotted },
-          horzLines: { color: 'rgba(30, 41, 59, 0.5)', style: LineStyle.Dotted },
+          vertLines: { color: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(226, 232, 240, 0.5)', style: LineStyle.Dotted },
+          horzLines: { color: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(226, 232, 240, 0.5)', style: LineStyle.Dotted },
         },
         crosshair: {
           mode: CrosshairMode.Normal,
-          vertLine: { labelBackgroundColor: 'var(--auth-black)' },
-          horzLine: { labelBackgroundColor: 'var(--auth-black)' },
+          vertLine: { labelBackgroundColor: isDark ? 'var(--auth-black)' : '#0f172a' },
+          horzLine: { labelBackgroundColor: isDark ? 'var(--auth-black)' : '#0f172a' },
         },
         timeScale: {
-          borderColor: 'rgba(30, 41, 59, 0.5)',
+          borderColor: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(226, 232, 240, 0.5)',
           timeVisible: true,
           secondsVisible: false,
         },
         rightPriceScale: {
-          borderColor: 'rgba(30, 41, 59, 0.5)',
+          borderColor: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(226, 232, 240, 0.5)',
           autoScale: true,
           scaleMargins: {
             top: 0.15, // Give 15% space at top

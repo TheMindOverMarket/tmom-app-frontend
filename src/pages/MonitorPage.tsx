@@ -160,11 +160,12 @@ export function MonitorPage() {
           </div>
         </div>
 
-        <div style={{ flex: 1, minHeight: 0, position: 'relative', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+        <div style={{ flex: 1, minHeight: 0, position: 'relative', backgroundColor: 'var(--auth-black)', borderRadius: '4px', border: '1px solid #1e293b', overflow: 'hidden' }}>
           <PriceChart 
             events={events}
             symbol={playbookSymbol}
             onMarkerClick={handleMarkerClick}
+            isDark={true}
           />
         </div>
 
