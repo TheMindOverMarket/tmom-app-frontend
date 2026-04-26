@@ -490,20 +490,20 @@ export function NewStrategyPage() {
               display: 'flex', 
               flexDirection: 'column', 
               justifyContent: 'center', 
-              padding: '40px 20px',
-              gap: '24px'
+              padding: '20px 20px',
+              gap: '16px'
             }}>
               {/* 1. HERO HEADER */}
-              <div style={{ textAlign: 'center', marginBottom: '8px', animation: 'heroFade 0.8s ease-out' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '20px' }}>
+              <div style={{ textAlign: 'center', marginBottom: '4px', animation: 'heroFade 0.8s ease-out' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '12px' }}>
                    <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to right, transparent, var(--auth-border))' }}></div>
                    <span style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '0.3em', color: 'var(--auth-text-muted)', textTransform: 'uppercase' }}>Universal Playbook Parser</span>
                    <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to left, transparent, var(--auth-border))' }}></div>
                 </div>
                 <h1 style={{ 
-                  fontSize: '56px', 
+                  fontSize: '48px', 
                   fontFamily: "'Cormorant Garamond', serif", 
-                  margin: '0 0 12px 0',
+                  margin: '0 0 8px 0',
                   fontWeight: 300,
                   textTransform: 'uppercase',
                   letterSpacing: '0.06em',
@@ -646,7 +646,7 @@ export function NewStrategyPage() {
 
               {/* 4. TEMPLATES (Blueprints) */}
               <div style={{ animation: 'heroFade 1.1s ease-out' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
                   <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.25em', textTransform: 'uppercase' }}>Available Blueprints</span>
                   <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to right, var(--auth-border), transparent)' }}></div>
                 </div>

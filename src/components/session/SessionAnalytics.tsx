@@ -79,7 +79,7 @@ export function SessionAnalytics() {
 
   return (
     <div style={{
-      padding: '32px',
+      padding: '24px 32px',
       backgroundColor: 'transparent',
       display: 'flex',
       flexDirection: 'column',
@@ -87,7 +87,7 @@ export function SessionAnalytics() {
       minHeight: 0,
       overflow: 'hidden'
     }}>
-      <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexShrink: 0 }}>
+      <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexShrink: 0 }}>
         <div>
           <h2 style={{ 
             fontSize: '28px', 
@@ -117,18 +117,18 @@ export function SessionAnalytics() {
       </div>
 
       {/* Stats Dashboard */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '40px', flexShrink: 0 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px', flexShrink: 0 }}>
         {[
           { label: 'Total Sessions', value: stats.total, color: 'var(--brand)' },
           { label: 'Completed Audit', value: stats.completed, color: 'var(--auth-accent)' },
           { label: 'Last 24 Hours', value: stats.recent, color: '#f59e0b' }
         ].map(stat => (
           <div key={stat.label} style={{
-            padding: '24px',
+            padding: '16px 20px',
             backgroundColor: 'rgba(255, 255, 255, 0.02)',
             borderRadius: '8px',
             border: '1px solid var(--auth-border)',
-            minHeight: '120px',
+            minHeight: '80px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
@@ -158,7 +158,7 @@ export function SessionAnalytics() {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '40px', borderBottom: '1px solid var(--auth-border)', marginBottom: '32px', flexShrink: 0 }}>
+      <div style={{ display: 'flex', gap: '40px', borderBottom: '1px solid var(--auth-border)', marginBottom: '16px', flexShrink: 0 }}>
         {[
           { id: 'all', label: 'All Sessions' },
           { id: 'completed', label: 'Completed Audit' }
@@ -189,7 +189,7 @@ export function SessionAnalytics() {
       </div>
 
       {/* Search Bar */}
-      <div style={{ marginBottom: '32px', flexShrink: 0 }}>
+      <div style={{ marginBottom: '16px', flexShrink: 0 }}>
         <input 
           type="text" 
           placeholder="FILTER BY SESSION ID..."
