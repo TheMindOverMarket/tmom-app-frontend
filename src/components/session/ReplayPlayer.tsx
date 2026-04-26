@@ -76,24 +76,7 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
     }
   };
 
-  const handleMarkerClick = (timestamp: number, type?: 'adherence' | 'deviation') => {
-    const snappedTimestamp = Math.floor(timestamp / 60) * 60;
-    const idx = events.findIndex((event) => {
-      const eventSnappedTimestamp = Math.floor(new Date(event.timestamp).getTime() / 1000 / 60) * 60;
-      if (eventSnappedTimestamp !== snappedTimestamp) return false;
-      if (!type) return true;
-      return (
-        (type === 'deviation' && event.type === SessionEventType.DEVIATION) ||
-        (type === 'adherence' && event.type === SessionEventType.ADHERENCE)
-      );
-    });
-
-    if (idx !== -1) {
-       setCurrentIndex(idx);
-       setSelectedEventId(events[idx].id);
-       setIsPlaying(false);
-    }
-  };
+  const selectedEvent = events.find(e => e.id === selectedEventId);
 
   return (
     <div style={{ 
