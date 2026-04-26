@@ -16,7 +16,7 @@ export function Navbar() {
 
   const isAdmin = currentUser?.role === 'MANAGER';
   const navItems = isAdmin 
-    ? [...NAV_ITEMS, { path: '/admin', label: 'ADMIN CONTROL', icon: LayoutGrid }]
+    ? [{ path: '/admin', label: 'ADMIN CONTROL', icon: LayoutGrid }, ...NAV_ITEMS]
     : NAV_ITEMS;
 
   return (
