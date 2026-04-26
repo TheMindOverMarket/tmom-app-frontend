@@ -274,60 +274,96 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
               
               <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
                 {/* AI Reasoning Section */}
-                {((selectedEvent.event_data as any)?.ai_reasoning || (selectedEvent.event_metadata as any)?.ai_reasoning || (selectedEvent as any).ai_reasoning) && (
-                  <div style={{ marginBottom: '24px' }}>
-                    <div style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.15em', fontFamily: "'Space Mono', monospace", marginBottom: '8px' }}>AI SIGNAL / REASONING</div>
-                    <div style={{ padding: '12px', backgroundColor: isDark ? 'rgba(59, 130, 246, 0.1)' : '#eff6ff', borderRadius: '8px', border: `1px solid ${isDark ? 'rgba(59, 130, 246, 0.2)' : '#bfdbfe'}`, fontSize: '12px', lineHeight: '1.6', color: isDark ? '#e2e8f0' : '#1e3a8a' }}>
-                      {(selectedEvent.event_data as any)?.ai_reasoning || (selectedEvent.event_metadata as any)?.ai_reasoning || (selectedEvent as any).ai_reasoning}
+                {(() => {
+                  const rawReasoning = (selectedEvent.event_data as any)?.ai_reasoning || (selectedEvent.event_metadata as any)?.ai_reasoning || (selectedEvent as any).ai_reasoning;
+                  const deviationCost = (selectedEvent.event_data as any)?.deviation_cost || (selectedEvent.event_metadata as any)?.deviation_cost || (selectedEvent as any).deviation_cost;
+                  
+                  if (!rawReasoning && !deviationCost) return null;
+
+                  return (
+                    <div style={{ marginBottom: '24px' }}>
+                      <div style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.15em', fontFamily: "'Space Mono', monospace", marginBottom: '8px' }}>AI SIGNAL / REASONING</div>
+                      
+                      {rawReasoning && (
+                        <div style={{ 
+                          padding: '12px', 
+                          backgroundColor: rawReasoning === "GENERATING..." ? 'rgba(255,255,255,0.03)' : 'rgba(59, 130, 246, 0.1)', 
+                          borderRadius: '8px', 
+                          border: `1px solid ${rawReasoning === "GENERATING..." ? 'var(--auth-border)' : 'rgba(59, 130, 246, 0.2)'}`, 
+                          fontSize: '12px', 
+                          lineHeight: '1.6', 
+                          color: isDark ? '#e2e8f0' : '#1e3a8a',
+                          position: 'relative',
+                          overflow: 'hidden'
+                        }}>
+                          {rawReasoning === "GENERATING..." ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--auth-accent)', fontWeight: 700, fontFamily: "'Space Mono', monospace", fontSize: '10px' }}>
+                               <div className="pulse-dot" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'currentColor' }} />
+                               STALE GENERATION DETECTED
+                            </div>
+                          ) : (
+                            rawReasoning
+                          )}
+                        </div>
+                      )}
+
+                      {deviationCost !== undefined && (
+                        <div style={{ marginTop: '8px', padding: '12px', backgroundColor: 'rgba(234, 88, 12, 0.1)', borderRadius: '8px', border: '1px solid rgba(234, 88, 12, 0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '9px', fontWeight: 900, color: '#fb923c', letterSpacing: '0.15em', fontFamily: "'Space Mono', monospace" }}>DEVIATION PENALTY</span>
+                          <span style={{ fontSize: '13px', fontWeight: 900, color: '#ffffff', fontFamily: "'Space Mono', monospace" }}>
+                            ${Number(deviationCost).toFixed(2)}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    {((selectedEvent.event_data as any)?.deviation_cost || (selectedEvent.event_metadata as any)?.deviation_cost || (selectedEvent as any).deviation_cost) && (
-                      <div style={{ marginTop: '8px', padding: '12px', backgroundColor: isDark ? 'rgba(234, 88, 12, 0.1)' : '#fff7ed', borderRadius: '8px', border: `1px solid ${isDark ? 'rgba(234, 88, 12, 0.2)' : '#ffedd5'}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '9px', fontWeight: 900, color: isDark ? '#fb923c' : '#c2410c', letterSpacing: '0.15em', fontFamily: "'Space Mono', monospace" }}>DEVIATION PENALTY</span>
-                        <span style={{ fontSize: '13px', fontWeight: 900, color: isDark ? '#ffffff' : '#000000', fontFamily: "'Space Mono', monospace" }}>
-                          ${Number((selectedEvent.event_data as any)?.deviation_cost || (selectedEvent.event_metadata as any)?.deviation_cost || (selectedEvent as any).deviation_cost).toFixed(2)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* Rules Evaluated */}
                 <div style={{ marginBottom: '24px' }}>
                   <div style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.15em', fontFamily: "'Space Mono', monospace", marginBottom: '12px' }}>RULE EVALUATIONS</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {Object.keys(selectedEvent.event_data.rule_evaluations || {}).length > 0 ? (
                       Object.entries(selectedEvent.event_data.rule_evaluations || {}).map(([ruleId, passed]) => {
                         const allRules = ((playbook?.context as any)?.compiled_rules as any[]) || playbook?.rules || [];
                         const rule = allRules.find((r: any) => r.id === ruleId || r.name === ruleId);
                         const isTrue = passed === true;
+                        
                         return (
                           <div key={ruleId} style={{ 
-                            padding: '12px', 
-                            backgroundColor: isDark ? (isTrue ? 'rgba(0, 255, 136, 0.05)' : 'rgba(239, 68, 68, 0.05)') : (isTrue ? '#f0fdf4' : '#fef2f2'),
-                            borderRadius: '8px',
+                            borderRadius: '4px',
                             border: `1px solid ${isDark ? (isTrue ? 'rgba(0, 255, 136, 0.2)' : 'rgba(239, 68, 68, 0.2)') : (isTrue ? '#bcf1d3' : '#fee2e2')}`,
+                            backgroundColor: isDark ? (isTrue ? 'rgba(0, 255, 136, 0.05)' : 'rgba(239, 68, 68, 0.05)') : (isTrue ? '#f0fdf4' : '#fef2f2'),
+                            overflow: 'hidden',
+                            display: 'flex',
+                            flexDirection: 'column'
                           }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: rule ? '12px' : '0' }}>
-                              <div style={{ fontSize: '11px', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '0.05em', fontFamily: "'Space Mono', monospace" }}>
-                                {rule ? 'RULE EVALUATED' : (ruleId.length > 20 ? `ID: ${ruleId.slice(0, 8)}` : ruleId)}
-                              </div>
-                              <div style={{ 
-                                padding: '2px 6px', borderRadius: '4px', fontSize: '9px', fontWeight: 900, fontFamily: "'Space Mono', monospace",
-                                backgroundColor: isTrue ? (isDark ? 'var(--auth-accent)' : '#10b981') : '#ef4444',
-                                color: isDark ? 'var(--auth-black)' : '#ffffff',
-                                boxShadow: isTrue && isDark ? '0 0 10px rgba(0,255,136,0.2)' : 'none'
-                              }}>
-                                {isTrue ? 'PASS' : 'FAIL'}
-                              </div>
-                            </div>
-                            {rule && (
+                            {/* Card Header */}
+                            <div style={{ 
+                                padding: '8px 12px', 
+                                borderBottom: '1px solid rgba(255,255,255,0.05)', 
+                                display: 'flex', 
+                                justifyContent: 'space-between', 
+                                alignItems: 'center',
+                                backgroundColor: 'rgba(255,255,255,0.02)'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontSize: '10px', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', fontFamily: "'Space Mono', monospace", letterSpacing: '0.05em' }}>
+                                        {rule ? rule.name.toUpperCase() : `ID: ${ruleId.slice(0, 8)}`}
+                                    </span>
+                                </div>
                                 <div style={{ 
-                                    transform: 'scale(0.95)', 
-                                    transformOrigin: 'top left', 
-                                    width: '105.26%',
-                                    margin: '-8px 0 -16px 0'
+                                    padding: '2px 6px', borderRadius: '4px', fontSize: '9px', fontWeight: 900, fontFamily: "'Space Mono', monospace",
+                                    backgroundColor: isTrue ? (isDark ? 'var(--auth-accent)' : '#10b981') : '#ef4444',
+                                    color: isDark ? 'var(--auth-black)' : '#ffffff'
                                 }}>
-                                   <RuleLogicTree rule={rule} isDark={isDark} />
+                                    {isTrue ? 'PASS' : 'FAIL'}
+                                </div>
+                            </div>
+
+                            {rule && (
+                                <div style={{ padding: '12px' }}>
+                                   <RuleLogicTree rule={rule} isDark={isDark} compact={true} />
                                 </div>
                             )}
                           </div>
