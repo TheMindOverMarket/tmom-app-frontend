@@ -3,6 +3,7 @@ import { Rule } from '../../domain/playbook/types';
 interface RuleLogicTreeProps {
     rule: Rule;
     isDark?: boolean;
+    compact?: boolean;
 }
 
 const getPrimitiveBadge = (primitive: string, isDark: boolean = false) => {
@@ -73,56 +74,57 @@ const getLegacyEvaluatorBadge = (metric: string, isDark: boolean = false) => {
     };
 };
 
-export function RuleLogicTree({ rule, isDark = false }: RuleLogicTreeProps) {
+export function RuleLogicTree({ rule, isDark = false, compact = false }: RuleLogicTreeProps) {
     const isCompiled = Array.isArray(rule.extensions) && rule.extensions.length > 0;
     const items = isCompiled ? rule.extensions! : (rule.conditions || []);
     const edges = rule.condition_edges || [];
 
     return (
         <div style={{
-            padding: '24px',
+            padding: compact ? '0' : '24px',
             borderRadius: '8px',
-            border: isDark ? '1px solid var(--auth-border)' : '1px solid #e2e8f0',
-            backgroundColor: isDark ? 'rgba(255, 255, 255, 0.01)' : 'white',
-            marginBottom: '16px',
+            border: compact ? 'none' : (isDark ? '1px solid var(--auth-border)' : '1px solid #e2e8f0'),
+            backgroundColor: compact ? 'transparent' : (isDark ? 'rgba(255, 255, 255, 0.01)' : 'white'),
+            marginBottom: compact ? '0' : '16px',
             position: 'relative',
             overflow: 'hidden'
         }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: isDark ? 'var(--auth-border)' : '#cbd5e1' }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-                <div>
-                    <h4 style={{ 
-                        margin: '0 0 4px 0', 
-                        fontSize: '18px', 
-                        fontWeight: isDark ? 400 : 900, 
-                        color: isDark ? '#ffffff' : '#0f172a',
-                        fontFamily: isDark ? "'Cormorant Garamond', serif" : 'inherit'
-                    }}>{rule.name}</h4>
-                    {rule.description && (
-                        <p style={{ 
-                            margin: 0, 
-                            fontSize: '11px', 
-                            color: 'var(--auth-text-muted)', 
-                            fontWeight: 500,
-                            fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
-                        }}>{rule.description}</p>
-                    )}
+            {!compact && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: isDark ? 'var(--auth-border)' : '#cbd5e1' }} />}
+            {!compact && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                    <div>
+                        <h4 style={{ 
+                            margin: '0 0 4px 0', 
+                            fontSize: '18px', 
+                            fontWeight: isDark ? 400 : 900, 
+                            color: isDark ? '#ffffff' : '#0f172a',
+                            fontFamily: isDark ? "'Cormorant Garamond', serif" : 'inherit'
+                        }}>{rule.name}</h4>
+                        {rule.description && (
+                            <p style={{ 
+                                margin: 0, 
+                                fontSize: '11px', 
+                                color: 'var(--auth-text-muted)', 
+                                fontWeight: 500,
+                                fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
+                            }}>{rule.description}</p>
+                        )}
+                    </div>
+                    <div style={{ 
+                        padding: '4px 10px', 
+                        borderRadius: '2px', 
+                        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#f1f5f9', 
+                        color: isDark ? '#ffffff' : '#475569', 
+                        fontSize: '10px', 
+                        fontWeight: 800, 
+                        textTransform: 'uppercase',
+                        fontFamily: isDark ? "'Space Mono', monospace" : 'inherit',
+                        border: isDark ? '1px solid var(--auth-border)' : 'none'
+                    }}>
+                        {rule.category}
+                    </div>
                 </div>
-                <div style={{ 
-                    padding: '4px 10px', 
-                    borderRadius: '2px', 
-                    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#f1f5f9', 
-                    color: isDark ? '#ffffff' : '#475569', 
-                    fontSize: '10px', 
-                    fontWeight: 800, 
-                    textTransform: 'uppercase',
-                    fontFamily: isDark ? "'Space Mono', monospace" : 'inherit',
-                    border: isDark ? '1px solid var(--auth-border)' : 'none'
-                }}>
-                    {rule.category}
-                </div>
-            </div>
-
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {items.length === 0 ? (
                     <div style={{ fontSize: '12px', color: 'var(--auth-text-muted)', fontStyle: 'italic', fontFamily: isDark ? "'Space Mono', monospace" : 'inherit' }}>No conditions bound.</div>

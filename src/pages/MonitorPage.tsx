@@ -4,7 +4,7 @@ import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { useRuleEngineEvents } from '../hooks/useRuleEngineEvents';
 import { PriceChart } from '../components/PriceChart';
 import { RuleEventInspector } from '../components/RuleEventInspector';
-import { Activity, Circle, Bell } from 'lucide-react';
+import { Activity, Circle, Bell, Check, X } from 'lucide-react';
 import { useDeviationEngine } from '../hooks/useDeviationEngine';
 import { DeviationPanel } from '../components/deviation/DeviationPanel';
 import { resolvePlaybookSymbol } from '../domain/playbook/utils';
@@ -234,35 +234,69 @@ export function MonitorPage() {
           </div>
           
           <div style={{ 
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
+            flex: 1, 
             padding: '12px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))',
+            gap: '12px',
             overflowY: 'auto'
           }}>
             {rules.length === 0 ? (
-              <div style={{ fontSize: '11px', color: '#94a3b8', textAlign: 'center', padding: '12px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--auth-text-muted)', textAlign: 'center', padding: '12px' }}>
                 Fetching active playbook parameters...
               </div>
             ) : (
-              rules.map((rule, idx) => (
-                <div key={rule.id || idx} style={{
-                  border: `1px solid ${
-                    lastEvent?.rule_status?.[rule.id] === false ? 'rgba(239, 68, 68, 0.2)' : 
-                    lastEvent?.rule_status?.[rule.id] === true ? 'rgba(0, 255, 136, 0.2)' : 'rgba(255,255,255,0.05)'
-                  }`,
-                  borderRadius: '6px',
-                  backgroundColor: lastEvent?.rule_status?.[rule.id] === false ? 'rgba(239, 68, 68, 0.05)' : 
-                                   lastEvent?.rule_status?.[rule.id] === true ? 'rgba(0, 255, 136, 0.05)' : 'transparent',
-                  boxShadow: lastEvent?.rule_status?.[rule.id] === false ? '0 0 15px rgba(239, 68, 68, 0.1)' : 'none',
-                  transition: 'all 0.3s ease',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{ transform: 'scale(0.95)', transformOrigin: 'top center', width: '105.26%', marginBottom: '-10px' }}>
-                    <RuleLogicTree rule={rule} isDark={true} />
+              rules.map((rule, idx) => {
+                const status = lastEvent?.rule_status?.[rule.id];
+                return (
+                  <div key={rule.id || idx} style={{
+                    border: `1px solid ${
+                      status === false ? 'rgba(239, 68, 68, 0.2)' : 
+                      status === true ? 'rgba(0, 255, 136, 0.2)' : 'rgba(255,255,255,0.05)'
+                    }`,
+                    borderRadius: '4px',
+                    backgroundColor: status === false ? 'rgba(239, 68, 68, 0.05)' : 
+                                     status === true ? 'rgba(0, 255, 136, 0.05)' : 'rgba(0,0,0,0.15)',
+                    boxShadow: status === false ? '0 0 15px rgba(239, 68, 68, 0.1)' : 'none',
+                    transition: 'all 0.3s ease',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}>
+                    {/* Card Header */}
+                    <div style={{ 
+                        padding: '8px 12px', 
+                        borderBottom: '1px solid rgba(255,255,255,0.05)', 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(255,255,255,0.02)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '10px', fontWeight: 900, color: '#ffffff', fontFamily: "'Space Mono', monospace", letterSpacing: '0.05em' }}>{rule.name.toUpperCase()}</span>
+                            <span style={{ 
+                                fontSize: '8px', 
+                                padding: '1px 6px', 
+                                backgroundColor: 'rgba(255,255,255,0.05)', 
+                                color: 'var(--auth-text-muted)', 
+                                borderRadius: '2px', 
+                                fontWeight: 900, 
+                                letterSpacing: '0.05em',
+                                fontFamily: "'Space Mono', monospace"
+                            }}>{rule.category.toUpperCase()}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            {status === true && <Check size={14} color="var(--auth-accent)" strokeWidth={3} />}
+                            {status === false && <X size={14} color="#ef4444" strokeWidth={3} />}
+                        </div>
+                    </div>
+
+                    <div style={{ padding: '12px' }}>
+                      <RuleLogicTree rule={rule} isDark={true} compact={true} />
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
