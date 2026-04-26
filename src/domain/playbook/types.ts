@@ -48,6 +48,7 @@ export interface Playbook {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  rules?: Rule[];
 }
 
 export interface PlaybookCreate {

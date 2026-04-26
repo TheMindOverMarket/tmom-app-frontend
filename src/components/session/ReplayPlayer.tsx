@@ -1,11 +1,11 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Session, SessionEvent, SessionEventType } from '../../domain/session/types';
 import { useDeviationEngine } from '../../hooks/useDeviationEngine';
 import { AlertTriangle, DollarSign, Activity } from 'lucide-react';
 import { ReplayChart } from '../ReplayChart';
 import { CONFIG } from '../../config/constants';
 import { playbookApi } from '../../domain/playbook/api';
-import { Playbook } from '../../domain/playbook/types';
+import { Playbook, Rule } from '../../domain/playbook/types';
 
 interface ReplayPlayerProps {
   session: Session;
