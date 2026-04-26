@@ -18,6 +18,7 @@ export function useRuleEngineEvents(isActive: boolean = false, sessionId?: strin
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const retryCountRef = useRef(0);
+  const lastKnownSessionId = useRef<string | null>(null);
 
   const toggleMockMode = useCallback(() => {
     setIsMockMode(prev => !prev);
@@ -120,9 +121,11 @@ export function useRuleEngineEvents(isActive: boolean = false, sessionId?: strin
     if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
     setIsConnected(false);
     
-    // Clear old events when a new session starts
-    if (isActive) {
+    // Clear old events when a new session starts (STRICT ID CHANGE ONLY)
+    if (isActive && sessionId && lastKnownSessionId.current !== sessionId) {
+      console.log(`[useRuleEngineEvents] Session ID changed from ${lastKnownSessionId.current} to ${sessionId}. Clearing events.`);
       setEvents([]);
+      lastKnownSessionId.current = sessionId;
     }
 
     // 2. Mocking logic

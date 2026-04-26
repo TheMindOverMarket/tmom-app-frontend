@@ -71,6 +71,7 @@ export function useDeviationEngine(sessionId: string | null | undefined) {
   const [error, setError] = useState<string | null>(null);
   const pollRef = useRef<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const lastKnownSessionId = useRef<string | null>(null);
 
   const fetchSummary = useCallback(async () => {
     if (!sessionId || !DEVIATION_ENGINE_API) return;
@@ -131,11 +132,19 @@ export function useDeviationEngine(sessionId: string | null | undefined) {
     if (!sessionId) {
       setSummary(null);
       setRecords([]);
+      lastKnownSessionId.current = null;
       if (wsRef.current) {
         wsRef.current.close();
         wsRef.current = null;
       }
       return;
+    }
+
+    // Stability: Only clear records if the ID actually changed
+    if (sessionId && lastKnownSessionId.current !== sessionId) {
+       console.log(`[useDeviationEngine] Session ID changed from ${lastKnownSessionId.current} to ${sessionId}. Clearing records.`);
+       setRecords([]);
+       lastKnownSessionId.current = sessionId;
     }
 
     if (!DEVIATION_ENGINE_API || !DEVIATION_ENGINE_WS) {
