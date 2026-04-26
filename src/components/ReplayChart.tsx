@@ -214,63 +214,90 @@ export function ReplayChart({ session, events, onMarkerClick, isDark = false, se
     }
   }, [selectedTimestamp]);
 
-  if (loading) return (
-    <div style={{ 
-      flex: 1, 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      height: '100%', 
-      backgroundColor: isDark ? 'var(--auth-black)' : '#ffffff' 
-    }}>
-        <div style={{ 
-          fontSize: '10px', 
-          fontWeight: 900, 
-          color: isDark ? 'var(--auth-text-muted)' : '#94a3b8', 
-          letterSpacing: '0.15em',
-          fontFamily: isDark ? "'Space Mono', monospace" : 'inherit'
-        }}>
-            REHYDRATING MARKET ESTATE...
-        </div>
-    </div>
-  );
+  const containerStyle: React.CSSProperties = { 
+    position: 'relative', 
+    width: '100%', 
+    height: '100%', 
+    minHeight: 0, 
+    flex: 1,
+    backgroundColor: isDark ? 'var(--auth-black)' : '#ffffff'
+  };
 
-  if (chartError) {
-    return (
-      <StatusPlaceholder
-        icon={CandlestickChart}
-        title="Replay Chart Unavailable"
-        subtitle={`${chartError} We have the saved session events, but we could not rehydrate the candle series needed to recreate the live display.`}
-        style={{ height: '100%' }}
-      />
-    );
-  }
-
-  // Ensure the chart container always renders even if candles are loading
-  // This prevents the "Black Screen" effect.
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 0, flex: 1 }}>
+    <div style={containerStyle}>
+      {/* The Chart Container - Always rendered to ensure stable ref for usePriceChart */}
       <div 
         ref={chartContainerRef} 
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} 
       />
-      {candles.length === 0 && !loading && (
-          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10 }}>
+
+      {/* Loading Overlay */}
+      {loading && (
+        <div style={{ 
+          position: 'absolute', 
+          inset: 0, 
+          zIndex: 20, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          backgroundColor: isDark ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)',
+          backdropFilter: 'blur(4px)'
+        }}>
+            <div style={{ 
+              fontSize: '10px', 
+              fontWeight: 900, 
+              color: isDark ? 'var(--auth-accent)' : '#111827', 
+              letterSpacing: '0.2em',
+              fontFamily: "'Space Mono', monospace"
+            }}>
+                REHYDRATING MARKET ESTATE...
+            </div>
+        </div>
+      )}
+
+      {/* Error Overlay */}
+      {chartError && (
+        <div style={{ position: 'absolute', inset: 0, zIndex: 30, backgroundColor: isDark ? 'var(--auth-black)' : '#ffffff' }}>
+          <StatusPlaceholder
+            icon={CandlestickChart}
+            title="Replay Chart Unavailable"
+            subtitle={`${chartError} We have the saved session events, but we could not rehydrate the candle series.`}
+            style={{ height: '100%' }}
+          />
+        </div>
+      )}
+
+      {/* Waiting for Data Overlay */}
+      {candles.length === 0 && !loading && !chartError && (
+          <div style={{ 
+            position: 'absolute', 
+            top: '50%', 
+            left: '50%', 
+            transform: 'translate(-50%, -50%)', 
+            zIndex: 10,
+            textAlign: 'center'
+          }}>
               <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace" }}>
                   WAITING FOR MARKET DATA...
               </div>
           </div>
       )}
-      <MarkerLayer 
-        markers={markers} 
-        onMarkerClick={onMarkerClick} 
-        selectedTimestamp={selectedTimestamp}
-      />
-      <ChartControls
-        deduplicateEvents={deduplicateEvents}
-        onToggle={() => setDeduplicateEvents(!deduplicateEvents)}
-      />
-      <ChartLegend isMockData={false} symbol={resolvedSymbol} />
+
+      {/* Overlays (Legend, Markers, Controls) */}
+      {!chartError && (
+        <>
+          <MarkerLayer 
+            markers={markers} 
+            onMarkerClick={onMarkerClick} 
+            selectedTimestamp={selectedTimestamp}
+          />
+          <ChartControls
+            deduplicateEvents={deduplicateEvents}
+            onToggle={() => setDeduplicateEvents(!deduplicateEvents)}
+          />
+          <ChartLegend isMockData={false} symbol={resolvedSymbol} />
+        </>
+      )}
     </div>
   );
 }
