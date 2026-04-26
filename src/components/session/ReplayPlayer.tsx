@@ -15,13 +15,13 @@ interface ReplayPlayerProps {
 export function ReplayPlayer({ session, events, loading, onClose, isDark = false }: ReplayPlayerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(events[0]?.id || null);
   const { summary: deviationSummary } = useDeviationEngine(session.id);
   const playbackRef = useRef<number | null>(null);
 
   const selectedEvent = useMemo(() => 
-    events.find(e => e.id === selectedEventId) || events[currentIndex], 
-    [events, selectedEventId, currentIndex]
+    events.find(e => e.id === selectedEventId), 
+    [events, selectedEventId]
   );
   const visibleEvents = useMemo(
     () => events.slice(0, Math.min(currentIndex + 1, events.length)),
@@ -486,7 +486,7 @@ export function ReplayPlayer({ session, events, loading, onClose, isDark = false
               <div style={{ flex: 1, minHeight: 0 }}>
                  <ReplayChart 
                    session={session} 
-                   events={visibleEvents} 
+                   events={events} 
                    onMarkerClick={handleMarkerClick} 
                    isDark={isDark}
                    selectedEventId={selectedEventId}
