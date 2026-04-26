@@ -3,7 +3,7 @@ import { Session, SessionEvent, SessionEventType } from '../../domain/session/ty
 import { Activity } from 'lucide-react';
 import { ReplayChart } from '../ReplayChart';
 import { playbookApi } from '../../domain/playbook/api';
-import { Playbook, Rule } from '../../domain/playbook/types';
+import { Playbook } from '../../domain/playbook/types';
 import { RuleLogicTree } from '../playbook/RuleLogicTree';
 
 interface ReplayPlayerProps {
@@ -199,7 +199,7 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
           {/* Event Timeline Sidebar (Left) */}
           <div style={{ 
-            width: '240px', 
+            width: '200px', 
             borderRight: `1px solid ${isDark ? 'var(--auth-border)' : '#f1f5f9'}`, 
             overflowY: 'auto',
             backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : '#fcfdfe',
@@ -260,7 +260,7 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
           {/* Event Inspector Sidebar (Right) */}
           {selectedEvent && (
             <div style={{ 
-              width: '320px', 
+              width: '260px', 
               backgroundColor: isDark ? 'rgba(0, 0, 0, 0.3)' : '#ffffff', 
               borderLeft: `1px solid ${isDark ? 'var(--auth-border)' : '#e2e8f0'}`,
               display: 'flex',
@@ -280,6 +280,14 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
                     <div style={{ padding: '12px', backgroundColor: isDark ? 'rgba(59, 130, 246, 0.1)' : '#eff6ff', borderRadius: '8px', border: `1px solid ${isDark ? 'rgba(59, 130, 246, 0.2)' : '#bfdbfe'}`, fontSize: '12px', lineHeight: '1.6', color: isDark ? '#e2e8f0' : '#1e3a8a' }}>
                       {(selectedEvent.event_data as any)?.ai_reasoning || (selectedEvent.event_metadata as any)?.ai_reasoning || (selectedEvent as any).ai_reasoning}
                     </div>
+                    {((selectedEvent.event_data as any)?.deviation_cost || (selectedEvent.event_metadata as any)?.deviation_cost || (selectedEvent as any).deviation_cost) && (
+                      <div style={{ marginTop: '8px', padding: '12px', backgroundColor: isDark ? 'rgba(234, 88, 12, 0.1)' : '#fff7ed', borderRadius: '8px', border: `1px solid ${isDark ? 'rgba(234, 88, 12, 0.2)' : '#ffedd5'}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '9px', fontWeight: 900, color: isDark ? '#fb923c' : '#c2410c', letterSpacing: '0.15em', fontFamily: "'Space Mono', monospace" }}>DEVIATION PENALTY</span>
+                        <span style={{ fontSize: '13px', fontWeight: 900, color: isDark ? '#ffffff' : '#000000', fontFamily: "'Space Mono', monospace" }}>
+                          ${Number((selectedEvent.event_data as any)?.deviation_cost || (selectedEvent.event_metadata as any)?.deviation_cost || (selectedEvent as any).deviation_cost).toFixed(2)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -289,7 +297,8 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {Object.keys(selectedEvent.event_data.rule_evaluations || {}).length > 0 ? (
                       Object.entries(selectedEvent.event_data.rule_evaluations || {}).map(([ruleId, passed]) => {
-                        const rule = (playbook?.rules || []).find((r: Rule) => r.id === ruleId || r.name === ruleId);
+                        const allRules = ((playbook?.context as any)?.compiled_rules as any[]) || playbook?.rules || [];
+                        const rule = allRules.find((r: any) => r.id === ruleId || r.name === ruleId);
                         const isTrue = passed === true;
                         return (
                           <div key={ruleId} style={{ 

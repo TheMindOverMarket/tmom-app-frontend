@@ -45,8 +45,16 @@ export function MarkerLayer({ markers, onMarkerClick, selectedTimestamp }: Marke
                         ? `drop-shadow(0 0 12px ${color}) drop-shadow(0 0 2px white)` 
                         : 'drop-shadow(0 0 1px white) drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
                       transition: 'all 0.2s ease', 
+                      animation: isSelected ? 'markerPulse 1.5s infinite' : 'none',
                   }}
               >
+                  <style>{`
+                    @keyframes markerPulse {
+                      0% { filter: drop-shadow(0 0 5px ${color}) scale(1.4); }
+                      50% { filter: drop-shadow(0 0 20px ${color}) drop-shadow(0 0 2px white) scale(1.6); }
+                      100% { filter: drop-shadow(0 0 5px ${color}) scale(1.4); }
+                    }
+                  `}</style>
                   {icon}
               </div>
           );
