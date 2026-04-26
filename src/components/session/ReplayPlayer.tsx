@@ -199,7 +199,7 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
           border: `1px solid ${isDark ? 'var(--auth-border)' : '#e2e8f0'}`,
           alignItems: 'center'
         }}>
-          {session.is_audit_ready && (session.session_metadata as any)?.report_card && (
+          {session.is_audit_ready && session.session_metadata?.report_card && (
             <div style={{ 
               display: 'flex', 
               alignItems: 'center', 
@@ -209,23 +209,31 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
               flex: 1 
             }}>
               <div style={{ 
-                width: '40px', 
-                height: '40px', 
-                borderRadius: '50%', 
-                backgroundColor: isDark ? 'rgba(0, 255, 136, 0.1)' : '#ffffff',
-                border: `2px solid ${isDark ? 'var(--auth-accent)' : '#10b981'}`,
+                width: '42px', 
+                height: '42px', 
+                borderRadius: '8px', 
+                backgroundColor: isDark ? 'rgba(0, 255, 136, 0.05)' : '#f0fdf4',
+                border: `1px solid ${isDark ? 'rgba(0, 255, 136, 0.2)' : '#10b981'}`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                flexShrink: 0
+                flexShrink: 0,
+                boxShadow: isDark ? '0 0 15px rgba(0, 255, 136, 0.1)' : 'none'
               }}>
-                <div style={{ fontSize: '18px', fontWeight: 900, color: isDark ? 'var(--auth-accent)' : '#10b981', fontFamily: "'Space Mono', monospace" }}>
-                  {(session.session_metadata as any)?.report_card?.consistency_grade}
+                <div style={{ fontSize: '20px', fontWeight: 900, color: isDark ? 'var(--auth-accent)' : '#10b981', fontFamily: "'Space Mono', monospace" }}>
+                  {session.session_metadata.report_card.consistency_grade}
                 </div>
               </div>
-              <div>
-                <div style={{ fontSize: '8px', fontWeight: 900, color: isDark ? 'var(--auth-accent)' : '#059669', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: "'Space Mono', monospace" }}>AUDIT REPORT</div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: isDark ? '#ffffff' : '#0f172a' }}>{(session.session_metadata as any)?.report_card?.behavioral_pattern} • {(session.session_metadata as any)?.report_card?.summary.slice(0, 80)}...</div>
+              <div style={{ overflow: 'hidden' }}>
+                <div style={{ fontSize: '8px', fontWeight: 900, color: isDark ? 'var(--auth-accent)' : '#059669', textTransform: 'uppercase', letterSpacing: '0.15em', fontFamily: "'Space Mono', monospace", marginBottom: '2px' }}>BEHAVIORAL AUDIT</div>
+                <div style={{ 
+                  fontSize: '12px', 
+                  fontWeight: 600, 
+                  color: isDark ? '#ffffff' : '#0f172a',
+                  lineHeight: '1.4'
+                }}>
+                  <span style={{ color: isDark ? 'var(--auth-accent)' : '#10b981' }}>{session.session_metadata.report_card.behavioral_pattern}</span> • {session.session_metadata.report_card.summary}
+                </div>
               </div>
             </div>
           )}
@@ -472,9 +480,10 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
               display: 'flex', 
               flexDirection: 'column', 
               backgroundColor: isDark ? 'var(--auth-black)' : '#f8fafc', 
-              position: 'relative' 
+              position: 'relative',
+              minHeight: 0
             }}>
-              <div style={{ flex: 1, minHeight: 0 }}>
+              <div style={{ flex: 1.5, minHeight: 0 }}>
                  <ReplayChart 
                    session={session} 
                    events={events} 
