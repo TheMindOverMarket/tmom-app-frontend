@@ -3,6 +3,7 @@ import { Session, SessionEvent, SessionEventType } from '../../domain/session/ty
 import { useDeviationEngine } from '../../hooks/useDeviationEngine';
 import { AlertTriangle, DollarSign, Activity } from 'lucide-react';
 import { ReplayChart } from '../ReplayChart';
+import { CONFIG } from '../../config/constants';
 
 interface ReplayPlayerProps {
   session: Session;
@@ -139,9 +140,27 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
               color: isDark ? '#ffffff' : 'var(--slate-900)', 
               margin: 0, 
               letterSpacing: isDark ? '0.02em' : '-0.025em',
-              fontFamily: isDark ? "'Cormorant Garamond', serif" : 'inherit'
+              fontFamily: isDark ? "'Cormorant Garamond', serif" : 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px'
             }}>
               Archive: <span style={{ color: isDark ? 'var(--auth-accent)' : 'var(--brand)' }}>{session.id.slice(0, 8).toUpperCase()}</span>
+              
+              {/* Organic Config Guard Badge */}
+              <div style={{
+                fontSize: '8px',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                backgroundColor: CONFIG.WS_ENGINE_URL ? 'rgba(0, 255, 136, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                color: CONFIG.WS_ENGINE_URL ? (isDark ? 'var(--auth-accent)' : '#10b981') : '#ef4444',
+                border: `1px solid ${CONFIG.WS_ENGINE_URL ? 'rgba(0, 255, 136, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
+                fontFamily: "'Space Mono', monospace",
+                fontWeight: 900,
+                letterSpacing: '0.1em'
+              }}>
+                {CONFIG.WS_ENGINE_URL ? 'ENGINE: CONNECTED' : 'ENGINE: CONFIG MISSING'}
+              </div>
             </h2>
           </div>
           <button 
