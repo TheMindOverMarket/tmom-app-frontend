@@ -85,12 +85,22 @@ export function ReplayChart({ session, events, onMarkerClick, isDark = false, se
     return nearest;
   };
 
-  const deriveRuleEngineEvents = (replayEvents: SessionEvent[], replayCandles: Candle[]): RuleEngineEvent[] =>
-    replayEvents
+  const deriveRuleEngineEvents = (replayEvents: SessionEvent[], replayCandles: Candle[]): RuleEngineEvent[] => {
+    const sessionStartMs = new Date(session.start_time).getTime();
+    
+    return replayEvents
       .filter((event) => event.type === SessionEventType.ADHERENCE || event.type === SessionEventType.DEVIATION)
       .map((event) => {
-        const msTimestamp = new Date(event.timestamp).getTime();
-        const nearestCandle = getNearestCandle(msTimestamp, replayCandles);
+        let timestamp = new Date(event.timestamp).getTime();
+        
+        // AUTOMATIC TIME SHIFT: 
+        // If the event is from the "1:37 AM" ghost period but the session is at 2:14 PM,
+        // we shift it to the session start so it appears on the chart for auditing.
+        if (timestamp < sessionStartMs - (3600 * 2 * 1000)) {
+           timestamp = sessionStartMs;
+        }
+
+        const nearestCandle = getNearestCandle(timestamp, replayCandles);
         const extractedPrice = extractNumericValue(event);
         const price = extractedPrice ?? nearestCandle?.close ?? 0;
         const ruleName =
@@ -146,13 +156,27 @@ export function ReplayChart({ session, events, onMarkerClick, isDark = false, se
           return;
         }
 
+        // TIME ALIGNMENT FIX: 
+        // If we have events, we want to make sure the chart window includes them
+        // even if they are slightly outside the session.start_time due to clock drift.
+        const eventTimes = events.map(e => new Date(e.timestamp).getTime());
+        const minEventTime = eventTimes.length > 0 ? Math.min(...eventTimes) : new Date(session.start_time).getTime();
+        const maxEventTime = eventTimes.length > 0 ? Math.max(...eventTimes) : (session.end_time ? new Date(session.end_time).getTime() : new Date().getTime());
+
+        // Fetch a wider window for context (15 mins before/after)
+        const historyStart = new Date(Math.min(minEventTime, new Date(session.start_time).getTime()) - (15 * 60 * 1000)).toISOString();
+        const historyEnd = new Date(Math.max(maxEventTime, session.end_time ? new Date(session.end_time).getTime() : new Date().getTime()) + (15 * 60 * 1000)).toISOString();
+
+        console.log(`[ReplayChart] Fetching history from ${historyStart} to ${historyEnd}`);
+
         const history = await BackendMarketDataProvider.getHistory(nextResolvedSymbol, 60, {
-          start_time: session.start_time,
-          end_time: session.end_time || new Date().toISOString(),
+          start_time: historyStart,
+          end_time: historyEnd,
         });
         setCandles(history);
+        
         if (history.length === 0) {
-          setChartError('No market candles were returned for this session window.');
+          setChartError('No market candles were found for the session window.');
         }
       } catch (err) {
         console.error('[ReplayChart] Failed to load replay market data', err);
