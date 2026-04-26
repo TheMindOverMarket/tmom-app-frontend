@@ -1,90 +1,131 @@
-import { useEffect, useRef, useState } from 'react';
-import { createChart, CandlestickSeries, LineSeries, type IChartApi, type ISeriesApi, type Time } from 'lightweight-charts';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { 
+  createChart, 
+  IChartApi, 
+  ISeriesApi, 
+  Time, 
+  UTCTimestamp,
+  ColorType,
+  CrosshairMode,
+  LineStyle
+} from 'lightweight-charts';
 import { RuleEngineEvent } from '../domain/ruleEngine/types';
-import { MarkerData } from '../components/chart/types';
 import { Candle } from '../marketdata/types';
 
+export interface MarkerData {
+  id: string;
+  timestamp: number;
+  type: 'adherence' | 'deviation';
+  x: number;
+  y: number;
+}
+
+/**
+ * usePriceChart
+ * 
+ * Logic to manage a Lightweight Charts instance, sync historical candles,
+ * handle live updates, and manage marker coordinate calculations.
+ */
 export function usePriceChart(
   events: RuleEngineEvent[],
   candles: Candle[],
   currentCandle: Candle | null,
-  ema9: any[],
-  currentEMA9: any | null,
+  ema9: { time: Time; value: number }[],
+  currentEMA9: { time: Time; value: number } | null,
   isMockData: boolean = false
 ) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
   const emaSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
-
-  const [deduplicateEvents, setDeduplicateEvents] = useState(true);
   const [markers, setMarkers] = useState<MarkerData[]>([]);
+  const [deduplicateEvents, setDeduplicateEvents] = useState(true);
+  
+  const initialRangeSetRef = useRef(false);
 
-  const dataRef = useRef({ candles, currentCandle, events, deduplicateEvents });
-
+  // Store data in refs for coordinate calculations without re-triggering effects
+  const dataRef = useRef({ events, candles, currentCandle, deduplicateEvents });
   useEffect(() => {
-    dataRef.current = { candles, currentCandle, events, deduplicateEvents };
-  }, [candles, currentCandle, events, deduplicateEvents]);
+    dataRef.current = { events, candles, currentCandle, deduplicateEvents };
+  }, [events, candles, currentCandle, deduplicateEvents]);
 
-  // Chart Init
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
     const chart = createChart(chartContainerRef.current, {
-      layout: { background: { color: '#ffffff' }, textColor: '#333' },
-      grid: { vertLines: { color: '#f0f3fa' }, horzLines: { color: '#f0f3fa' } },
-      width: chartContainerRef.current.clientWidth,
-      height: chartContainerRef.current.clientHeight || 400,
-      timeScale: { timeVisible: true, secondsVisible: false },
+      layout: {
+        background: { type: ColorType.Solid, color: 'transparent' },
+        textColor: '#94a3b8',
+        fontSize: 10,
+        fontFamily: "'Inter', sans-serif",
+      },
+      grid: {
+        vertLines: { color: 'rgba(30, 41, 59, 0.5)', style: LineStyle.Dotted },
+        horzLines: { color: 'rgba(30, 41, 59, 0.5)', style: LineStyle.Dotted },
+      },
+      crosshair: {
+        mode: CrosshairMode.Normal,
+        vertLine: { labelBackgroundColor: 'var(--auth-black)' },
+        horzLine: { labelBackgroundColor: 'var(--auth-black)' },
+      },
+      timeScale: {
+        borderColor: 'rgba(30, 41, 59, 0.5)',
+        timeVisible: true,
+        secondsVisible: false,
+      },
+      rightPriceScale: {
+        borderColor: 'rgba(30, 41, 59, 0.5)',
+        autoScale: true,
+      },
+      handleScale: true,
+      handleScroll: true,
     });
+
+    const series = chart.addCandlestickSeries({
+      upColor: '#10b981',
+      downColor: '#ef4444',
+      borderVisible: false,
+      wickUpColor: '#10b981',
+      wickDownColor: '#ef4444',
+    });
+
+    const emaSeries = chart.addLineSeries({
+        color: '#6366f1',
+        lineWidth: 1,
+        priceLineVisible: false,
+        lastValueVisible: false,
+        crosshairMarkerVisible: false,
+    });
+
     chartRef.current = chart;
-
-    const series = chart.addSeries(CandlestickSeries, {
-      upColor: '#26a69a', downColor: '#ef5350', borderVisible: false,
-      wickUpColor: '#26a69a', wickDownColor: '#ef5350',
-    });
     seriesRef.current = series;
-
-    const emaSeries = chart.addSeries(LineSeries, {
-      color: '#2962FF', lineWidth: 2, crosshairMarkerVisible: false,
-      lastValueVisible: false, priceLineVisible: false,
-    });
     emaSeriesRef.current = emaSeries;
 
     const handleResize = () => {
-      if (chartContainerRef.current && chartRef.current) {
-        chartRef.current.applyOptions({
+      if (chartContainerRef.current) {
+        chart.applyOptions({
           width: chartContainerRef.current.clientWidth,
-          height: chartContainerRef.current.clientHeight || 400,
+          height: chartContainerRef.current.clientHeight,
         });
       }
     };
-
-    const resizeObserver = new ResizeObserver(handleResize);
-    resizeObserver.observe(chartContainerRef.current);
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      resizeObserver.disconnect();
+      window.removeEventListener('resize', handleResize);
       chart.remove();
-      chartRef.current = null;
     };
   }, []);
 
-  const initialRangeSetRef = useRef(false);
-
-  // Data Updates
   useEffect(() => {
     if (seriesRef.current && candles.length > 0) {
       seriesRef.current.setData(candles);
       
       // On initial history load, zoom into the last 60 bars for a better focused view
-      // This also ensures the Y-axis auto-scales to the recent relevant prices.
       if (!initialRangeSetRef.current && chartRef.current) {
         const timeScale = chartRef.current.timeScale();
         const DEFAULT_BARS = 60;
         const width = chartContainerRef.current?.clientWidth || 800;
-        
-        // Match standard trading platforms: roughly show last 60 bars or fill 75% of container width
         const barsToDisplay = Math.min(candles.length, Math.floor(width / 15), DEFAULT_BARS);
         
         timeScale.setVisibleLogicalRange({
@@ -96,7 +137,6 @@ export function usePriceChart(
       }
     }
   }, [candles]);
-
 
   useEffect(() => {
     if (emaSeriesRef.current && ema9.length > 0) emaSeriesRef.current.setData(ema9);
@@ -174,8 +214,6 @@ export function usePriceChart(
         const snappedTime = Math.floor(evt.timestamp / 60) * 60;
         const time = snappedTime as Time;
         const x = timeScale.timeToCoordinate(time);
-        
-        // Use right-most edge for live updates if coordinate is not yet cached but the event is at the current minute
         const finalX = x !== null ? x : (width - 4);
         if (finalX < 0 || finalX > width + 50) return;
 
@@ -210,20 +248,24 @@ export function usePriceChart(
     updateMarkersOverlay();
   }, [events, candles, currentCandle, deduplicateEvents]);
 
-  const scrollToTime = (timestamp: number) => {
-    if (!chartRef.current) return;
+  const scrollToTime = useCallback((timestamp: number) => {
+    if (!chartRef.current || candles.length === 0) return;
+    
     const timeScale = chartRef.current.timeScale();
-    const width = chartContainerRef.current?.clientWidth || 800;
-    const barsToDisplay = Math.floor(width / 15);
-    
-    // Convert timestamp to coordinate to check if it's already visible
-    const x = timeScale.timeToCoordinate(timestamp as Time);
-    
-    if (x === null || x < 20 || x > width - 20) {
-      // Not visible or too close to edges, center it
-      // We use setVisibleRange if we want exact bounds, but setVisibleLogicalRange is more stable with bars
-      // Finding the index of the candle with this timestamp
-      const candleIndex = dataRef.current.candles.findIndex(c => Number(c.time) === timestamp);
+    const candleTimes = candles.map(c => Number(c.time));
+    const minTime = Math.min(...candleTimes);
+    const maxTime = Math.max(...candleTimes);
+
+    // Safety Clamp: Reject scroll if time is wildly outside the loaded history
+    if (timestamp < minTime - 3600 || timestamp > maxTime + 3600) {
+      console.warn(`[usePriceChart] Rejecting scroll to ${timestamp} as it is outside candle range [${minTime}, ${maxTime}]`);
+      return;
+    }
+
+    const coordinate = timeScale.timeToCoordinate(timestamp as UTCTimestamp);
+    if (coordinate !== null) {
+      const barsToDisplay = 100;
+      const candleIndex = candles.findIndex(c => Number(c.time) >= timestamp);
       if (candleIndex !== -1) {
         timeScale.setVisibleLogicalRange({
           from: candleIndex - Math.floor(barsToDisplay / 2),
@@ -231,7 +273,7 @@ export function usePriceChart(
         });
       }
     }
-  };
+  }, [candles]);
 
   return {
     chartContainerRef,
