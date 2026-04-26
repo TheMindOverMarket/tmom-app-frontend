@@ -329,8 +329,8 @@ export function PlaybooksPage() {
               }}
               variant="danger"
               isDark={true}
-              size="md"
-              icon={<Trash2 size={14} />}
+              size="sm"
+              icon={<Trash2 size={12} />}
             >
               Delete All
             </ActionButton>
