@@ -90,6 +90,10 @@ export function usePriceChart(
         rightPriceScale: {
           borderColor: 'rgba(30, 41, 59, 0.5)',
           autoScale: true,
+          scaleMargins: {
+            top: 0.15, // Give 15% space at top
+            bottom: 0.15, // Give 15% space at bottom
+          },
         },
         handleScale: true,
         handleScroll: true,

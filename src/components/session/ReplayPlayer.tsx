@@ -4,6 +4,7 @@ import { useDeviationEngine } from '../../hooks/useDeviationEngine';
 import { AlertTriangle, DollarSign, Activity } from 'lucide-react';
 import { ReplayChart } from '../ReplayChart';
 import { CONFIG } from '../../config/constants';
+import { playbookApi } from '../../domain/playbook/api';
 
 interface ReplayPlayerProps {
   session: Session;
@@ -36,6 +37,7 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
 
   const { summary: deviationSummary } = useDeviationEngine(session.id);
   const playbackRef = useRef<number | null>(null);
+  const { data: playbook } = playbookApi.useGetPlaybookQuery(session.playbook_id);
 
   const selectedEvent = useMemo(() => 
     events.find(e => e.id === selectedEventId), 
@@ -43,21 +45,34 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
   );
 
   useEffect(() => {
-    if (isPlaying) {
-      playbackRef.current = window.setInterval(() => {
+    let interval: any;
+    if (isPlaying && events.length > 0) {
+      interval = setInterval(() => {
         setCurrentIndex(prev => {
-          if (prev < events.length - 1) return prev + 1;
-          setIsPlaying(false);
-          return prev;
+          const next = prev + 1;
+          if (next >= events.length) {
+            setIsPlaying(false);
+            return prev;
+          }
+          
+          // FLUID SYNC: Keep list in view
+          const nextEvent = events[next];
+          setSelectedEventId(nextEvent.id);
+          
+          // Use requestAnimationFrame for smoother scroll
+          requestAnimationFrame(() => {
+            document.getElementById(`event-${nextEvent.id}`)?.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'nearest' 
+            });
+          });
+          
+          return next;
         });
-      }, 1000);
-    } else if (playbackRef.current) {
-      clearInterval(playbackRef.current);
+      }, 1000); // 1-second playback steps
     }
-    return () => {
-      if (playbackRef.current) clearInterval(playbackRef.current);
-    };
-  }, [isPlaying, events.length]);
+    return () => clearInterval(interval);
+  }, [isPlaying, events, setSelectedEventId]);
 
   const togglePlay = () => setIsPlaying(!isPlaying);
   
@@ -508,20 +523,49 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
                       fontFamily: "'Space Mono', monospace"
                     }}>{selectedEvent.id}</div>
                   </div>
-                  <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
-                    <pre style={{
-                      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.01)' : '#f8fafc',
-                      color: isDark ? 'var(--auth-accent)' : '#334155',
-                      padding: '20px',
-                      borderRadius: '8px',
-                      fontSize: '11px',
-                      lineHeight: '1.6',
-                      overflowX: 'auto',
-                      fontFamily: "'Space Mono', monospace",
-                      border: `1px solid ${isDark ? 'var(--auth-border)' : '#f1f5f9'}`
-                    }}>
-                      {JSON.stringify(selectedEvent.event_data, null, 2)}
-                    </pre>
+                  <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+                      {Object.entries((selectedEvent.event_data as any)?.rule_evaluations || {}).map(([ruleId, passed]) => {
+                        const rule = playbook?.rules.find(r => r.id === ruleId);
+                        const isTrue = passed === true;
+                        
+                        return (
+                          <div key={ruleId} style={{ 
+                            padding: '12px 16px', 
+                            backgroundColor: isDark ? (isTrue ? 'rgba(0, 255, 136, 0.05)' : 'rgba(239, 68, 68, 0.03)') : (isTrue ? '#f0fdf4' : '#fef2f2'),
+                            borderRadius: '8px',
+                            border: `1px solid ${isDark ? (isTrue ? 'rgba(0, 255, 136, 0.1)' : 'rgba(239, 68, 68, 0.1)') : (isTrue ? '#bcf1d3' : '#fee2e2')}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between'
+                          }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                              <div style={{ fontSize: '8px', fontWeight: 900, color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace" }}>RULE ID: {ruleId.slice(0, 8)}</div>
+                              <div style={{ fontSize: '13px', fontWeight: 600, color: isDark ? '#ffffff' : '#0f172a' }}>
+                                {rule?.name || 'Unknown Trading Rule'}
+                              </div>
+                            </div>
+                            <div style={{ 
+                              padding: '4px 10px', 
+                              borderRadius: '4px', 
+                              fontSize: '10px', 
+                              fontWeight: 900, 
+                              fontFamily: "'Space Mono', monospace",
+                              backgroundColor: isTrue ? (isDark ? 'var(--auth-accent)' : '#10b981') : '#ef4444',
+                              color: isDark ? 'var(--auth-black)' : '#ffffff'
+                            }}>
+                              {isTrue ? 'PASS' : 'FAIL'}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {(!selectedEvent.event_data || !Object.keys((selectedEvent.event_data as any)?.rule_evaluations || {}).length) && (
+                      <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--auth-text-muted)', fontSize: '12px', fontFamily: "'Space Mono', monospace" }}>
+                        NO RULE EVALUATIONS CAPTURED FOR THIS TICK
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
