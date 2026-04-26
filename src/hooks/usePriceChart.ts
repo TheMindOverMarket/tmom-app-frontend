@@ -177,7 +177,13 @@ export function usePriceChart(
   }, [ema9]);
 
   useEffect(() => {
-    if (seriesRef.current && currentCandle) seriesRef.current.update(currentCandle);
+    if (seriesRef.current && currentCandle) {
+        seriesRef.current.update(currentCandle);
+        // Auto-scroll to latest if we are already near the end
+        if (chartRef.current) {
+            chartRef.current.timeScale().scrollToPosition(0, true);
+        }
+    }
     if (emaSeriesRef.current && currentEMA9) emaSeriesRef.current.update(currentEMA9);
   }, [currentCandle, currentEMA9]);
 

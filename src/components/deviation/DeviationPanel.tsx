@@ -37,11 +37,12 @@ interface DeviationPanelProps {
   summary: DeviationSummary | null;
   records: DeviationRecord[];
   isActive: boolean;
+  onRecordClick?: (timestamp: number) => void;
 }
 
 // ─── Main Component ──────────────────────────────────────────────────
 
-export function DeviationPanel({ summary, records, isActive }: DeviationPanelProps) {
+export function DeviationPanel({ summary, records, isActive, onRecordClick }: DeviationPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
   if (!isActive && records.length === 0) {
@@ -173,7 +174,11 @@ export function DeviationPanel({ summary, records, isActive }: DeviationPanelPro
               </div>
             ) : (
               records.map((record, idx) => (
-                <DeviationRow key={record.id || idx} record={record} />
+                <DeviationRow 
+                  key={record.id || idx} 
+                  record={record} 
+                  onClick={() => onRecordClick?.(new Date(record.detected_at).getTime() / 1000)}
+                />
               )).reverse() // Show newest first
             )}
           </div>
@@ -222,7 +227,7 @@ function SummaryCell({ label, value, color }: { label: string; value: string; co
   );
 }
 
-function DeviationRow({ record }: { record: DeviationRecord }) {
+function DeviationRow({ record, onClick }: { record: DeviationRecord; onClick: () => void }) {
   const [expanded, setExpanded] = useState(false);
   const IconComponent = FAMILY_ICONS[record.deviation_family] || AlertTriangle;
   const severityColor = SEVERITY_COLORS[record.severity] || '#6b7280';
@@ -232,7 +237,10 @@ function DeviationRow({ record }: { record: DeviationRecord }) {
 
   return (
     <div
-      onClick={() => setExpanded(!expanded)}
+      onClick={() => {
+        setExpanded(!expanded);
+        onClick();
+      }}
       style={{
         padding: '10px 16px',
         borderBottom: '1px solid #f8fafc',

@@ -13,9 +13,10 @@ interface PriceChartProps {
   symbol: string;
   onMarkerClick: (timestamp: number, type?: 'adherence' | 'deviation') => void;
   isDark?: boolean;
+  selectedTimestamp?: number | null;
 }
 
-export function PriceChart({ events, symbol, onMarkerClick, isDark = true }: PriceChartProps) {
+export function PriceChart({ events, symbol, onMarkerClick, isDark = true, selectedTimestamp }: PriceChartProps) {
   const { candles, currentCandle, isMockData } = useMarketData(symbol, 60);
   const { ema9, currentEMA9 } = useDerivedSignals(candles, currentCandle);
 
@@ -47,6 +48,7 @@ export function PriceChart({ events, symbol, onMarkerClick, isDark = true }: Pri
       <MarkerLayer 
         markers={markers} 
         onMarkerClick={onMarkerClick} 
+        selectedTimestamp={selectedTimestamp}
       />
      
       <ChartControls 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { useRuleEngineEvents } from '../hooks/useRuleEngineEvents';
@@ -35,6 +35,36 @@ export function MonitorPage() {
     null;
 
   const rules = (supervisionPlaybook?.context?.compiled_rules as any[]) || [];
+
+  const allChartEvents = useMemo(() => {
+    const mappedDeviations = deviationRecords.map(rec => ({
+      id: rec.id,
+      timestamp: Math.floor(rec.detected_at / 1000),
+      msTimestamp: rec.detected_at,
+      originalTimestamp: new Date(rec.detected_at).toISOString(),
+      price: (rec.explainability_payload as any)?.price || 0,
+      playbook_id: supervisionPlaybook?.id || '',
+      session_id: activeSession?.id || '',
+      user_id: supervisionPlaybook?.user_id || '',
+      rule: rec.deviation_type,
+      rule_triggered: false,
+      triggered_entries: [],
+      rule_evaluations: {},
+      action: false,
+      deviation: true,
+      ai_reasoning: rec.ai_reasoning,
+      rawRule: rec.explainability_payload
+    }));
+
+    const combined = [...events];
+    mappedDeviations.forEach(dev => {
+      if (!combined.some(e => e.id === dev.id)) {
+        combined.push(dev as any);
+      }
+    });
+
+    return combined;
+  }, [events, deviationRecords, supervisionPlaybook, activeSession]);
 
   // Guard: Redirect if no playbook selected
   useEffect(() => {
@@ -163,10 +193,11 @@ export function MonitorPage() {
 
         <div style={{ flex: 1, minHeight: 0, position: 'relative', backgroundColor: 'var(--auth-black)', borderRadius: '4px', border: '1px solid #1e293b', overflow: 'hidden' }}>
           <PriceChart 
-            events={events}
+            events={allChartEvents}
             symbol={playbookSymbol}
             onMarkerClick={handleMarkerClick}
             isDark={true}
+            selectedTimestamp={focusedView?.timestamp}
           />
         </div>
 
@@ -228,7 +259,7 @@ export function MonitorPage() {
       {/* Right Column: Rule Engine Feed + Deviation Panel */}
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, gap: '16px', height: '100%' }}>
         <RuleEventInspector 
-          events={events} 
+          events={allChartEvents} 
           rules={rules}
           focusedTimestamp={focusedView?.timestamp || null}
           isActive={isStreaming}
@@ -239,6 +270,7 @@ export function MonitorPage() {
           summary={deviationSummary}
           records={deviationRecords}
           isActive={isStreaming}
+          onRecordClick={(ts) => handleMarkerClick(ts, 'deviation')}
         />
       </div>
     </div>
