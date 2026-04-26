@@ -46,7 +46,7 @@ export function SessionAnalytics() {
 
   const stats = useMemo(() => ({
     total: sessions.length,
-    completed: sessions.filter(s => s.status === SessionStatus.COMPLETED).length,
+    completed: sessions.filter(s => s.status === SessionStatus.COMPLETED && s.is_audit_ready).length,
     recent: sessions.filter(s => {
       const start = new Date(s.start_time).getTime();
       return (Date.now() - start) < 24 * 60 * 60 * 1000;
@@ -56,7 +56,7 @@ export function SessionAnalytics() {
   const filteredSessions = useMemo(() => {
     let list = sessions;
     if (activeTab === 'completed') {
-      list = list.filter(s => s.status === SessionStatus.COMPLETED);
+      list = list.filter(s => s.status === SessionStatus.COMPLETED && s.is_audit_ready);
     }
     return list.filter(s => s.id.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [sessions, searchQuery, activeTab]);

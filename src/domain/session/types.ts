@@ -19,6 +19,7 @@ export interface Session {
   start_time: string; // ISO-8601
   end_time: string | null;
   status: SessionStatus;
+  is_audit_ready: boolean;
   session_metadata?: Record<string, unknown>;
   created_at: string;
 }

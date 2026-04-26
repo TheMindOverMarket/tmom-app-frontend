@@ -179,6 +179,82 @@ export function ReplayPlayer({ session, events, loading, onClose, isDark = false
           ))}
         </div>
 
+        {/* Audit Report Card (Premium Section) */}
+        {session.is_audit_ready && session.session_metadata?.report_card && (
+          <div style={{ 
+            marginBottom: '32px',
+            padding: '24px',
+            backgroundColor: isDark ? 'rgba(0, 255, 136, 0.03)' : '#f0fdf4',
+            borderRadius: '12px',
+            border: `1px solid ${isDark ? 'rgba(0, 255, 136, 0.2)' : '#bcf1d3'}`,
+            display: 'flex',
+            gap: '32px',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            {/* Watermark Grade */}
+            <div style={{
+              position: 'absolute',
+              right: '-10px',
+              bottom: '-20px',
+              fontSize: '120px',
+              fontWeight: 900,
+              color: isDark ? 'rgba(0, 255, 136, 0.05)' : 'rgba(16, 185, 129, 0.05)',
+              fontFamily: "'Space Mono', monospace",
+              pointerEvents: 'none'
+            }}>
+              {(session.session_metadata.report_card as any).consistency_grade}
+            </div>
+
+            <div style={{ 
+              width: '100px', 
+              height: '100px', 
+              borderRadius: '50%', 
+              backgroundColor: isDark ? 'rgba(0, 255, 136, 0.1)' : '#ffffff',
+              border: `4px solid ${isDark ? 'var(--auth-accent)' : '#10b981'}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              boxShadow: '0 8px 24px rgba(0,0,0,0.1)'
+            }}>
+              <div style={{ fontSize: '48px', fontWeight: 900, color: isDark ? 'var(--auth-accent)' : '#10b981', fontFamily: "'Space Mono', monospace" }}>
+                {(session.session_metadata.report_card as any).consistency_grade}
+              </div>
+            </div>
+
+            <div style={{ flex: 1, zIndex: 1 }}>
+              <div style={{ 
+                fontSize: '9px', 
+                fontWeight: 900, 
+                color: isDark ? 'var(--auth-accent)' : '#059669', 
+                textTransform: 'uppercase', 
+                letterSpacing: '0.2em',
+                marginBottom: '8px',
+                fontFamily: "'Space Mono', monospace"
+              }}>AUDIT REPORT CARD</div>
+              <h3 style={{ fontSize: '18px', margin: '0 0 12px 0', fontWeight: 600 }}>
+                {(session.session_metadata.report_card as any).summary}
+              </h3>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+                <div>
+                  <div style={{ fontSize: '8px', fontWeight: 900, color: 'var(--auth-text-muted)', textTransform: 'uppercase', marginBottom: '4px', fontFamily: "'Space Mono', monospace" }}>BEHAVIORAL PATTERN</div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#ffffff' : '#065f46' }}>{(session.session_metadata.report_card as any).behavioral_pattern}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '8px', fontWeight: 900, color: 'var(--auth-text-muted)', textTransform: 'uppercase', marginBottom: '4px', fontFamily: "'Space Mono', monospace" }}>TOP VIOLATION</div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#ef4444' }}>{(session.session_metadata.report_card as any).top_violation}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '8px', fontWeight: 900, color: 'var(--auth-text-muted)', textTransform: 'uppercase', marginBottom: '4px', fontFamily: "'Space Mono', monospace" }}>NEXT FOCUS</div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: isDark ? 'var(--auth-accent)' : '#10b981' }}>{(session.session_metadata.report_card as any).actionable_feedback}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Cost of Deviation Impact */}
         {deviationSummary && (
           <div style={{ 
