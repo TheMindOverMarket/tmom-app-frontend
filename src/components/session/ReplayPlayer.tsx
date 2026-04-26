@@ -76,8 +76,6 @@ export function ReplayPlayer({ session, events: rawEvents, loading, onClose, isD
     }
   };
 
-  const selectedEvent = events.find(e => e.id === selectedEventId);
-
   return (
     <div style={{ 
       display: 'flex', 
