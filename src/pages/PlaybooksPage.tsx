@@ -17,13 +17,14 @@ export function PlaybooksPage() {
     setSelectedPlaybook,
     activatePlaybook,
     deletePlaybook,
-    rules,
     isLoadingPlaybooks,
     fetchPlaybooks,
     deleteAllPlaybooks
   } = usePlaybookContext();
   
   const navigate = useNavigate();
+
+  const rules = (selectedPlaybook?.context?.compiled_rules as any[]) || [];
 
   const [showDetailView, setShowDetailView] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -273,7 +274,7 @@ export function PlaybooksPage() {
                        </div>
                     ) : (
                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                         {rules.map((rule) => Object.keys(rule).length > 0 && (
+                         {rules.map((rule: any) => Object.keys(rule).length > 0 && (
                             <RuleLogicTree key={rule.id} rule={rule} isDark={true} />
                          ))}
                        </div>

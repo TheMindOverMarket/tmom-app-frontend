@@ -13,7 +13,6 @@ export function MonitorPage() {
   const {
     selectedPlaybook,
     playbooks,
-    rules,
     activeSession,
     isStreaming,
     isStartingStream,
@@ -33,6 +32,8 @@ export function MonitorPage() {
     selectedPlaybook ??
     playbooks.find((playbook) => playbook.is_active) ??
     null;
+
+  const rules = (supervisionPlaybook?.context?.compiled_rules as any[]) || [];
 
   // Guard: Redirect if no playbook selected
   useEffect(() => {
@@ -239,7 +240,9 @@ export function MonitorPage() {
                   </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                    {rule.conditions?.map((cond: any, cIdx: number) => (
+                    {(rule.extensions || rule.conditions)?.map((cond: any, cIdx: number) => {
+                      const isCompiled = !!rule.extensions;
+                      return (
                       <div key={cond.id || cIdx} style={{ 
                         fontSize: '8.5px', 
                         padding: '2px 6px', 
@@ -248,14 +251,23 @@ export function MonitorPage() {
                         display: 'flex', 
                         alignItems: 'center',
                         gap: '4px',
-                        border: '1px solid #f1f5f9'
+                        border: '1px solid #f1f5f9',
+                        flexWrap: 'wrap'
                       }}>
-                        <Circle size={6} color="#e2e8f0" />
-                        <span style={{ fontWeight: 800, color: 'var(--brand)' }}>{cond.metric}</span>
-                        <span style={{ color: '#94a3b8', fontWeight: 700 }}>{cond.comparator}</span>
-                        <span style={{ fontWeight: 900, color: '#0f172a' }}>{cond.value}</span>
+                        <Circle size={6} color="#e2e8f0" style={{ flexShrink: 0 }} />
+                        <span style={{ fontWeight: 800, color: 'var(--brand)' }}>{isCompiled ? cond.primitive : cond.metric}</span>
+                        {isCompiled ? (
+                            Object.entries(cond.params || {}).map(([k, v]) => (
+                                <span key={k} style={{ fontWeight: 900, color: '#0f172a' }}>{k}:{typeof v==='object'?JSON.stringify(v):String(v)}</span>
+                            ))
+                        ) : (
+                            <>
+                                <span style={{ color: '#94a3b8', fontWeight: 700 }}>{cond.comparator}</span>
+                                <span style={{ fontWeight: 900, color: '#0f172a' }}>{cond.value}</span>
+                            </>
+                        )}
                       </div>
-                    ))}
+                    )})}
                   </div>
                 </div>
               ))

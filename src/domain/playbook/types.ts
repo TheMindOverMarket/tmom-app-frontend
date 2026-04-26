@@ -27,6 +27,11 @@ export interface Rule {
   created_at: string;
   conditions?: RuleCondition[];
   condition_edges?: ConditionEdge[];
+  extensions?: {
+    id: string;
+    primitive: string;
+    params: Record<string, any>;
+  }[];
 }
 
 export interface Playbook {

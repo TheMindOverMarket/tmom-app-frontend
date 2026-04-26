@@ -31,7 +31,6 @@ interface PlaybookContextType {
   isStoppingStream: boolean;
   startStream: (playbookId: string) => Promise<Session | undefined>;
   stopStream: () => Promise<void>;
-  rules: any[]; 
   deletePlaybook: (id: string) => Promise<void>;
   deleteAllPlaybooks: () => Promise<void>;
   setIsSubmitting: (val: boolean) => void;
@@ -59,7 +58,6 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
   const [playbooks, setPlaybooks] = useState<Playbook[]>([]);
   const [selectedPlaybook, setSelectedPlaybook] = useState<Playbook | null>(null);
   const [streamingMessage, setStreamingMessage] = useState('');
-  const [rules, setRules] = useState<any[]>([]); 
   const [isLoadingPlaybooks, setIsLoadingPlaybooks] = useState(false);
 
   const [activeSession, setActiveSession] = useState<Session | null>(null);
@@ -140,7 +138,6 @@ Cooldown:
     if (!currentUser) {
       setPlaybooks([]);
       setSelectedPlaybook(null);
-      setRules([]);
       setIsLoadingPlaybooks(false);
       return;
     }
@@ -283,11 +280,6 @@ Cooldown:
         if (status === 'COMPLETED' || status === 'FAILED' || status === 'INCOMPLETE' || status === 'INITIALIZING') {
           setSelectedPlaybook(updated);
           
-          if (status === 'COMPLETED') {
-            const newRules = await playbookApi.listPlaybookRules(updated.id);
-            setRules(newRules);
-          }
-          
           await fetchPlaybooks();
           if (pollInterval) clearInterval(pollInterval);
         }
@@ -304,16 +296,6 @@ Cooldown:
       if (pollInterval) clearInterval(pollInterval);
     };
   }, [selectedPlaybook, fetchPlaybooks]);
-
-  useEffect(() => {
-    if (selectedPlaybook && selectedPlaybook.generation_status === 'COMPLETED') {
-      playbookApi.listPlaybookRules(selectedPlaybook.id)
-        .then(setRules)
-        .catch(console.error);
-    } else if (selectedPlaybook?.generation_status !== 'PENDING') {
-      setRules([]);
-    }
-  }, [selectedPlaybook]);
 
   useEffect(() => {
     void fetchPlaybooks();
@@ -355,7 +337,6 @@ Cooldown:
     setSelectedPlaybook(null);
     setActiveSession(null);
     setIsStreaming(false);
-    setRules([]);
     setDraftChatHistory([]);
     setCurrentDraft(null);
   }, [currentUser?.id]);
@@ -586,7 +567,6 @@ Cooldown:
     createPlaybookFromNL, chatWithSystem, playbooks, selectedPlaybook, setSelectedPlaybook,
     isLoadingPlaybooks, fetchPlaybooks, activatePlaybook,
     activeSession, isStreaming, streamingMessage, isStartingStream, isStoppingStream, startStream, stopStream,
-    rules,
     deletePlaybook,
     deleteAllPlaybooks,
     setIsSubmitting,

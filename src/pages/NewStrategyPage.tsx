@@ -715,7 +715,7 @@ export function NewStrategyPage() {
                 const progressionSteps = [
                   { label: 'Analyzing Intent', status: chatHistory.length > 0 ? 'COMPLETED' : 'PENDING' },
                   { label: 'Logic Extraction', status: currentDraft ? 'COMPLETED' : 'PENDING' },
-                  { label: 'Indicator Mapping', status: (currentDraft?.context_skeleton?.ta_lib_metrics?.length > 0) ? 'COMPLETED' : 'PENDING' },
+                  { label: 'Indicator Mapping', status: (currentDraft?.context_skeleton?.ta_lib_metrics !== undefined) ? 'COMPLETED' : 'PENDING' },
                   { label: 'Structural Validation', status: currentDraft?.status === 'ok' ? 'COMPLETED' : 'PENDING' }
                 ];
                 const completedStages = progressionSteps.filter(s => s.status === 'COMPLETED').length;
