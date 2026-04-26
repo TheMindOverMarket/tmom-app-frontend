@@ -23,10 +23,6 @@ export function ReplayPlayer({ session, events, loading, onClose, isDark = false
     events.find(e => e.id === selectedEventId), 
     [events, selectedEventId]
   );
-  const visibleEvents = useMemo(
-    () => events.slice(0, Math.min(currentIndex + 1, events.length)),
-    [events, currentIndex]
-  );
 
   useEffect(() => {
     if (isPlaying) {
