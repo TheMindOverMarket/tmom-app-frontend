@@ -45,7 +45,7 @@ export function Navbar() {
             onClick={(e) => {
               if (isDisabled) e.preventDefault();
             }}
-            title={isDisabled ? "Select or initiate a Playbook to enable real-time supervision orchestration" : label}
+            title={isDisabled ? "LIVE SUPERVISION LOCKED: Select or initiate a Playbook to enable real-time orchestration" : label}
             style={({ isActive }) => ({
               display: 'flex',
               alignItems: 'center',
@@ -54,14 +54,15 @@ export function Navbar() {
               fontSize: '10px',
               fontWeight: 700,
               fontFamily: "'Space Mono', monospace",
-              color: isDisabled ? 'rgba(255, 255, 255, 0.15)' : (isActive ? 'var(--auth-accent)' : 'var(--auth-text-muted)'),
+              color: isDisabled ? 'rgba(255, 255, 255, 0.1)' : (isActive ? 'var(--auth-accent)' : 'var(--auth-text-muted)'),
               textDecoration: 'none',
               borderBottom: !isDisabled && isActive ? '2px solid var(--auth-accent)' : '2px solid transparent',
               cursor: isDisabled ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s',
               height: '100%',
               letterSpacing: '0.1em',
-              pointerEvents: 'auto'
+              pointerEvents: 'auto',
+              filter: isDisabled ? 'grayscale(1) opacity(0.5)' : 'none'
             })}
             onMouseEnter={e => {
               if (!isDisabled) e.currentTarget.style.color = '#ffffff';
@@ -75,7 +76,7 @@ export function Navbar() {
           >
             {({ isActive }) => (
               <>
-                <Icon size={12} strokeWidth={isActive ? 3 : 2} />
+                <Icon size={12} strokeWidth={isActive ? 3 : 2} style={{ opacity: isDisabled ? 0.3 : 1 }} />
                 {label}
               </>
             )}
