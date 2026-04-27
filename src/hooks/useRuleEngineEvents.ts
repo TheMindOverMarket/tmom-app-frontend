@@ -14,7 +14,7 @@ export function useRuleEngineEvents(isActive: boolean = false, sessionId?: strin
   const [lastEvent, setLastEvent] = useState<RuleEngineEvent | null>(null);
   const [isMockMode, setIsMockMode] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
-  
+
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const retryCountRef = useRef(0);
@@ -36,7 +36,7 @@ export function useRuleEngineEvents(isActive: boolean = false, sessionId?: strin
       if (currentUser?.id) params.append('user_id', currentUser.id);
 
       const queryString = params.toString();
-      const wsUrl = queryString 
+      const wsUrl = queryString
         ? `${CONFIG.WS_ENGINE_URL}?${queryString}`
         : CONFIG.WS_ENGINE_URL;
 
@@ -56,25 +56,27 @@ export function useRuleEngineEvents(isActive: boolean = false, sessionId?: strin
           const eventDate = rawData.timestamp ? new Date(rawData.timestamp) : new Date();
           const msTimestamp = eventDate.getTime();
           const unixTimestamp = Math.floor(msTimestamp / 1000);
-          
+
           setEvents(prev => {
-            // Check if this is an update to an existing manual action (via order_id)
-            if (rawData.order_id) {
-              const existingIdx = prev.findIndex(evt => evt.order_id === rawData.order_id);
-              if (existingIdx !== -1) {
-                const updatedEvents = [...prev];
-                const updatedEvent: RuleEngineEvent = {
-                  ...updatedEvents[existingIdx],
-                  ...rawData,
-                  // Keep original timestamps for stability
-                  timestamp: updatedEvents[existingIdx].timestamp,
-                  msTimestamp: updatedEvents[existingIdx].msTimestamp,
-                  ai_reasoning: rawData.ai_reasoning || updatedEvents[existingIdx].ai_reasoning,
-                };
-                updatedEvents[existingIdx] = updatedEvent;
-                setLastEvent(updatedEvent);
-                return updatedEvents;
-              }
+            // Check if this is an update to an existing event (via order_id or id)
+            const existingIdx = prev.findIndex(evt =>
+              (rawData.order_id && evt.order_id === rawData.order_id) ||
+              (rawData.id && evt.id === rawData.id)
+            );
+            if (existingIdx !== -1) {
+              const updatedEvents = [...prev];
+              const updatedEvent: RuleEngineEvent = {
+                ...updatedEvents[existingIdx],
+                ...rawData,
+                // Keep the original event's IDs and timestamps for stability
+                id: updatedEvents[existingIdx].id,
+                timestamp: updatedEvents[existingIdx].timestamp,
+                msTimestamp: updatedEvents[existingIdx].msTimestamp,
+                ai_reasoning: rawData.ai_reasoning || updatedEvents[existingIdx].ai_reasoning,
+              };
+              updatedEvents[existingIdx] = updatedEvent;
+              setLastEvent(updatedEvent);
+              return updatedEvents;
             }
 
             // Normal new event
@@ -97,7 +99,7 @@ export function useRuleEngineEvents(isActive: boolean = false, sessionId?: strin
       ws.onclose = (ev) => {
         setIsConnected(false);
         wsRef.current = null;
-        
+
         // Exponential backoff retry if session is still active and not a clean close
         if (isActive && !ev.wasClean) {
           const delay = Math.min(1000 * Math.pow(2, retryCountRef.current), 30000);
@@ -124,7 +126,7 @@ export function useRuleEngineEvents(isActive: boolean = false, sessionId?: strin
     if (wsRef.current) wsRef.current.close();
     if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
     setIsConnected(false);
-    
+
     // Clear old events when a new session starts (STRICT ID CHANGE ONLY)
     if (isActive && sessionId && lastKnownSessionId.current !== sessionId) {
       console.log(`[useRuleEngineEvents] Session ID changed from ${lastKnownSessionId.current} to ${sessionId}. Clearing events.`);

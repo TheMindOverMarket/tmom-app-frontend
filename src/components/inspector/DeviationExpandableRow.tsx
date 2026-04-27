@@ -3,6 +3,7 @@ import { RuleEngineEvent } from '../../domain/ruleEngine/types';
 import { sessionApi } from '../../domain/session/api';
 import { Rule } from '../../domain/playbook/types';
 import { RuleLogicTree } from '../playbook/RuleLogicTree';
+import { Zap } from 'lucide-react';
 
 interface DeviationExpandableRowProps {
   event: RuleEngineEvent;
@@ -10,11 +11,11 @@ interface DeviationExpandableRowProps {
 }
 
 const formatDate = (date: Date) => {
-  return date.toLocaleTimeString([], { 
-    hour12: false, 
-    hour: '2-digit', 
-    minute: '2-digit', 
-    second: '2-digit' 
+  return date.toLocaleTimeString([], {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
   });
 };
 
@@ -30,7 +31,7 @@ export const DeviationExpandableRow: FC<DeviationExpandableRowProps> = memo(({ e
   const [error, setError] = useState<string | null>(null);
 
   const date = new Date(event.msTimestamp);
-  
+
   const iconColor = '#ef4444';
   const labelColor = '#ef4444';
   const tagBg = 'rgba(239, 68, 68, 0.1)';
@@ -53,7 +54,7 @@ export const DeviationExpandableRow: FC<DeviationExpandableRowProps> = memo(({ e
 
   return (
     <div style={{ backgroundColor: 'transparent' }}>
-      <div 
+      <div
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -64,7 +65,7 @@ export const DeviationExpandableRow: FC<DeviationExpandableRowProps> = memo(({ e
           transition: 'all 0.2s ease',
           cursor: 'pointer',
           fontFamily: "'Inter', sans-serif"
-        }} 
+        }}
         onClick={handleExpand}
       >
         {/* Time */}
@@ -80,46 +81,46 @@ export const DeviationExpandableRow: FC<DeviationExpandableRowProps> = memo(({ e
         {/* Action/Rule */}
         <div style={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '4px', overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-             <span style={{ 
-               fontWeight: 900, 
-               color: labelColor,
-               backgroundColor: tagBg,
-               padding: '2px 8px',
-               borderRadius: '2px',
-               fontSize: '8px',
-               textTransform: 'uppercase',
-               letterSpacing: '0.1em',
-               fontFamily: "'Space Mono', monospace"
-             }}>
-               {event.deviation_type?.toUpperCase() || 'DEVIATION'}
-             </span>
-             <span style={{ color: 'var(--auth-text-muted)', fontSize: '9px', fontWeight: 900, fontFamily: "'Space Mono', monospace" }}>
-               {event.action ? 'ORDER SENT' : 'NO-OP'}
-             </span>
+            <span style={{
+              fontWeight: 900,
+              color: labelColor,
+              backgroundColor: tagBg,
+              padding: '2px 8px',
+              borderRadius: '2px',
+              fontSize: '8px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              fontFamily: "'Space Mono', monospace"
+            }}>
+              {event.deviation_type?.toUpperCase() || 'DEVIATION'}
+            </span>
+            <span style={{ color: 'var(--auth-text-muted)', fontSize: '9px', fontWeight: 900, fontFamily: "'Space Mono', monospace" }}>
+              {event.action ? 'ORDER SENT' : 'NO-OP'}
+            </span>
           </div>
-        {matchedRule ? (
-          <div style={{ 
-            marginTop: '8px', 
-            backgroundColor: 'rgba(0,0,0,0.3)',
-            borderRadius: '4px',
-            border: '1px solid var(--auth-border)',
-            padding: '4px'
-          }}>
-            <RuleLogicTree rule={matchedRule} isDark={true} compact={true} />
-          </div>
-        ) : (
-          <div style={{ 
-            fontSize: '11px', 
-            color: '#ffffff', 
-            fontWeight: 600,
-            whiteSpace: 'nowrap', 
-            overflow: 'hidden', 
-            textOverflow: 'ellipsis',
-            marginTop: '4px'
-          }}>
-            {typeof event.rule === 'string' ? event.rule.toUpperCase() : 'SYSTEM DEVIATION'}
-          </div>
-        )}
+          {matchedRule ? (
+            <div style={{
+              marginTop: '8px',
+              backgroundColor: 'rgba(0,0,0,0.3)',
+              borderRadius: '4px',
+              border: '1px solid var(--auth-border)',
+              padding: '4px'
+            }}>
+              <RuleLogicTree rule={matchedRule} isDark={true} compact={true} />
+            </div>
+          ) : (
+            <div style={{
+              fontSize: '11px',
+              color: '#ffffff',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              marginTop: '4px'
+            }}>
+              {typeof event.rule === 'string' ? event.rule.toUpperCase() : 'SYSTEM DEVIATION'}
+            </div>
+          )}
         </div>
 
         {/* Price */}
@@ -130,23 +131,23 @@ export const DeviationExpandableRow: FC<DeviationExpandableRowProps> = memo(({ e
 
       {/* Expanded Reasoning Panel */}
       {expanded && (
-        <div style={{ 
-          padding: '16px 16px 20px 52px', 
-          backgroundColor: 'rgba(0, 0, 0, 0.4)', 
+        <div style={{
+          padding: '16px 16px 20px 52px',
+          backgroundColor: 'rgba(0, 0, 0, 0.4)',
           fontSize: '11px',
           color: '#e2e8f0',
           borderBottom: '1px solid var(--auth-border)',
           lineHeight: '1.6'
         }}>
-          { (loading || event.ai_reasoning === "GENERATING...") ? (
-            <div style={{ color: '#f97316', fontStyle: 'italic', display: 'flex', gap: '10px', alignItems: 'center', fontWeight: 900, fontFamily: "'Space Mono', monospace", fontSize: '10px' }}>
-              <div style={{ 
-                width: '12px', 
-                height: '12px', 
-                border: '2px solid #f97316', 
-                borderTopColor: 'transparent', 
-                borderRadius: '50%', 
-                animation: 'spin 1.5s linear infinite' 
+          {(loading || (event.ai_reasoning === "GENERATING..." && !reasoning)) ? (
+            <div style={{ color: '#fb923c', fontStyle: 'italic', display: 'flex', gap: '10px', alignItems: 'center', fontWeight: 700, fontFamily: "'Space Mono', monospace", fontSize: '10px' }}>
+              <div style={{
+                width: '12px',
+                height: '12px',
+                border: '2px solid #f97316',
+                borderTopColor: 'transparent',
+                borderRadius: '50%',
+                animation: 'spin 1.5s linear infinite'
               }} />
               ANALYZING DEVIATION LOGIC...
             </div>
@@ -154,12 +155,12 @@ export const DeviationExpandableRow: FC<DeviationExpandableRowProps> = memo(({ e
             <div style={{ color: '#ef4444', fontWeight: 900, fontFamily: "'Space Mono', monospace" }}>{error.toUpperCase()}</div>
           ) : (event.ai_reasoning || reasoning) ? (
             <div>
-              <div style={{ 
-                fontWeight: 900, 
-                marginBottom: '8px', 
-                color: '#818cf8', 
-                textTransform: 'uppercase', 
-                fontSize: '9px', 
+              <div style={{
+                fontWeight: 900,
+                marginBottom: '8px',
+                color: '#818cf8',
+                textTransform: 'uppercase',
+                fontSize: '9px',
                 letterSpacing: '0.15em',
                 fontFamily: "'Space Mono', monospace",
                 display: 'flex',
