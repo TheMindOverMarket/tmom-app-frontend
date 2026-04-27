@@ -21,42 +21,45 @@ export function StatusPlaceholder({ icon: Icon, title, subtitle, style }: Status
       justifyContent: 'center',
       padding: '48px 24px',
       textAlign: 'center',
-      backgroundColor: '#ffffff',
+      backgroundColor: 'transparent',
       flex: 1,
       minHeight: '200px',
       ...style
     }}>
       {Icon && (
         <div style={{
-          width: '40px',
-          height: '40px',
-          borderRadius: '10px',
-          backgroundColor: '#f8fafc',
+          width: '44px',
+          height: '44px',
+          borderRadius: '12px',
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          marginBottom: '16px',
-          border: '1px solid #f1f5f9'
+          marginBottom: '20px',
+          border: '1px solid rgba(255, 255, 255, 0.05)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
         }}>
-          <Icon size={18} color="#94a3b8" strokeWidth={1.5} />
+          <Icon size={20} color="var(--auth-accent)" strokeWidth={1.5} />
         </div>
       )}
       <div style={{
-        fontSize: '10px',
+        fontSize: '11px',
         fontWeight: 900,
-        color: '#0f172a',
-        letterSpacing: '0.12em',
+        color: '#ffffff',
+        letterSpacing: '0.15em',
         textTransform: 'uppercase',
-        marginBottom: '6px'
+        marginBottom: '8px',
+        fontFamily: "'Space Mono', monospace"
       }}>
         {title}
       </div>
       <div style={{
-        fontSize: '10.5px',
-        color: '#94a3b8',
+        fontSize: '11px',
+        color: 'var(--auth-text-muted)',
         fontWeight: 500,
-        maxWidth: '220px',
-        lineHeight: '1.5'
+        maxWidth: '260px',
+        lineHeight: '1.6',
+        fontFamily: "'Inter', sans-serif"
       }}>
         {subtitle}
       </div>

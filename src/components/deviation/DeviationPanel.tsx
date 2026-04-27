@@ -52,10 +52,11 @@ export function DeviationPanel({ summary, records, isActive, onRecordClick }: De
         title={`DEVIATION ENGINE INACTIVE`}
         subtitle={`Start a live session to begin the real-time cost-of-deviation analysis.`}
         style={{ 
-          border: '1px solid #e2e8f0', 
+          border: '1px solid var(--auth-border)', 
           borderRadius: '4px',
           padding: '40px 16px',
-          minHeight: 'auto'
+          minHeight: 'auto',
+          backgroundColor: 'transparent'
         }}
       />
     );
@@ -63,7 +64,7 @@ export function DeviationPanel({ summary, records, isActive, onRecordClick }: De
 
   return (
     <div style={{
-      backgroundColor: 'rgba(255,255,255,0.03)',
+      backgroundColor: 'var(--auth-black)',
       border: '1px solid var(--auth-border)',
       borderRadius: '4px',
       display: 'flex',
@@ -71,13 +72,15 @@ export function DeviationPanel({ summary, records, isActive, onRecordClick }: De
       overflow: 'hidden',
       flex: 1,
       minHeight: 0,
+      boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
     }}>
       {/* ── Header ─── */}
       <div
         onClick={() => setIsExpanded(!isExpanded)}
         style={{
           padding: '12px 16px',
-          backgroundColor: '#0f172a',
+          backgroundColor: 'rgba(255,255,255,0.03)',
+          borderBottom: '1px solid var(--auth-border)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -90,14 +93,16 @@ export function DeviationPanel({ summary, records, isActive, onRecordClick }: De
             width: '6px',
             height: '6px',
             borderRadius: '50%',
-            backgroundColor: isActive ? '#10b981' : '#94a3b8',
+            backgroundColor: isActive ? 'var(--auth-accent)' : 'var(--auth-text-muted)',
             animation: isActive ? 'pulse 1.5s infinite' : 'none',
+            boxShadow: isActive ? '0 0 10px var(--auth-accent)' : 'none'
           }} />
           <span style={{
             fontSize: '10px',
             fontWeight: 900,
-            color: '#f8fafc',
+            color: '#ffffff',
             letterSpacing: '0.15em',
+            fontFamily: "'Space Mono', monospace"
           }}>
             DEVIATION COST ENGINE
           </span>
@@ -105,11 +110,12 @@ export function DeviationPanel({ summary, records, isActive, onRecordClick }: De
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {summary && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <DollarSign size={12} color="#ef4444" />
+              <DollarSign size={12} color={summary.total_deviation_cost > 0 ? '#ef4444' : 'var(--auth-accent)'} />
               <span style={{
                 fontSize: '12px',
                 fontWeight: 900,
-                color: summary.total_deviation_cost > 0 ? '#ef4444' : '#10b981',
+                color: summary.total_deviation_cost > 0 ? '#ef4444' : 'var(--auth-accent)',
+                fontFamily: "'Space Mono', monospace"
               }}>
                 {summary.total_deviation_cost > 0
                   ? `-$${summary.total_deviation_cost.toFixed(2)}`
@@ -118,8 +124,8 @@ export function DeviationPanel({ summary, records, isActive, onRecordClick }: De
             </div>
           )}
           {isExpanded
-            ? <ChevronUp size={14} color="#94a3b8" />
-            : <ChevronDown size={14} color="#94a3b8" />}
+            ? <ChevronUp size={14} color="var(--auth-text-muted)" />
+            : <ChevronDown size={14} color="var(--auth-text-muted)" />}
         </div>
       </div>
 
@@ -131,28 +137,28 @@ export function DeviationPanel({ summary, records, isActive, onRecordClick }: De
               display: 'grid',
               gridTemplateColumns: 'repeat(4, 1fr)',
               gap: '1px',
-              backgroundColor: '#f1f5f9',
-              borderBottom: '1px solid #e2e8f0',
+              backgroundColor: 'var(--auth-border)',
+              borderBottom: '1px solid var(--auth-border)',
             }}>
               <SummaryCell
                 label="COST"
                 value={`$${summary.total_deviation_cost.toFixed(2)}`}
-                color={summary.total_deviation_cost > 0 ? '#ef4444' : '#10b981'}
+                color={summary.total_deviation_cost > 0 ? '#ef4444' : 'var(--auth-accent)'}
               />
               <SummaryCell
                 label="UNAUTH GAIN"
                 value={`$${summary.total_unauthorized_gain.toFixed(2)}`}
-                color={summary.total_unauthorized_gain > 0 ? '#f97316' : '#6b7280'}
+                color={summary.total_unauthorized_gain > 0 ? '#f97316' : 'var(--auth-text-muted)'}
               />
               <SummaryCell
                 label="TRADES"
                 value={`${summary.trade_count}`}
-                color="#0f172a"
+                color="#ffffff"
               />
               <SummaryCell
                 label="DEVIATIONS"
                 value={`${summary.deviation_count}`}
-                color={summary.deviation_count > 0 ? '#ef4444' : '#10b981'}
+                color={summary.deviation_count > 0 ? '#ef4444' : 'var(--auth-accent)'}
               />
             </div>
           )}
@@ -161,14 +167,16 @@ export function DeviationPanel({ summary, records, isActive, onRecordClick }: De
           <div style={{
             flex: 1,
             overflowY: 'auto',
+            backgroundColor: 'transparent'
           }}>
             {records.length === 0 ? (
               <div style={{
                 padding: '32px 24px',
                 textAlign: 'center',
                 fontSize: '11px',
-                color: '#64748b',
+                color: 'var(--auth-text-muted)',
                 fontWeight: 600,
+                fontFamily: "'Inter', sans-serif"
               }}>
                 No deviations detected — all trades compliant
               </div>
@@ -187,17 +195,18 @@ export function DeviationPanel({ summary, records, isActive, onRecordClick }: De
           {summary && summary.pending_finalization > 0 && (
             <div style={{
               padding: '8px 16px',
-              backgroundColor: '#fefce8',
-              borderTop: '1px solid #fef08a',
+              backgroundColor: 'rgba(251, 191, 36, 0.05)',
+              borderTop: '1px solid rgba(251, 191, 36, 0.1)',
               fontSize: '10px',
-              color: '#854d0e',
+              color: '#fbbf24',
               fontWeight: 700,
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
+              fontFamily: "'Space Mono', monospace"
             }}>
               <Clock size={12} />
-              {summary.pending_finalization} deviation{summary.pending_finalization > 1 ? 's' : ''} awaiting position close for finalization
+              {summary.pending_finalization} DEVIATION{summary.pending_finalization > 1 ? 'S' : ''} AWAITING FINALIZATION
             </div>
           )}
         </>
@@ -211,16 +220,16 @@ export function DeviationPanel({ summary, records, isActive, onRecordClick }: De
 function SummaryCell({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div style={{
-      backgroundColor: 'transparent',
-      padding: '10px 12px',
+      backgroundColor: 'var(--auth-black)',
+      padding: '12px',
       display: 'flex',
       flexDirection: 'column',
-      gap: '2px',
+      gap: '4px',
     }}>
-      <div style={{ fontSize: '9px', fontWeight: 800, color: 'var(--auth-text-muted)', letterSpacing: '0.05em', fontFamily: "'Space Mono', monospace" }}>
+      <div style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.05em', fontFamily: "'Space Mono', monospace" }}>
         {label}
       </div>
-      <div style={{ fontSize: '16px', fontWeight: 900, color, fontFamily: "'Space Mono', monospace" }}>
+      <div style={{ fontSize: '15px', fontWeight: 900, color, fontFamily: "'Space Mono', monospace" }}>
         {value}
       </div>
     </div>
@@ -230,10 +239,10 @@ function SummaryCell({ label, value, color }: { label: string; value: string; co
 function DeviationRow({ record, onClick }: { record: DeviationRecord; onClick: () => void }) {
   const [expanded, setExpanded] = useState(false);
   const IconComponent = FAMILY_ICONS[record.deviation_family] || AlertTriangle;
-  const severityColor = SEVERITY_COLORS[record.severity] || '#6b7280';
+  const severityColor = SEVERITY_COLORS[record.severity] || 'var(--auth-text-muted)';
   const cost = record.finalized_cost ?? record.candidate_cost;
   const typeLabel = DEVIATION_TYPE_LABELS[record.deviation_type] || record.deviation_type;
-  const ts = new Date(record.detected_at).toLocaleTimeString();
+  const ts = new Date(record.detected_at).toLocaleTimeString([], { hour12: false });
 
   return (
     <div
@@ -242,11 +251,11 @@ function DeviationRow({ record, onClick }: { record: DeviationRecord; onClick: (
         onClick();
       }}
       style={{
-        padding: '10px 16px',
-        borderBottom: '1px solid rgba(255,255,255,0.05)',
+        padding: '12px 16px',
+        borderBottom: '1px solid var(--auth-border)',
         cursor: 'pointer',
-        transition: 'background-color 0.15s ease',
-        backgroundColor: expanded ? 'rgba(255,255,255,0.05)' : 'transparent',
+        transition: 'all 0.2s ease',
+        backgroundColor: expanded ? 'rgba(255,255,255,0.02)' : 'transparent',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -255,18 +264,20 @@ function DeviationRow({ record, onClick }: { record: DeviationRecord; onClick: (
           <div style={{
             fontSize: '11px',
             fontWeight: 800,
-            color: severityColor,
+            color: '#ffffff',
             fontFamily: "'Inter', sans-serif"
           }}>
-            {typeLabel}
+            {typeLabel.toUpperCase()}
           </div>
           <div style={{
-            fontSize: '9px',
+            fontSize: '8px',
             padding: '2px 6px',
-            borderRadius: '4px',
-            backgroundColor: severityColor + '15',
+            borderRadius: '2px',
+            backgroundColor: severityColor + '20',
             color: severityColor,
-            fontWeight: 800,
+            fontWeight: 900,
+            fontFamily: "'Space Mono', monospace",
+            letterSpacing: '0.05em'
           }}>
             {record.severity}
           </div>
@@ -275,13 +286,14 @@ function DeviationRow({ record, onClick }: { record: DeviationRecord; onClick: (
           {cost !== null && cost !== undefined && (
             <span style={{
               fontSize: '11px',
-              fontWeight: 800,
-              color: cost > 0 ? '#ef4444' : '#10b981',
+              fontWeight: 900,
+              color: cost > 0 ? '#ef4444' : 'var(--auth-accent)',
+              fontFamily: "'Space Mono', monospace"
             }}>
               {cost > 0 ? `-$${cost.toFixed(2)}` : '$0.00'}
             </span>
           )}
-          <span style={{ fontSize: '10px', color: '#94a3b8' }}>
+          <span style={{ fontSize: '10px', color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace" }}>
             {ts}
           </span>
         </div>
@@ -291,48 +303,50 @@ function DeviationRow({ record, onClick }: { record: DeviationRecord; onClick: (
         <div style={{
           marginTop: '12px',
           padding: '12px',
-          backgroundColor: '#f1f5f9',
+          backgroundColor: 'rgba(0,0,0,0.3)',
+          border: '1px solid var(--auth-border)',
           borderRadius: '4px',
-          fontSize: '10px',
-          lineHeight: '1.5',
+          fontSize: '11px',
+          lineHeight: '1.6',
+          color: '#e2e8f0'
         }}>
           {record.ai_reasoning ? (
             <div style={{ marginBottom: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                 <Zap size={10} color="#6366f1" />
-                 <span style={{ fontSize: '9px', fontWeight: 900, color: '#6366f1', letterSpacing: '0.05em' }}>AI REASONING</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                 <Zap size={12} color="#818cf8" />
+                 <span style={{ fontSize: '9px', fontWeight: 900, color: '#818cf8', letterSpacing: '0.1em', fontFamily: "'Space Mono', monospace" }}>AI SIGNAL REASONING</span>
               </div>
               {record.ai_reasoning === "GENERATING..." ? (
                 <div style={{ 
-                  color: '#6366f1', 
-                  fontWeight: 600, 
+                  color: '#818cf8', 
+                  fontWeight: 700, 
                   fontStyle: 'italic',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px'
                 }}>
-                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#6366f1', animation: 'pulse 1s infinite' }} />
-                  Analyzing deviation logic...
+                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#818cf8', animation: 'pulse 1s infinite' }} />
+                  Processing deviation logic...
                 </div>
               ) : (
-                <div style={{ color: '#0f172a', fontWeight: 600 }}>
+                <div style={{ color: '#ffffff', fontWeight: 500 }}>
                   {record.ai_reasoning}
                 </div>
               )}
             </div>
           ) : null}
 
-          <div style={{ color: '#475569', fontWeight: 600 }}>
+          <div style={{ color: 'var(--auth-text-muted)', fontWeight: 500 }}>
             {record.explainability_payload?.summary?.matched_vs_expected || 'No additional logic details.'}
           </div>
           {record.price_delta !== null && (
-            <div style={{ marginTop: '6px', color: '#64748b' }}>
-              <span style={{ fontWeight: 700 }}>Price Δ:</span> ${Math.abs(record.price_delta).toFixed(2)}
+            <div style={{ marginTop: '8px', color: '#ffffff', fontSize: '10px' }}>
+              <span style={{ fontWeight: 900, color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace" }}>PRICE Δ:</span> ${Math.abs(record.price_delta).toFixed(2)}
             </div>
           )}
           {record.explainability_payload?.cost_summary && (
-            <div style={{ marginTop: '4px', color: '#64748b' }}>
-              <span style={{ fontWeight: 700 }}>Costability:</span> {record.costability.replace(/_/g, ' ')}
+            <div style={{ marginTop: '4px', color: '#ffffff', fontSize: '10px' }}>
+              <span style={{ fontWeight: 900, color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace" }}>TYPE:</span> {record.costability.replace(/_/g, ' ').toUpperCase()}
             </div>
           )}
         </div>

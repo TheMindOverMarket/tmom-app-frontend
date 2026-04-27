@@ -52,7 +52,10 @@ export function useRuleEngineEvents(isActive: boolean = false, sessionId?: strin
       ws.onmessage = (msg) => {
         try {
           const rawData: RuleEngineRawMessage = JSON.parse(msg.data);
-          const date = new Date(); 
+          // Use server timestamp if available for alignment with market data
+          const eventDate = rawData.timestamp ? new Date(rawData.timestamp) : new Date();
+          const msTimestamp = eventDate.getTime();
+          const unixTimestamp = Math.floor(msTimestamp / 1000);
           
           setEvents(prev => {
             // Check if this is an update to an existing manual action (via order_id)
@@ -63,8 +66,9 @@ export function useRuleEngineEvents(isActive: boolean = false, sessionId?: strin
                 const updatedEvent: RuleEngineEvent = {
                   ...updatedEvents[existingIdx],
                   ...rawData,
-                  // Keep the original event's timestamps for stability
+                  // Keep original timestamps for stability
                   timestamp: updatedEvents[existingIdx].timestamp,
+                  msTimestamp: updatedEvents[existingIdx].msTimestamp,
                   ai_reasoning: rawData.ai_reasoning || updatedEvents[existingIdx].ai_reasoning,
                 };
                 updatedEvents[existingIdx] = updatedEvent;
@@ -77,9 +81,9 @@ export function useRuleEngineEvents(isActive: boolean = false, sessionId?: strin
             const newEvent: RuleEngineEvent = {
               ...rawData,
               id: crypto.randomUUID(),
-              timestamp: Math.floor(date.getTime() / 1000),
-              msTimestamp: date.getTime(),
-              originalTimestamp: rawData.timestamp,
+              timestamp: unixTimestamp,
+              msTimestamp: msTimestamp,
+              originalTimestamp: rawData.timestamp || eventDate.toISOString(),
               rawRule: rawData.rule,
             };
             setLastEvent(newEvent);
