@@ -146,6 +146,7 @@ export function PlaybooksPage() {
                     onBlur={() => handleSaveRename(selectedPlaybook.id)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSaveRename(selectedPlaybook.id)}
                     onClick={(e) => e.stopPropagation()}
+                    onFocus={(e) => e.target.select()}
                     autoFocus
                     style={{
                       fontSize: '24px',
@@ -488,6 +489,7 @@ export function PlaybooksPage() {
                           onClick={(e) => e.stopPropagation()}
                           onBlur={() => handleSaveRename(pb.id)}
                           onKeyDown={(e) => e.key === 'Enter' && handleSaveRename(pb.id)}
+                          onFocus={(e) => e.target.select()}
                           autoFocus
                           style={{
                             fontSize: '16px',
@@ -501,8 +503,17 @@ export function PlaybooksPage() {
                           }}
                         />
                       ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <h4 style={{ fontSize: '18px', fontFamily: "'Cormorant Garamond', serif", margin: 0, fontWeight: 300, color: '#ffffff' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
+                          <h4 style={{ 
+                            fontSize: '18px', 
+                            fontFamily: "'Cormorant Garamond', serif", 
+                            margin: 0, 
+                            fontWeight: 300, 
+                            color: '#ffffff',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                          }}>
                             {pb.name}
                           </h4>
                           <button
