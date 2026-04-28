@@ -149,23 +149,32 @@ export function PlaybooksPage() {
                     onFocus={(e) => e.target.select()}
                     autoFocus
                     style={{
-                      fontSize: '24px',
+                      fontSize: '28px',
                       fontFamily: "'Cormorant Garamond', serif",
                       backgroundColor: 'rgba(255,255,255,0.05)',
                       border: '1px solid var(--auth-accent)',
                       color: 'white',
-                      padding: '2px 8px',
+                      padding: '4px 12px',
                       borderRadius: '4px',
                       outline: 'none',
-                      width: '300px'
+                      width: '100%',
+                      minWidth: '400px',
+                      margin: '-4px -12px'
                     }}
                   />
                 ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    {selectedPlaybook.name}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+                    <span style={{ 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis', 
+                      whiteSpace: 'nowrap',
+                      maxWidth: '800px'
+                    }}>
+                      {selectedPlaybook.name}
+                    </span>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleStartRename(selectedPlaybook); }}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--auth-text-muted)', padding: '4px' }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--auth-text-muted)', padding: '4px', flexShrink: 0 }}
                       title="Rename playbook"
                     >
                       <Plus size={14} style={{ transform: 'rotate(45deg)' }} />
@@ -492,14 +501,16 @@ export function PlaybooksPage() {
                           onFocus={(e) => e.target.select()}
                           autoFocus
                           style={{
-                            fontSize: '16px',
+                            fontSize: '18px',
                             fontFamily: "'Cormorant Garamond', serif",
                             backgroundColor: 'rgba(255,255,255,0.05)',
                             border: '1px solid var(--auth-accent)',
                             color: 'white',
-                            padding: '0 4px',
-                            borderRadius: '2px',
-                            outline: 'none'
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            outline: 'none',
+                            width: '100%',
+                            minWidth: '200px'
                           }}
                         />
                       ) : (
