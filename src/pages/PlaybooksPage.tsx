@@ -19,7 +19,8 @@ export function PlaybooksPage() {
     deletePlaybook,
     isLoadingPlaybooks,
     fetchPlaybooks,
-    deleteAllPlaybooks
+    deleteAllPlaybooks,
+    renamePlaybook
   } = usePlaybookContext();
   
   const navigate = useNavigate();
@@ -33,6 +34,8 @@ export function PlaybooksPage() {
     id: string | 'all';
     name: string;
   }>({ id: '', name: '' });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState('');
 
   const handleConfirmDelete = async () => {
     if (confirmConfig.id === 'all') {
@@ -60,6 +63,18 @@ export function PlaybooksPage() {
 
   const handleBackToLibrary = () => {
     setShowDetailView(false);
+  };
+
+  const handleStartRename = (pb: Playbook) => {
+    setEditingId(pb.id);
+    setEditingName(pb.name);
+  };
+
+  const handleSaveRename = async (id: string) => {
+    if (editingName.trim()) {
+      await renamePlaybook(id, editingName);
+    }
+    setEditingId(null);
   };
 
   const glassStyle = {
@@ -123,7 +138,39 @@ export function PlaybooksPage() {
                 <span style={labelStyle}>Playbook Inspection Mode</span>
               </div>
               <div style={{ fontSize: '28px', fontFamily: "'Cormorant Garamond', serif", color: '#ffffff', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                {selectedPlaybook.name}
+                {editingId === selectedPlaybook.id ? (
+                  <input
+                    type="text"
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    onBlur={() => handleSaveRename(selectedPlaybook.id)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSaveRename(selectedPlaybook.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    autoFocus
+                    style={{
+                      fontSize: '24px',
+                      fontFamily: "'Cormorant Garamond', serif",
+                      backgroundColor: 'rgba(255,255,255,0.05)',
+                      border: '1px solid var(--auth-accent)',
+                      color: 'white',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      outline: 'none',
+                      width: '300px'
+                    }}
+                  />
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {selectedPlaybook.name}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleStartRename(selectedPlaybook); }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--auth-text-muted)', padding: '4px' }}
+                      title="Rename playbook"
+                    >
+                      <Plus size={14} style={{ transform: 'rotate(45deg)' }} />
+                    </button>
+                  </div>
+                )}
                 <span style={{ 
                   fontSize: '12px', 
                   fontFamily: "'Space Mono', monospace", 
@@ -433,9 +480,42 @@ export function PlaybooksPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <h4 style={{ fontSize: '18px', fontFamily: "'Cormorant Garamond', serif", margin: 0, fontWeight: 300, color: '#ffffff' }}>
-                        {pb.name}
-                      </h4>
+                      {editingId === pb.id ? (
+                        <input
+                          type="text"
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                          onBlur={() => handleSaveRename(pb.id)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleSaveRename(pb.id)}
+                          autoFocus
+                          style={{
+                            fontSize: '16px',
+                            fontFamily: "'Cormorant Garamond', serif",
+                            backgroundColor: 'rgba(255,255,255,0.05)',
+                            border: '1px solid var(--auth-accent)',
+                            color: 'white',
+                            padding: '0 4px',
+                            borderRadius: '2px',
+                            outline: 'none'
+                          }}
+                        />
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <h4 style={{ fontSize: '18px', fontFamily: "'Cormorant Garamond', serif", margin: 0, fontWeight: 300, color: '#ffffff' }}>
+                            {pb.name}
+                          </h4>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleStartRename(pb); }}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--auth-text-muted)', padding: '2px', opacity: 0.5 }}
+                            onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                            onMouseLeave={e => e.currentTarget.style.opacity = '0.5'}
+                            title="Rename"
+                          >
+                            <Plus size={12} style={{ transform: 'rotate(45deg)' }} />
+                          </button>
+                        </div>
+                      )}
                       <span style={{ 
                         fontSize: '9px', 
                         fontFamily: "'Space Mono', monospace", 

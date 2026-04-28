@@ -70,12 +70,17 @@ export function NewStrategyPage() {
     finalizePlaybook,
     resetDraft,
     deletePlaybook,
-    setIsSubmitting
+    setIsSubmitting,
+    playbookName,
+    setPlaybookName,
+    renamePlaybook
   } = usePlaybookContext();
 
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [editingName, setEditingName] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef(selectedPlaybook?.generation_status);
 
@@ -112,6 +117,20 @@ export function NewStrategyPage() {
     // Always use chatWithSystem now; it handles both stateful and draft flows
     await chatWithSystem(playbookInput);
     setPlaybookInput('');
+  };
+
+  const handleStartRename = () => {
+    if (selectedPlaybook) {
+      setEditingName(selectedPlaybook.name);
+      setIsRenaming(true);
+    }
+  };
+
+  const handleSaveRename = async () => {
+    if (selectedPlaybook && editingName.trim()) {
+      await renamePlaybook(selectedPlaybook.id, editingName);
+    }
+    setIsRenaming(false);
   };
 
   const handleSelectTemplate = (content: string) => {
@@ -329,6 +348,52 @@ export function NewStrategyPage() {
               )}
             </div>
           )}
+
+          {selectedPlaybook && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '8px 16px',
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid var(--auth-border)',
+              borderRadius: '4px',
+              animation: 'fadeIn 0.5s ease-out'
+            }}>
+              <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.1em' }}>EDITING:</span>
+              {isRenaming ? (
+                <input
+                  type="text"
+                  value={editingName}
+                  onChange={(e) => setEditingName(e.target.value)}
+                  onBlur={handleSaveRename}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveRename()}
+                  autoFocus
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    border: '1px solid var(--auth-accent)',
+                    color: 'white',
+                    padding: '2px 8px',
+                    borderRadius: '2px',
+                    outline: 'none'
+                  }}
+                />
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'white' }}>{selectedPlaybook.name}</span>
+                  <button
+                    onClick={handleStartRename}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--auth-text-muted)', padding: '2px' }}
+                  >
+                    <Plus size={12} style={{ transform: 'rotate(45deg)' }} />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Unified Container for SCROLLING Chat and INITIAL Parser */}
@@ -539,46 +604,71 @@ export function NewStrategyPage() {
                 animation: 'heroFade 1s ease-out'
               }}>
                 {isInitialTurn && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--auth-border)', paddingBottom: '16px', marginBottom: '2px' }}>
-                     <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.2em' }}>ASSET_PROFILE</span>
-                     <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-                       <select
-                         className="tmom-select tmom-select-dark"
-                         value={selectedMarket}
-                         onChange={(e) => setSelectedMarket(e.target.value)}
-                         disabled={isLoadingMarkets}
-                         style={{
-                           padding: '4px 34px 4px 12px',
-                           borderRadius: '2px',
-                           border: '1px solid var(--auth-border)',
-                           backgroundColor: 'rgba(255,255,255,0.03)',
-                           fontSize: '11px',
-                           fontWeight: 900,
-                           color: '#ffffff',
-                           outline: 'none',
-                           cursor: 'pointer',
-                           fontFamily: "'Space Mono', monospace",
-                           appearance: 'none',
-                           WebkitAppearance: 'none',
-                           MozAppearance: 'none',
-                           letterSpacing: '0.1em',
-                           minHeight: '30px'
-                         }}
-                       >
-                         {availableMarkets.length === 0 && <option value="">No markets</option>}
-                         {availableMarkets.map((market) => (
-                           <option key={market.symbol} value={market.symbol}>{market.symbol}</option>
-                         ))}
-                       </select>
-                       <ChevronDown
-                         size={12}
-                         style={{
-                           position: 'absolute',
-                           right: '12px',
-                           pointerEvents: 'none',
-                           color: 'rgba(255, 255, 255, 0.7)'
-                         }}
-                       />
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px', borderBottom: '1px solid var(--auth-border)', paddingBottom: '16px', marginBottom: '2px' }}>
+                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.2em' }}>PLAYBOOK_NAME</span>
+                        <input
+                          type="text"
+                          value={playbookName}
+                          onChange={(e) => setPlaybookName(e.target.value)}
+                          placeholder="Playbook Name"
+                          style={{
+                            padding: '4px 12px',
+                            borderRadius: '2px',
+                            border: '1px solid var(--auth-border)',
+                            backgroundColor: 'rgba(255,255,255,0.03)',
+                            fontSize: '11px',
+                            fontWeight: 900,
+                            color: '#ffffff',
+                            outline: 'none',
+                            fontFamily: "'Space Mono', monospace",
+                            letterSpacing: '0.1em',
+                            minHeight: '30px',
+                            width: '200px'
+                          }}
+                        />
+                     </div>
+                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.2em' }}>ASSET_PROFILE</span>
+                        <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                          <select
+                            className="tmom-select tmom-select-dark"
+                            value={selectedMarket}
+                            onChange={(e) => setSelectedMarket(e.target.value)}
+                            disabled={isLoadingMarkets}
+                            style={{
+                              padding: '4px 34px 4px 12px',
+                              borderRadius: '2px',
+                              border: '1px solid var(--auth-border)',
+                              backgroundColor: 'rgba(255,255,255,0.03)',
+                              fontSize: '11px',
+                              fontWeight: 900,
+                              color: '#ffffff',
+                              outline: 'none',
+                              cursor: 'pointer',
+                              fontFamily: "'Space Mono', monospace",
+                              appearance: 'none',
+                              WebkitAppearance: 'none',
+                              MozAppearance: 'none',
+                              letterSpacing: '0.1em',
+                              minHeight: '30px'
+                            }}
+                          >
+                            {availableMarkets.length === 0 && <option value="">No markets</option>}
+                            {availableMarkets.map((market) => (
+                              <option key={market.symbol} value={market.symbol}>{market.symbol}</option>
+                            ))}
+                          </select>
+                          <ChevronDown
+                            size={12}
+                            style={{
+                              position: 'absolute',
+                              right: '12px',
+                              pointerEvents: 'none',
+                              color: 'rgba(255, 255, 255, 0.7)'
+                            }}
+                          />
+                        </div>
                      </div>
                      <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
                         <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--auth-accent)', animation: 'pulse 2s infinite' }}></div>
@@ -749,6 +839,26 @@ export function NewStrategyPage() {
                     ))}
 
                     <div style={{ marginTop: '12px', paddingTop: '20px', borderTop: '1px solid var(--auth-border)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--auth-text-muted)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                          Update Name
+                        </span>
+                        <input
+                          type="text"
+                          value={playbookName}
+                          onChange={(e) => setPlaybookName(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            borderRadius: '4px',
+                            backgroundColor: 'rgba(255,255,255,0.05)',
+                            border: '1px solid var(--auth-border)',
+                            color: 'white',
+                            fontSize: '12px',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
                       <button
                         onClick={() => setIsPreviewModalOpen(true)}
                         style={{

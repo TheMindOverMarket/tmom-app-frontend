@@ -42,6 +42,9 @@ interface PlaybookContextType {
   setCurrentDraft: (val: any | null) => void;
   resetDraft: () => void;
   finalizePlaybook: () => Promise<Playbook | undefined>;
+  playbookName: string;
+  setPlaybookName: (val: string) => void;
+  renamePlaybook: (id: string, name: string) => Promise<void>;
 }
 
 const PlaybookContext = createContext<PlaybookContextType | undefined>(undefined);
@@ -52,6 +55,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
   const [availableMarkets, setAvailableMarkets] = useState<MarketOption[]>([]);
   const [isLoadingMarkets, setIsLoadingMarkets] = useState(false);
   const [playbookInput, setPlaybookInput] = useState('');
+  const [playbookName, setPlaybookName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   
@@ -252,6 +256,11 @@ Cooldown:
         !current.trim() || availableMarkets.some((market) => current === buildSamplePlaybook(market.symbol));
       return matchesExistingTemplate ? nextTemplate : current;
     });
+
+    setPlaybookName((current) => {
+      const defaultName = `${selectedMarket.split('/')[0]} Playbook`;
+      return !current || current.includes('Playbook') ? defaultName : current;
+    });
   }, [selectedMarket, availableMarkets, buildSamplePlaybook]);
 
   useEffect(() => {
@@ -426,8 +435,9 @@ Cooldown:
     setNotification(null);
 
     try {
+        const defaultName = `${selectedMarket.split('/')[0]} Playbook ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
         const playbook = await playbookApi.ingestPlaybook({
-          name: `${selectedMarket.split('/')[0]} Playbook ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+          name: playbookName || defaultName,
           user_id: currentUser.id,
           symbol: selectedMarket,
           market: selectedMarket,
@@ -438,6 +448,7 @@ Cooldown:
         await fetchPlaybooks();
         setSelectedPlaybook(playbook);
         setPlaybookInput('');
+        setPlaybookName('');
         void handleStream(playbook.id);
         return playbook;
     } catch (error: unknown) {
@@ -498,8 +509,9 @@ Cooldown:
     
     setIsSubmitting(true);
     try {
+        const defaultName = `${selectedMarket.split('/')[0]} Playbook ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
         const playbook = await playbookApi.ingestPlaybook({
-          name: `${selectedMarket.split('/')[0]} Playbook ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+          name: playbookName || defaultName,
           user_id: currentUser.id,
           symbol: selectedMarket,
           market: selectedMarket,
@@ -511,6 +523,7 @@ Cooldown:
         await fetchPlaybooks();
         setSelectedPlaybook(playbook);
         resetDraft();
+        setPlaybookName('');
         setNotification({ type: 'success', message: 'Playbook deployed and archived.' });
         return playbook;
     } catch (error: unknown) {
@@ -559,6 +572,17 @@ Cooldown:
     }
   };
 
+  const renamePlaybook = async (id: string, name: string) => {
+    try {
+      await playbookApi.updatePlaybook(id, { name });
+      await fetchPlaybooks();
+      setNotification({ type: 'success', message: `Playbook renamed to "${name}".` });
+    } catch (error: unknown) {
+      console.error('Failed to rename playbook:', error);
+      setNotification({ type: 'error', message: `Failed to rename: ${error instanceof Error ? error.message : 'Unknown error'}` });
+    }
+  };
+
   const value = {
     playbookInput, setPlaybookInput,
     selectedMarket, setSelectedMarket,
@@ -575,7 +599,10 @@ Cooldown:
     setDraftChatHistory,
     setCurrentDraft,
     resetDraft,
-    finalizePlaybook
+    finalizePlaybook,
+    playbookName,
+    setPlaybookName,
+    renamePlaybook
   };
 
   return <PlaybookContext.Provider value={value}>{children}</PlaybookContext.Provider>;
