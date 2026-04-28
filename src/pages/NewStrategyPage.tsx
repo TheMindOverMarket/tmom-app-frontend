@@ -83,6 +83,20 @@ export function NewStrategyPage() {
   const [editingName, setEditingName] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef(selectedPlaybook?.generation_status);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const bottomTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const adjust = (el: HTMLTextAreaElement | null) => {
+      if (el) {
+        el.style.height = 'auto';
+        el.style.height = `${el.scrollHeight}px`;
+      }
+    };
+    adjust(textareaRef.current);
+    adjust(bottomTextareaRef.current);
+  }, [playbookInput]);
+
 
   const startNewChat = () => {
     setSelectedPlaybook(null);
@@ -681,6 +695,7 @@ export function NewStrategyPage() {
                 <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
                    <span style={{ color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace", fontSize: '20px', marginTop: '4px', opacity: 0.5 }}>&gt;</span>
                    <textarea 
+                     ref={textareaRef}
                      placeholder={isInitialTurn ? "Describe your playbook constraints..." : "Input playbook refinements..."}
                      value={playbookInput}
                      onChange={(e) => setPlaybookInput(e.target.value)}
@@ -703,7 +718,8 @@ export function NewStrategyPage() {
                          padding: '4px 0',
                          backgroundColor: 'transparent',
                          color: '#ffffff',
-                         letterSpacing: '-0.02em'
+                         letterSpacing: '-0.02em',
+                         overflowY: 'auto'
                      }} 
                    />
                    <button
@@ -992,6 +1008,7 @@ export function NewStrategyPage() {
               }}>
                 <span style={{ color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace", fontSize: '20px', marginTop: '4px', opacity: 0.5 }}>&gt;</span>
                  <textarea 
+                   ref={bottomTextareaRef}
                    placeholder={selectedPlaybook ? "Refine this playbook..." : "Describe your playbook constraints..."}
                    value={playbookInput}
                    onChange={(e) => setPlaybookInput(e.target.value)}
@@ -1013,7 +1030,8 @@ export function NewStrategyPage() {
                        lineHeight: '1.7',
                        padding: '4px 0',
                        backgroundColor: 'transparent',
-                       color: '#ffffff'
+                       color: '#ffffff',
+                       overflowY: 'auto'
                    }} 
                  />
                  <button
