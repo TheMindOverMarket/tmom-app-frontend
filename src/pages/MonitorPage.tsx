@@ -92,30 +92,6 @@ export function MonitorPage() {
       color: '#ffffff',
       fontFamily: "'Inter', sans-serif"
     }}>
-      {notification && (
-        <div style={{
-          position: 'fixed',
-          top: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 9999,
-          backgroundColor: notification.type === 'success' ? '#059669' : '#dc2626',
-          color: 'white',
-          padding: '12px 24px',
-          borderRadius: '8px',
-          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          fontSize: '13px',
-          fontWeight: 700,
-          animation: 'slideDown 0.3s ease-out'
-        }}>
-          <Bell size={16} />
-          {notification.message}
-        </div>
-      )}
-
       {/* Left Column: Chart & Controls */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', minHeight: 0 }}>
           <div style={{ 
