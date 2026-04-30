@@ -78,6 +78,20 @@ export function usePriceChart(
           vertLines: { color: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(226, 232, 240, 0.5)', style: LineStyle.Dotted },
           horzLines: { color: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(226, 232, 240, 0.5)', style: LineStyle.Dotted },
         },
+        localization: {
+          timeFormatter: (timestamp: number) => {
+            const date = new Date(timestamp * 1000);
+            return date.toLocaleString('en-US', {
+              timeZone: 'America/New_York',
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false
+            });
+          }
+        },
         crosshair: {
           mode: CrosshairMode.Normal,
           vertLine: { labelBackgroundColor: isDark ? 'var(--auth-black)' : '#0f172a' },
@@ -87,6 +101,15 @@ export function usePriceChart(
           borderColor: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(226, 232, 240, 0.5)',
           timeVisible: true,
           secondsVisible: false,
+          tickMarkFormatter: (time: number) => {
+            const date = new Date(time * 1000);
+            return date.toLocaleString('en-US', {
+              timeZone: 'America/New_York',
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false
+            });
+          }
         },
         rightPriceScale: {
           borderColor: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(226, 232, 240, 0.5)',
