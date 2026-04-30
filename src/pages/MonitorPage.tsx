@@ -31,7 +31,7 @@ export function MonitorPage() {
     if (lastCompletedSessionId) {
       const timer = setTimeout(() => {
         clearLastCompletedSession();
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [lastCompletedSessionId, clearLastCompletedSession]);
@@ -339,29 +339,31 @@ export function MonitorPage() {
               onClick={clearLastCompletedSession}
               style={{
                 position: 'absolute',
-                top: '12px',
-                right: '12px',
-                background: 'none',
-                border: 'none',
-                color: 'var(--auth-text-muted)',
+                top: '16px',
+                right: '16px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#ffffff',
                 cursor: 'pointer',
-                padding: '4px',
+                padding: '6px',
+                borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                opacity: 0.6,
-                transition: 'all 0.2s'
+                opacity: 0.8,
+                transition: 'all 0.2s',
+                zIndex: 10
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.opacity = '1';
-                e.currentTarget.style.color = '#ffffff';
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = '0.6';
-                e.currentTarget.style.color = 'var(--auth-text-muted)';
+                e.currentTarget.style.opacity = '0.8';
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
               }}
             >
-              <X size={18} />
+              <X size={20} />
             </button>
             <div>
               <div style={{
