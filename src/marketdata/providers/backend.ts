@@ -23,11 +23,23 @@ export const BackendMarketDataProvider: MarketDataProvider = {
 
     let url = `${CONFIG.BACKEND_BASE_URL}/market-data/history?symbol=${encodeURIComponent(symbol)}&timeframe=${timeframe}`;
     
-    if (options?.start_time) url += `&start_time=${encodeURIComponent(options.start_time)}`;
-    if (options?.end_time) url += `&end_time=${encodeURIComponent(options.end_time)}`;
-    if (!options?.start_time) url += `&limit=100`; // Default to last 100 if no range provided
+    let start = options?.start_time;
+    let end = options?.end_time;
 
-    const response = await fetch(url);
+    // Alpaca defaults to midnight UTC if start is omitted, causing the data to stick at 21:39 EST.
+    // To fix this, we ALWAYS provide a rolling start and end time.
+    if (!end) end = new Date().toISOString();
+    if (!start) start = new Date(Date.now() - (interval * 100 * 1000)).toISOString();
+
+    url += `&start_time=${encodeURIComponent(start)}&end_time=${encodeURIComponent(end)}&limit=100`;
+
+    const response = await fetch(url, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
     
     if (!response.ok) {
       throw new Error(`Failed to fetch history from backend: ${response.status}`);
