@@ -3,6 +3,7 @@ import { type Candle, type MarketDataProvider } from '../types';
 import { CONFIG } from '../../config/constants';
 
 let lastKnownPrice = 71500;
+let lastHistoricalCandle: Candle | null = null;
 
 /**
  * BackendMarketDataProvider
@@ -30,37 +31,60 @@ export const BackendMarketDataProvider: MarketDataProvider = {
 
     const data: Candle[] = await response.json();
     
-    // Update our baseline for the live simulator to ensure continuity
+    // Update our baseline for the live simulator/websocket to ensure continuity
     if (data.length > 0) {
-      lastKnownPrice = data[data.length - 1].close;
+      lastHistoricalCandle = data[data.length - 1];
+      lastKnownPrice = lastHistoricalCandle.close;
     }
     
     return data;
   },
 
-  subscribeLive: (_symbol: string, _interval: number, onCandleUpdate: (candle: Candle) => void): () => void => {
-    // TODO: Connect to the backend Market Data WebSocket once available.
-    // For now, we simulate live updates locally with random noise around the last known price.
-    const intervalId = setInterval(() => {
-      // Walk the price logically from where we left off
-      const change = (Math.random() - 0.5) * 50;
-      const open = lastKnownPrice;
-      const close = lastKnownPrice + change;
-      const high = Math.max(open, close) + Math.random() * 10;
-      const low = Math.min(open, close) - Math.random() * 10;
-      
-      onCandleUpdate({
-        time: (Math.floor(Date.now() / 1000 / 60) * 60) as Time,
-        open,
-        high,
-        low,
-        close,
-      });
+  subscribeLive: (symbol: string, _interval: number, onCandleUpdate: (candle: Candle) => void): () => void => {
+    let currentBarTime: Time | null = null;
+    let currentBarOpen: number | null = null;
 
-      // Update baseline for next tick
-      lastKnownPrice = close;
-    }, 5000);
+    const wsUrl = CONFIG.WS_BACKEND_URL;
+    const ws = new WebSocket(wsUrl);
 
-    return () => clearInterval(intervalId);
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.symbol !== symbol) return;
+
+        const dt = new Date(data.timestamp || data.current_time);
+        if (isNaN(dt.getTime())) return;
+        
+        const time = (Math.floor(dt.getTime() / 1000 / 60) * 60) as Time;
+        
+        if (currentBarTime !== time) {
+           if (lastHistoricalCandle && lastHistoricalCandle.time === time) {
+               currentBarOpen = lastHistoricalCandle.open;
+           } else {
+               currentBarOpen = currentBarOpen === null ? (lastKnownPrice || data.price) : data.price;
+           }
+           currentBarTime = time;
+        }
+
+        const close = data.price;
+        const high = data.high ?? Math.max(currentBarOpen!, close);
+        const low = data.low ?? Math.min(currentBarOpen!, close);
+
+        onCandleUpdate({
+          time,
+          open: currentBarOpen!,
+          high,
+          low,
+          close,
+        });
+
+        lastKnownPrice = close;
+
+      } catch (err) {
+        console.warn('[BackendMarketDataProvider] WS Parse Error:', err);
+      }
+    };
+
+    return () => ws.close();
   }
 };
