@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { X } from 'lucide-react';
 
 interface NotificationBannerProps {
   notification: { type: 'success' | 'error'; message: string } | null;
@@ -10,7 +11,7 @@ export function NotificationBanner({ notification, onClose }: NotificationBanner
     if (notification && notification.type === 'success') {
       const timer = setTimeout(() => {
         onClose();
-      }, 5000);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [notification, onClose]);
@@ -49,13 +50,18 @@ export function NotificationBanner({ notification, onClose }: NotificationBanner
           border: 'none', 
           color: 'inherit', 
           cursor: 'pointer',
-          fontWeight: 'bold',
+          padding: '4px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           opacity: 0.6,
           marginLeft: '16px',
-          fontSize: '18px'
+          transition: 'opacity 0.2s'
         }}
+        onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+        onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
       >
-        ✕
+        <X size={16} />
       </button>
 
       <style dangerouslySetInnerHTML={{ __html: `

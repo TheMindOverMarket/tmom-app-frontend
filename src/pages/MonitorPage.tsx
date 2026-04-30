@@ -27,6 +27,15 @@ export function MonitorPage() {
   const { summary: deviationSummary, records: deviationRecords } = useDeviationEngine(activeSession?.id);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (lastCompletedSessionId) {
+      const timer = setTimeout(() => {
+        clearLastCompletedSession();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [lastCompletedSessionId, clearLastCompletedSession]);
+
   const [focusedView, setFocusedView] = useState<{ timestamp: number; filter: 'adherence' | 'deviation' | null } | null>(null);
   const isLoading = isStartingStream || isStoppingStream;
   const supervisionPlaybook =
@@ -323,8 +332,37 @@ export function MonitorPage() {
             flexDirection: 'column',
             gap: '24px',
             textAlign: 'center',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            position: 'relative'
           }}>
+            <button
+              onClick={clearLastCompletedSession}
+              style={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                background: 'none',
+                border: 'none',
+                color: 'var(--auth-text-muted)',
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: 0.6,
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '1';
+                e.currentTarget.style.color = '#ffffff';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '0.6';
+                e.currentTarget.style.color = 'var(--auth-text-muted)';
+              }}
+            >
+              <X size={18} />
+            </button>
             <div>
               <div style={{
                 width: '48px',
