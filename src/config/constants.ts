@@ -22,12 +22,16 @@ const getWsUrl = (baseUrl: string, path: string, localPrefix: string) => {
     return `ws://${window.location.host}${localPrefix}${path}`;
   }
   
-  // If the baseUrl is relative (like '/api/backend' in Vercel), construct an absolute WS URL
-  if (baseUrl.startsWith('/')) {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    return `${protocol}//${window.location.host}${baseUrl}${path}`;
+  // In production, Vercel rewrites do not support long-lived WebSocket connections reliably.
+  // We must bypass Vercel and connect directly to the Render backends.
+  if (localPrefix === '/api/backend') {
+    return `wss://tmom-app-backend.onrender.com${path}`;
   }
-  
+  if (localPrefix === '/api/engine') {
+    return `wss://rule-engine-rcg9.onrender.com${path}`;
+  }
+
+  // Fallback
   return `${toWebSocketBaseUrl(baseUrl)}${path}`;
 };
 
