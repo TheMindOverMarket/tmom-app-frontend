@@ -4,7 +4,7 @@ import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { useRuleEngineEvents } from '../hooks/useRuleEngineEvents';
 import { PriceChart } from '../components/PriceChart';
 import { RuleEventInspector } from '../components/RuleEventInspector';
-import { Activity, Circle, Bell, Check, X } from 'lucide-react';
+import { Activity, Circle, Check, X } from 'lucide-react';
 import { useDeviationEngine } from '../hooks/useDeviationEngine';
 import { DeviationPanel } from '../components/deviation/DeviationPanel';
 import { resolvePlaybookSymbol } from '../domain/playbook/utils';
@@ -20,7 +20,6 @@ export function MonitorPage() {
     isStoppingStream,
     startStream,
     stopStream,
-    notification,
   } = usePlaybookContext();
   const { events, lastEvent, isMockMode, toggleMockMode } = useRuleEngineEvents(isStreaming, activeSession?.id);
   const { summary: deviationSummary, records: deviationRecords } = useDeviationEngine(activeSession?.id);
