@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useUserSession } from '../contexts/UserSessionContext';
 
@@ -9,16 +9,32 @@ export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useUserSession();
   const navigate = useNavigate();
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      formRef.current?.requestSubmit();
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password) return;
+    
+    const form = e.target as HTMLFormElement;
+    const emailInput = form.elements.namedItem('email') as HTMLInputElement;
+    const passwordInput = form.elements.namedItem('password') as HTMLInputElement;
+    
+    const submitEmail = email.trim() || (emailInput?.value || '').trim();
+    const submitPassword = password || (passwordInput?.value || '');
+
+    if (!submitEmail || !submitPassword) return;
     
     setError('');
     setIsLoading(true);
     
     try {
-      const user = await login({ email: email.trim(), password });
+      const user = await login({ email: submitEmail, password: submitPassword });
       navigate(user.role === 'MANAGER' ? '/admin' : '/playbooks');
     } catch (err: any) {
       setError(err.message || 'Login failed');
@@ -69,13 +85,15 @@ export function LoginPage() {
           Sign in
         </h2>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <form ref={formRef} onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
             <label style={labelStyle}>Email</label>
             <input
+              name="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="trader@example.com"
               disabled={isLoading}
               style={inputStyle}
@@ -85,9 +103,11 @@ export function LoginPage() {
           <div>
             <label style={labelStyle}>Password</label>
             <input
+              name="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="••••••••"
               disabled={isLoading}
               style={inputStyle}
@@ -97,7 +117,7 @@ export function LoginPage() {
           <div style={{ marginTop: '4px' }}>
             <button
               type="submit"
-              disabled={!email || isLoading}
+              disabled={isLoading}
               style={{
                 width: '100%',
                 padding: '16px',

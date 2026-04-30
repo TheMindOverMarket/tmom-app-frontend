@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useUserSession } from '../contexts/UserSessionContext';
 
@@ -13,12 +13,34 @@ export function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { signup } = useUserSession();
   const navigate = useNavigate();
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      formRef.current?.requestSubmit();
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !firstName.trim() || !lastName.trim() || !password) return;
     
-    if (password !== confirmPassword) {
+    const form = e.target as HTMLFormElement;
+    const emailInput = form.elements.namedItem('email') as HTMLInputElement;
+    const firstNameInput = form.elements.namedItem('firstName') as HTMLInputElement;
+    const lastNameInput = form.elements.namedItem('lastName') as HTMLInputElement;
+    const passwordInput = form.elements.namedItem('password') as HTMLInputElement;
+    const confirmPasswordInput = form.elements.namedItem('confirmPassword') as HTMLInputElement;
+    
+    const submitEmail = email.trim() || (emailInput?.value || '').trim();
+    const submitFirstName = firstName.trim() || (firstNameInput?.value || '').trim();
+    const submitLastName = lastName.trim() || (lastNameInput?.value || '').trim();
+    const submitPassword = password || (passwordInput?.value || '');
+    const submitConfirmPassword = confirmPassword || (confirmPasswordInput?.value || '');
+
+    if (!submitEmail || !submitFirstName || !submitLastName || !submitPassword) return;
+    
+    if (submitPassword !== submitConfirmPassword) {
       setError("Passwords do not match");
       return;
     }
@@ -28,10 +50,10 @@ export function SignupPage() {
     
     try {
       await signup({ 
-        email: email.trim(), 
-        first_name: firstName.trim(), 
-        last_name: lastName.trim(), 
-        password,
+        email: submitEmail, 
+        first_name: submitFirstName, 
+        last_name: submitLastName, 
+        password: submitPassword,
         role
       });
       navigate(role === 'MANAGER' ? '/admin' : '/playbooks');
@@ -107,13 +129,15 @@ export function SignupPage() {
           Join the system to establish your trading supervision baseline.
         </p>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <form ref={formRef} onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div>
             <label style={labelStyle}>Email Address</label>
             <input
+              name="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="trader@example.com"
               disabled={isLoading}
               style={inputStyle}
@@ -124,9 +148,11 @@ export function SignupPage() {
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>First Name</label>
               <input
+                name="firstName"
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="John"
                 disabled={isLoading}
                 style={inputStyle}
@@ -135,9 +161,11 @@ export function SignupPage() {
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>Last Name</label>
               <input
+                name="lastName"
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="Doe"
                 disabled={isLoading}
                 style={inputStyle}
@@ -148,9 +176,11 @@ export function SignupPage() {
           <div>
             <label style={labelStyle}>Create Password</label>
             <input
+              name="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="••••••••"
               disabled={isLoading}
               style={inputStyle}
@@ -160,9 +190,11 @@ export function SignupPage() {
           <div>
             <label style={labelStyle}>Confirm Password</label>
             <input
+              name="confirmPassword"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="••••••••"
               disabled={isLoading}
               style={inputStyle}
@@ -231,7 +263,7 @@ export function SignupPage() {
 
           <button
             type="submit"
-            disabled={!email || isLoading}
+            disabled={isLoading}
             style={{
               width: '100%',
               padding: '12px',
