@@ -20,6 +20,8 @@ export function MonitorPage() {
     isStoppingStream,
     startStream,
     stopStream,
+    lastCompletedSessionId,
+    clearLastCompletedSession,
   } = usePlaybookContext();
   const { events, lastEvent, isMockMode, toggleMockMode } = useRuleEngineEvents(isStreaming, activeSession?.id);
   const { summary: deviationSummary, records: deviationRecords } = useDeviationEngine(activeSession?.id);
@@ -294,6 +296,100 @@ export function MonitorPage() {
           onRecordClick={(ts) => handleMarkerClick(ts, 'deviation')}
         />
       </div>
+
+      {lastCompletedSessionId && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.6)',
+          backdropFilter: 'blur(12px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px'
+        }}>
+          <div style={{
+            backgroundColor: 'var(--auth-black)',
+            border: '1px solid var(--auth-border)',
+            borderRadius: '8px',
+            padding: '32px',
+            maxWidth: '500px',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '24px',
+            textAlign: 'center',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+          }}>
+            <div>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px',
+                border: '1px solid rgba(0, 255, 136, 0.2)'
+              }}>
+                <Check size={24} color="var(--auth-accent)" />
+              </div>
+              <h3 style={{ margin: '0 0 8px 0', fontSize: '20px', fontFamily: "'Cormorant Garamond', serif", color: '#ffffff' }}>
+                Session Completed
+              </h3>
+              <p style={{ margin: 0, fontSize: '12px', color: 'var(--auth-text-muted)', fontFamily: "'Space Mono', monospace" }}>
+                Supervision has been stopped. The engine records have been finalized and are ready for review.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={clearLastCompletedSession}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  backgroundColor: 'transparent',
+                  border: '1px solid var(--auth-border)',
+                  color: 'var(--auth-text-muted)',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 900,
+                  fontSize: '11px',
+                  fontFamily: "'Space Mono', monospace",
+                  letterSpacing: '0.1em'
+                }}
+              >
+                DISMISS
+              </button>
+              <button
+                onClick={() => {
+                  clearLastCompletedSession();
+                  navigate(`/analytics?session_id=${lastCompletedSessionId}`);
+                }}
+                style={{
+                  flex: 2,
+                  padding: '12px',
+                  backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                  border: '1px solid var(--auth-accent)',
+                  color: 'var(--auth-accent)',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 900,
+                  fontSize: '11px',
+                  fontFamily: "'Space Mono', monospace",
+                  letterSpacing: '0.1em'
+                }}
+              >
+                VIEW ANALYTICS &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

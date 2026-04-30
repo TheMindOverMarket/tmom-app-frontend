@@ -140,11 +140,17 @@ export function useDeviationEngine(sessionId: string | null | undefined) {
       return;
     }
 
-    // Stability: Only clear records if the ID actually changed
+    // Stability: Only clear records if the ID actually changed or session stopped
     if (sessionId && lastKnownSessionId.current !== sessionId) {
        console.log(`[useDeviationEngine] Session ID changed from ${lastKnownSessionId.current} to ${sessionId}. Clearing records.`);
        setRecords([]);
+       setSummary(null);
        lastKnownSessionId.current = sessionId;
+    } else if (!sessionId && lastKnownSessionId.current !== null) {
+       console.log(`[useDeviationEngine] Stream stopped. Clearing records.`);
+       setRecords([]);
+       setSummary(null);
+       lastKnownSessionId.current = null;
     }
 
     if (!DEVIATION_ENGINE_API || !DEVIATION_ENGINE_WS) {

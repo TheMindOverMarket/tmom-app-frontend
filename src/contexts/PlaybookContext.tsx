@@ -34,6 +34,8 @@ interface PlaybookContextType {
   deletePlaybook: (id: string) => Promise<void>;
   deleteAllPlaybooks: () => Promise<void>;
   setIsSubmitting: (val: boolean) => void;
+  lastCompletedSessionId: string | null;
+  clearLastCompletedSession: () => void;
   
   // Draft / Stateless Management
   draftChatHistory: any[];
@@ -68,6 +70,7 @@ export function PlaybookProvider({ children }: { children: ReactNode }) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isStartingStream, setIsStartingStream] = useState(false);
   const [isStoppingStream, setIsStoppingStream] = useState(false);
+  const [lastCompletedSessionId, setLastCompletedSessionId] = useState<string | null>(null);
 
   // Draft State
   const [draftChatHistory, setDraftChatHistory] = useState<any[]>([]);
@@ -418,6 +421,7 @@ Cooldown:
     setIsStoppingStream(true);
     try {
       await sessionApi.endSession(activeSession.id, { status: SessionStatus.COMPLETED });
+      setLastCompletedSessionId(activeSession.id);
       setActiveSession(null);
       setIsStreaming(false);
       setNotification({ type: 'success', message: 'Session completed.' });
@@ -594,6 +598,8 @@ Cooldown:
     deletePlaybook,
     deleteAllPlaybooks,
     setIsSubmitting,
+    lastCompletedSessionId,
+    clearLastCompletedSession: () => setLastCompletedSessionId(null),
     draftChatHistory,
     currentDraft,
     setDraftChatHistory,

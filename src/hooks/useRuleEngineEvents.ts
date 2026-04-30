@@ -127,11 +127,15 @@ export function useRuleEngineEvents(isActive: boolean = false, sessionId?: strin
     if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
     setIsConnected(false);
 
-    // Clear old events when a new session starts (STRICT ID CHANGE ONLY)
+    // Clear old events when a new session starts or when stream stops
     if (isActive && sessionId && lastKnownSessionId.current !== sessionId) {
       console.log(`[useRuleEngineEvents] Session ID changed from ${lastKnownSessionId.current} to ${sessionId}. Clearing events.`);
       setEvents([]);
       lastKnownSessionId.current = sessionId;
+    } else if (!isActive && lastKnownSessionId.current !== null) {
+      console.log(`[useRuleEngineEvents] Stream stopped. Clearing events.`);
+      setEvents([]);
+      lastKnownSessionId.current = null;
     }
 
     // 2. Mocking logic
