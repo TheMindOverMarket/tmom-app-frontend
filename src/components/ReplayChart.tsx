@@ -2,7 +2,6 @@ import { useEffect, useState, useMemo } from 'react';
 import { Session, SessionEvent, SessionEventType } from '../domain/session/types';
 import { RuleEngineEvent } from '../domain/ruleEngine/types';
 import { usePriceChart } from '../hooks/usePriceChart';
-import { useDerivedSignals } from '../hooks/useDerivedSignals';
 import { BackendMarketDataProvider } from '../marketdata/providers/backend';
 import { MarkerLayer } from './chart/MarkerLayer';
 import { ChartControls } from './chart/ChartControls';
@@ -194,15 +193,13 @@ export function ReplayChart({ session, events, onMarkerClick, isDark = false, se
 
   const ruleEvents = deriveRuleEngineEvents(events, candles);
 
-  const { ema9 } = useDerivedSignals(candles, null);
-
   const {
     chartContainerRef,
     deduplicateEvents,
     setDeduplicateEvents,
     markers,
     scrollToTime
-  } = usePriceChart(ruleEvents, candles, null, ema9, null, false);
+  } = usePriceChart(ruleEvents, candles, null, false);
 
   const selectedTimestamp = useMemo(() => {
     const evt = events.find(e => e.id === selectedEventId);

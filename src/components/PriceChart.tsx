@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { RuleEngineEvent } from '../domain/ruleEngine/types';
 import { usePriceChart } from '../hooks/usePriceChart';
 import { useMarketData } from '../hooks/useMarketData';
-import { useDerivedSignals } from '../hooks/useDerivedSignals';
 import { MarkerLayer } from './chart/MarkerLayer';
 import { ChartControls } from './chart/ChartControls';
 import { ChartLegend } from './chart/ChartLegend';
@@ -20,14 +19,13 @@ interface PriceChartProps {
 export function PriceChart({ events, symbol, onMarkerClick, isDark = true, selectedTimestamp }: PriceChartProps) {
   const [interval, setInterval] = useState<number>(60);
   const { candles, currentCandle, isMockData } = useMarketData(symbol, interval);
-  const { ema9, currentEMA9 } = useDerivedSignals(candles, currentCandle);
 
   const {
     chartContainerRef,
     deduplicateEvents,
     setDeduplicateEvents,
     markers
-  } = usePriceChart(events, candles, currentCandle, ema9, currentEMA9, isMockData, isDark);
+  } = usePriceChart(events, candles, currentCandle, isMockData, isDark);
 
   if (!symbol) {
     return (

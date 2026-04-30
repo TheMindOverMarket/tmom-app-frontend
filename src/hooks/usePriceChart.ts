@@ -8,8 +8,7 @@ import {
   ColorType,
   CrosshairMode,
   LineStyle,
-  CandlestickSeries,
-  LineSeries
+  CandlestickSeries
 } from 'lightweight-charts';
 import { RuleEngineEvent } from '../domain/ruleEngine/types';
 import { Candle } from '../marketdata/types';
@@ -32,15 +31,12 @@ export function usePriceChart(
   events: RuleEngineEvent[],
   candles: Candle[],
   currentCandle: Candle | null,
-  ema9: { time: Time; value: number }[],
-  currentEMA9: { time: Time; value: number } | null,
   isMockData: boolean = false,
   isDark: boolean = true
 ) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
-  const emaSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [deduplicateEvents, setDeduplicateEvents] = useState(true);
   
@@ -57,7 +53,6 @@ export function usePriceChart(
 
     let chart: IChartApi | null = null;
     let series: any = null;
-    let emaSeries: any = null;
 
     const init = () => {
       if (!chartContainerRef.current || chartRef.current) return;
@@ -131,17 +126,8 @@ export function usePriceChart(
         wickDownColor: '#ef4444',
       });
 
-      emaSeries = chart.addSeries(LineSeries, {
-          color: '#6366f1',
-          lineWidth: 1,
-          priceLineVisible: false,
-          lastValueVisible: false,
-          crosshairMarkerVisible: false,
-      });
-
       chartRef.current = chart;
       seriesRef.current = series;
-      emaSeriesRef.current = emaSeries;
 
       // Force immediate update if data is already available
       if (dataRef.current.candles.length > 0) {
@@ -169,7 +155,6 @@ export function usePriceChart(
         chart.remove();
         chartRef.current = null;
         seriesRef.current = null;
-        emaSeriesRef.current = null;
       }
     };
   }, []);
@@ -196,10 +181,6 @@ export function usePriceChart(
   }, [candles]);
 
   useEffect(() => {
-    if (emaSeriesRef.current && ema9.length > 0) emaSeriesRef.current.setData(ema9);
-  }, [ema9]);
-
-  useEffect(() => {
     if (seriesRef.current && currentCandle) {
         seriesRef.current.update(currentCandle);
         // Auto-scroll to latest if we are already near the end
@@ -207,8 +188,7 @@ export function usePriceChart(
             chartRef.current.timeScale().scrollToPosition(0, true);
         }
     }
-    if (emaSeriesRef.current && currentEMA9) emaSeriesRef.current.update(currentEMA9);
-  }, [currentCandle, currentEMA9]);
+  }, [currentCandle]);
 
   const updateMarkersOverlay = () => {
     if (!chartRef.current || !seriesRef.current) return;
