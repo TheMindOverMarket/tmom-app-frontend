@@ -97,7 +97,7 @@ export function NewStrategyPage() {
     };
     adjust(textareaRef.current);
     adjust(bottomTextareaRef.current);
-  }, [playbookInput]);
+  }, [playbookInput, isInitialView]);
 
 
   const startNewChat = () => {
@@ -780,7 +780,7 @@ export function NewStrategyPage() {
                          outline: 'none',
                          resize: 'none',
                          minHeight: '28px',
-                         maxHeight: '200px',
+                         maxHeight: '400px',
                          fontFamily: "'Space Mono', monospace",
                          lineHeight: '1.7',
                          padding: '4px 0',
@@ -1093,7 +1093,7 @@ export function NewStrategyPage() {
                        outline: 'none',
                        resize: 'none',
                        minHeight: '28px',
-                       maxHeight: '200px',
+                       maxHeight: '400px',
                        fontFamily: "'Space Mono', monospace",
                        lineHeight: '1.7',
                        padding: '4px 0',
