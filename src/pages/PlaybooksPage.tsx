@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { Playbook } from '../domain/playbook/types';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Copy, Check, ArrowLeft, Clock, Plus } from 'lucide-react';
+import { Trash2, Copy, Check, ArrowLeft, Clock, Plus, Edit2 } from 'lucide-react';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { resolvePlaybookSymbol } from '../domain/playbook/utils';
 import { RuleLogicTree } from '../components/playbook/RuleLogicTree';
@@ -174,10 +174,32 @@ export function PlaybooksPage() {
                     </span>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleStartRename(selectedPlaybook); }}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--auth-text-muted)', padding: '4px', flexShrink: 0 }}
+                      style={{ 
+                        background: 'none', 
+                        border: '1px solid rgba(255,255,255,0.1)', 
+                        cursor: 'pointer', 
+                        color: 'var(--auth-text-muted)', 
+                        padding: '6px',
+                        borderRadius: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s',
+                        flexShrink: 0 
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.color = '#ffffff';
+                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.color = 'var(--auth-text-muted)';
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                      }}
                       title="Rename playbook"
                     >
-                      <Plus size={14} style={{ transform: 'rotate(45deg)' }} />
+                      <Edit2 size={12} />
                     </button>
                   </div>
                 )}
@@ -529,12 +551,34 @@ export function PlaybooksPage() {
                           </h4>
                           <button
                             onClick={(e) => { e.stopPropagation(); handleStartRename(pb); }}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--auth-text-muted)', padding: '2px', opacity: 0.5 }}
-                            onMouseEnter={e => e.currentTarget.style.opacity = '1'}
-                            onMouseLeave={e => e.currentTarget.style.opacity = '0.5'}
+                            style={{ 
+                              background: 'none', 
+                              border: '1px solid rgba(255,255,255,0.1)', 
+                              cursor: 'pointer', 
+                              color: 'var(--auth-text-muted)', 
+                              padding: '4px',
+                              borderRadius: '4px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              transition: 'all 0.2s',
+                              opacity: 0.7 
+                            }}
+                            onMouseEnter={e => {
+                              e.currentTarget.style.opacity = '1';
+                              e.currentTarget.style.color = '#ffffff';
+                              e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                            }}
+                            onMouseLeave={e => {
+                              e.currentTarget.style.opacity = '0.7';
+                              e.currentTarget.style.color = 'var(--auth-text-muted)';
+                              e.currentTarget.style.backgroundColor = 'transparent';
+                              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                            }}
                             title="Rename"
                           >
-                            <Plus size={12} style={{ transform: 'rotate(45deg)' }} />
+                            <Edit2 size={10} />
                           </button>
                         </div>
                       )}

@@ -15,7 +15,8 @@ import {
   CheckCircle2,
   Activity,
   FileCode,
-  ChevronDown
+  ChevronDown,
+  Edit2
 } from 'lucide-react';
 import { IconButton } from '../components/common/IconButton';
 import { DraftPreviewModal } from '../components/playbook/DraftPreviewModal';
@@ -80,6 +81,7 @@ export function NewStrategyPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const prevStatusRef = useRef(selectedPlaybook?.generation_status);
@@ -145,6 +147,13 @@ export function NewStrategyPage() {
       await renamePlaybook(selectedPlaybook.id, editingName);
     }
     setIsRenaming(false);
+  };
+
+  const handleSaveRenameItem = async (id: string) => {
+    if (editingName.trim()) {
+      await renamePlaybook(id, editingName);
+    }
+    setEditingId(null);
   };
 
   const handleSelectTemplate = (content: string) => {
@@ -240,48 +249,85 @@ export function NewStrategyPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {playbooks.map(pb => (
                 <div key={pb.id} style={{ display: 'flex', alignItems: 'center', gap: '2px', position: 'relative' }} className="history-item-container">
-                  <button
-                    onClick={() => setSelectedPlaybook(pb)}
-                    style={{
-                      flex: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '10px 12px',
-                      borderRadius: '4px',
-                      border: 'none',
-                      backgroundColor: selectedPlaybook?.id === pb.id ? 'rgba(255,255,255,0.05)' : 'transparent',
-                      fontSize: '13px',
-                      color: selectedPlaybook?.id === pb.id ? '#ffffff' : 'var(--auth-text-muted)',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={e => { if (selectedPlaybook?.id !== pb.id) e.currentTarget.style.color = '#ffffff' }}
-                    onMouseLeave={e => { if (selectedPlaybook?.id !== pb.id) e.currentTarget.style.color = 'var(--auth-text-muted)' }}
-                  >
-                    <MessageSquare size={13} style={{ flexShrink: 0, opacity: 0.6 }} />
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: selectedPlaybook?.id === pb.id ? 600 : 400 }}>{pb.name}</span>
-                  </button>
-                  <div className="history-delete-button">
-                    <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (confirm('Permanently delete this playbook archive?')) {
-                        void deletePlaybook(pb.id);
-                      }
-                    }}
-                    icon={Trash2}
-                    label={`Delete ${pb.name}`}
-                    variant="danger"
-                    isDark={true}
-                    size={13}
-                    style={{ opacity: 0, width: '30px', height: '30px' }}
-                  />
-                  </div>
+                  {editingId === pb.id ? (
+                    <input
+                      type="text"
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      onBlur={() => handleSaveRenameItem(pb.id)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSaveRenameItem(pb.id)}
+                      autoFocus
+                      style={{
+                        flex: 1,
+                        fontSize: '12px',
+                        backgroundColor: 'rgba(255,255,255,0.05)',
+                        border: '1px solid var(--auth-accent)',
+                        color: 'white',
+                        padding: '8px 12px',
+                        borderRadius: '4px',
+                        outline: 'none',
+                        margin: '2px 8px'
+                      }}
+                    />
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setSelectedPlaybook(pb)}
+                        style={{
+                          flex: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          padding: '10px 12px',
+                          borderRadius: '4px',
+                          border: 'none',
+                          backgroundColor: selectedPlaybook?.id === pb.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                          fontSize: '13px',
+                          color: selectedPlaybook?.id === pb.id ? '#ffffff' : 'var(--auth-text-muted)',
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={e => { if (selectedPlaybook?.id !== pb.id) e.currentTarget.style.color = '#ffffff' }}
+                        onMouseLeave={e => { if (selectedPlaybook?.id !== pb.id) e.currentTarget.style.color = 'var(--auth-text-muted)' }}
+                      >
+                        <MessageSquare size={13} style={{ flexShrink: 0, opacity: 0.6 }} />
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: selectedPlaybook?.id === pb.id ? 600 : 400 }}>{pb.name}</span>
+                      </button>
+                      <div className="history-action-buttons" style={{ display: 'flex', opacity: 0, transition: 'opacity 0.2s' }}>
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingId(pb.id);
+                            setEditingName(pb.name);
+                          }}
+                          icon={Edit2}
+                          label="Rename"
+                          variant="ghost"
+                          isDark={true}
+                          size={12}
+                          style={{ width: '26px', height: '26px' }}
+                        />
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm('Permanently delete this playbook archive?')) {
+                              void deletePlaybook(pb.id);
+                            }
+                          }}
+                          icon={Trash2}
+                          label="Delete"
+                          variant="danger"
+                          isDark={true}
+                          size={12}
+                          style={{ width: '26px', height: '26px' }}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
@@ -400,9 +446,31 @@ export function NewStrategyPage() {
                   <span style={{ fontSize: '12px', fontWeight: 700, color: 'white' }}>{selectedPlaybook.name}</span>
                   <button
                     onClick={handleStartRename}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--auth-text-muted)', padding: '2px' }}
+                    style={{ 
+                      background: 'none', 
+                      border: '1px solid rgba(255,255,255,0.1)', 
+                      cursor: 'pointer', 
+                      color: 'var(--auth-text-muted)', 
+                      padding: '4px',
+                      borderRadius: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.color = '#ffffff';
+                      e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.color = 'var(--auth-text-muted)';
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                    }}
+                    title="Rename playbook"
                   >
-                    <Plus size={12} style={{ transform: 'rotate(45deg)' }} />
+                    <Edit2 size={10} />
                   </button>
                 </div>
               )}
@@ -1106,10 +1174,10 @@ export function NewStrategyPage() {
           0% { left: -40%; }
           100% { left: 100%; }
         }
-        .history-item-container:hover .history-delete-button button {
+        .history-item-container:hover .history-action-buttons {
           opacity: 1 !important;
         }
-        .history-delete-button button:hover {
+        .history-action-buttons button:hover {
           transform: scale(1.1);
         }
         textarea::-webkit-scrollbar {
