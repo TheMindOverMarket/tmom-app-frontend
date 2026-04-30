@@ -21,6 +21,7 @@ export default defineConfig({
         '/api/backend': {
           target: 'https://tmom-app-backend.onrender.com',
           changeOrigin: true,
+          ws: true,
           rewrite: (path) => path.replace(/^\/api\/backend/, ''),
         },
         '/api/engine': {
