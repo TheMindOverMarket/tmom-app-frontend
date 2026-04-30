@@ -28,6 +28,7 @@ interface ReplayChartProps {
  * Fetches the exact price action range and overlays rule events from the replay stream.
  */
 export function ReplayChart({ session, events, onMarkerClick, isDark = false, selectedEventId }: ReplayChartProps) {
+  const [interval, setInterval] = useState<number>(60);
   const [candles, setCandles] = useState<Candle[]>([]);
   const [loading, setLoading] = useState(true);
   const [resolvedSymbol, setResolvedSymbol] = useState('');
@@ -170,7 +171,7 @@ export function ReplayChart({ session, events, onMarkerClick, isDark = false, se
 
         console.log(`[ReplayChart] Fetching history from ${historyStart} to ${historyEnd}`);
 
-        const history = await BackendMarketDataProvider.getHistory(nextResolvedSymbol, 60, {
+        const history = await BackendMarketDataProvider.getHistory(nextResolvedSymbol, interval, {
           start_time: historyStart,
           end_time: historyEnd,
         });
@@ -189,7 +190,7 @@ export function ReplayChart({ session, events, onMarkerClick, isDark = false, se
     };
 
     void fetchData();
-  }, [events, session.end_time, session.playbook_id, session.start_time]);
+  }, [events, session.end_time, session.playbook_id, session.start_time, interval]);
 
   const ruleEvents = deriveRuleEngineEvents(events, candles);
 
@@ -294,6 +295,8 @@ export function ReplayChart({ session, events, onMarkerClick, isDark = false, se
           <ChartControls
             deduplicateEvents={deduplicateEvents}
             onToggle={() => setDeduplicateEvents(!deduplicateEvents)}
+            interval={interval}
+            onIntervalChange={setInterval}
           />
           <ChartLegend isMockData={false} symbol={resolvedSymbol} />
         </>

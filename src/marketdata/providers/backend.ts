@@ -14,6 +14,10 @@ export const BackendMarketDataProvider: MarketDataProvider = {
   getHistory: async (symbol: string, interval: number, options?: { start_time?: string, end_time?: string }): Promise<Candle[]> => {
     let timeframe = '1Min';
     if (interval === 60) timeframe = '1Min';
+    else if (interval === 300) timeframe = '5Min';
+    else if (interval === 600) timeframe = '10Min';
+    else if (interval === 900) timeframe = '15Min';
+    else if (interval === 1200) timeframe = '20Min';
     else if (interval === 3600) timeframe = '1Hour';
     else if (interval === 86400) timeframe = '1Day';
 
@@ -40,9 +44,11 @@ export const BackendMarketDataProvider: MarketDataProvider = {
     return data;
   },
 
-  subscribeLive: (symbol: string, _interval: number, onCandleUpdate: (candle: Candle) => void): () => void => {
+  subscribeLive: (symbol: string, interval: number, onCandleUpdate: (candle: Candle) => void): () => void => {
     let currentBarTime: Time | null = null;
     let currentBarOpen: number | null = null;
+    let currentBarHigh: number | null = null;
+    let currentBarLow: number | null = null;
 
     const wsUrl = CONFIG.WS_BACKEND_URL;
     const ws = new WebSocket(wsUrl);
@@ -55,26 +61,30 @@ export const BackendMarketDataProvider: MarketDataProvider = {
         const dt = new Date(data.timestamp || data.current_time);
         if (isNaN(dt.getTime())) return;
         
-        const time = (Math.floor(dt.getTime() / 1000 / 60) * 60) as Time;
+        const time = (Math.floor(dt.getTime() / 1000 / interval) * interval) as Time;
         
         if (currentBarTime !== time) {
            if (lastHistoricalCandle && lastHistoricalCandle.time === time) {
                currentBarOpen = lastHistoricalCandle.open;
+               currentBarHigh = lastHistoricalCandle.high;
+               currentBarLow = lastHistoricalCandle.low;
            } else {
                currentBarOpen = currentBarOpen === null ? (lastKnownPrice || data.price) : data.price;
+               currentBarHigh = data.price;
+               currentBarLow = data.price;
            }
            currentBarTime = time;
         }
 
         const close = data.price;
-        const high = data.high ?? Math.max(currentBarOpen!, close);
-        const low = data.low ?? Math.min(currentBarOpen!, close);
+        currentBarHigh = Math.max(currentBarHigh!, data.high ?? close, close);
+        currentBarLow = Math.min(currentBarLow!, data.low ?? close, close);
 
         onCandleUpdate({
           time,
           open: currentBarOpen!,
-          high,
-          low,
+          high: currentBarHigh,
+          low: currentBarLow,
           close,
         });
 

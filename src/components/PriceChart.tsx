@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { RuleEngineEvent } from '../domain/ruleEngine/types';
 import { usePriceChart } from '../hooks/usePriceChart';
 import { useMarketData } from '../hooks/useMarketData';
@@ -17,7 +18,8 @@ interface PriceChartProps {
 }
 
 export function PriceChart({ events, symbol, onMarkerClick, isDark = true, selectedTimestamp }: PriceChartProps) {
-  const { candles, currentCandle, isMockData } = useMarketData(symbol, 60);
+  const [interval, setInterval] = useState<number>(60);
+  const { candles, currentCandle, isMockData } = useMarketData(symbol, interval);
   const { ema9, currentEMA9 } = useDerivedSignals(candles, currentCandle);
 
   const {
@@ -54,6 +56,8 @@ export function PriceChart({ events, symbol, onMarkerClick, isDark = true, selec
       <ChartControls 
         deduplicateEvents={deduplicateEvents} 
         onToggle={() => setDeduplicateEvents(!deduplicateEvents)} 
+        interval={interval}
+        onIntervalChange={setInterval}
       />
 
       <ChartLegend isMockData={isMockData} symbol={symbol} />
