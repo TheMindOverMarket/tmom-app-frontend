@@ -644,7 +644,7 @@ export function NewStrategyPage() {
               <div style={{ textAlign: 'center', marginBottom: '4px', animation: 'heroFade 0.8s ease-out' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '12px' }}>
                    <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to right, transparent, var(--auth-border))' }}></div>
-                   <span style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '0.3em', color: 'var(--auth-text-muted)', textTransform: 'uppercase' }}>Universal Playbook Parser</span>
+                   <span style={{ fontSize: '9px', fontWeight: 900, letterSpacing: '0.3em', color: 'var(--auth-text-muted)', textTransform: 'uppercase' }}>Guardian Angle</span>
                    <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to left, transparent, var(--auth-border))' }}></div>
                 </div>
                 <h1 style={{ 
@@ -655,9 +655,9 @@ export function NewStrategyPage() {
                   textTransform: 'uppercase',
                   letterSpacing: '0.06em',
                   lineHeight: '1',
-                  color: '#ffffff'
+                  color: 'rgba(244, 247, 246, 0.92)'
                 }}>
-                  AI Playbook Parser
+                  Krish.
                 </h1>
                 <p style={{ 
                   fontSize: '15px', 
@@ -673,7 +673,7 @@ export function NewStrategyPage() {
 
               {/* 2. PARSER BOX */}
               <div style={{ 
-                backgroundColor: 'rgba(5, 5, 5, 0.8)', 
+                backgroundColor: 'rgba(10, 10, 10, 0.78)', 
                 backdropFilter: 'blur(20px)',
                 borderRadius: '4px', 
                 border: `1px solid ${playbookInput ? 'rgba(255, 255, 255, 0.2)' : 'var(--auth-border)'}`,
