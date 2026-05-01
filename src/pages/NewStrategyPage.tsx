@@ -88,6 +88,9 @@ export function NewStrategyPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const bottomTextareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const chatHistory = selectedPlaybook ? (selectedPlaybook.chat_history || []) : draftChatHistory;
+  const isInitialView = chatHistory.length === 0 && !isSubmitting;
+
   useEffect(() => {
     const adjust = (el: HTMLTextAreaElement | null) => {
       if (el) {
@@ -161,8 +164,6 @@ export function NewStrategyPage() {
   };
 
   const isInitialTurn = !selectedPlaybook && draftChatHistory.length === 0;
-  const chatHistory = selectedPlaybook ? (selectedPlaybook.chat_history || []) : draftChatHistory;
-  const isInitialView = chatHistory.length === 0 && !isSubmitting;
 
   const cardStyle = {
     backgroundColor: 'var(--auth-input-bg)',
@@ -306,7 +307,7 @@ export function NewStrategyPage() {
                           }}
                           icon={Edit2}
                           label="Rename"
-                          variant="ghost"
+                          variant="neutral"
                           isDark={true}
                           size={12}
                           style={{ width: '26px', height: '26px' }}
