@@ -146,7 +146,7 @@ export function RuleLogicTree({ rule, isDark = false, compact = false }: RuleLog
                         return (
                             <div key={cond.id || idx} style={{ display: 'flex', flexDirection: 'column' }}>
                                 <div style={{
-                                    padding: '12px 16px',
+                                    padding: compact ? '8px 12px' : '12px 16px',
                                     backgroundColor: isDark ? 'rgba(255, 255, 255, 0.015)' : '#f8fafc',
                                     border: isDark ? '1px solid var(--auth-border)' : '1px solid #f1f5f9',
                                     borderRadius: '4px',
@@ -154,7 +154,7 @@ export function RuleLogicTree({ rule, isDark = false, compact = false }: RuleLog
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
                                     flexWrap: 'wrap',
-                                    gap: '12px',
+                                    gap: compact ? '8px' : '12px',
                                     transition: 'all 0.2s ease'
                                 }}
                                     onMouseEnter={e => { 
@@ -250,7 +250,7 @@ export function RuleLogicTree({ rule, isDark = false, compact = false }: RuleLog
                                 </div>
 
                                 {idx < items.length - 1 && (
-                                    <div style={{ display: 'flex', justifyContent: 'center', margin: '4px 0', position: 'relative', height: '24px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'center', margin: '2px 0', position: 'relative', height: '20px' }}>
                                         <div style={{ 
                                             position: 'absolute', 
                                             top: '0', 
@@ -265,9 +265,9 @@ export function RuleLogicTree({ rule, isDark = false, compact = false }: RuleLog
                                             backgroundColor: logicalOperator === 'OR' ? 'rgba(217, 119, 6, 0.1)' : 'rgba(99, 102, 241, 0.1)',
                                             color: logicalOperator === 'OR' ? '#d97706' : 'var(--brand)',
                                             border: `1px solid ${logicalOperator === 'OR' ? 'rgba(217, 119, 6, 0.2)' : 'rgba(99, 102, 241, 0.2)'}`,
-                                            padding: '2px 10px',
+                                            padding: '1px 8px',
                                             borderRadius: '12px',
-                                            fontSize: '9px',
+                                            fontSize: '8px',
                                             fontWeight: 900,
                                             zIndex: 1,
                                             alignSelf: 'center',

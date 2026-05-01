@@ -4,12 +4,11 @@ import { usePlaybookContext } from '../contexts/PlaybookContext';
 import { useRuleEngineEvents } from '../hooks/useRuleEngineEvents';
 import { PriceChart } from '../components/PriceChart';
 import { RuleEventInspector } from '../components/RuleEventInspector';
-import { Activity, Circle, Check, X, Shield } from 'lucide-react';
+import { Activity, Circle, Check, X } from 'lucide-react';
 import { useDeviationEngine } from '../hooks/useDeviationEngine';
 import { DeviationPanel } from '../components/deviation/DeviationPanel';
 import { resolvePlaybookSymbol } from '../domain/playbook/utils';
 import { RuleLogicTree } from '../components/playbook/RuleLogicTree';
-import { StatusPlaceholder } from '../components/common/StatusPlaceholder';
 
 export function MonitorPage() {
   const {
@@ -110,7 +109,7 @@ export function MonitorPage() {
             justifyContent: 'space-between', 
             alignItems: 'center',
             backgroundColor: 'rgba(255,255,255,0.03)',
-            padding: '8px 16px',
+            padding: '6px 16px',
             borderRadius: '4px',
             border: '1px solid var(--auth-border)'
           }}>
@@ -205,7 +204,7 @@ export function MonitorPage() {
           backgroundColor: 'rgba(255,255,255,0.02)',
           borderRadius: '4px',
           border: '1px solid var(--auth-border)',
-          maxHeight: '280px',
+          maxHeight: '340px',
           flexShrink: 0
         }}>
           <div style={{ 
@@ -222,20 +221,13 @@ export function MonitorPage() {
           
           <div style={{ 
             flex: 1, 
-            padding: isStreaming || events.length > 0 ? '12px' : '0',
-            display: isStreaming || events.length > 0 ? 'grid' : 'flex',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))',
-            gap: '12px',
+            padding: '12px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: '8px',
             overflowY: 'auto'
           }}>
-            {!isStreaming && events.length === 0 ? (
-              <StatusPlaceholder 
-                icon={Shield}
-                title="Supervision Inactive"
-                subtitle="Start the live session to begin real-time rule monitoring and adherence tracking."
-                style={{ minHeight: 'auto', padding: '32px' }}
-              />
-            ) : rules.length === 0 ? (
+            {rules.length === 0 ? (
               <div style={{ fontSize: '11px', color: 'var(--auth-text-muted)', textAlign: 'center', padding: '12px' }}>
                 Fetching active playbook parameters...
               </div>

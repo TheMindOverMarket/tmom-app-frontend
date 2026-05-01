@@ -16,7 +16,7 @@ export function Header() {
 
   return (
     <header style={{ 
-      padding: '12px 24px', 
+      padding: '8px 24px', 
       display: 'flex', 
       justifyContent: 'space-between', 
       alignItems: 'center',

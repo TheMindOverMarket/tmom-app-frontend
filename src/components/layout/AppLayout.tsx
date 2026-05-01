@@ -30,7 +30,7 @@ export function AppLayout() {
 
       <main style={{ 
         flex: 1, 
-        padding: '24px', 
+        padding: '16px', 
         maxWidth: '1800px', 
         width: '100%',
         margin: '0 auto',
